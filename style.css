@@ -14,7 +14,7 @@ body {
   background: #1e1e1e;
   border: 2px solid #333;
   border-radius: 12px;
-  max-width: 500px;
+  max-width: 600px;
   width: 100%;
   padding: 20px;
   display: flex;
@@ -23,7 +23,7 @@ body {
 }
 
 .left-section {
-  width: 40%;
+  width: 60%;
   display: flex;
   flex-direction: column;
   align-items: center;
@@ -112,10 +112,13 @@ body {
   justify-content: space-between;
   font-size: 0.75rem;
   color: #999;
+  width: 100%;
+  white-space: nowrap;
+  margin-top: 4px;
 }
 
 .right-section {
-  width: 60%;
+  width: 40%;
   padding-left: 15px;
   display: flex;
   flex-direction: column;
@@ -142,7 +145,7 @@ body {
   background: #444;
 }
 
-/* ======== Mobile (stack vertically) ======== */
+/* Mobile Layout */
 @media (max-width: 600px) {
   .id-card {
     flex-direction: column;
@@ -183,5 +186,10 @@ body {
   .music-info {
     align-items: flex-start;
     text-align: left;
+  }
+
+  .time-stamps {
+    justify-content: space-between;
+    margin-top: 4px;
   }
 }
