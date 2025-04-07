@@ -3,19 +3,22 @@ body {
   display: flex;
   justify-content: center;
   align-items: center;
-  height: 100vh;
+  min-height: 100vh;
   font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
   color: #f1f1f1;
   margin: 0;
+  padding: 1rem;
 }
 
 .id-card {
   background: #1e1e1e;
   border: 2px solid #333;
   border-radius: 12px;
-  width: 500px;
+  max-width: 500px;
+  width: 100%;
   padding: 20px;
   display: flex;
+  flex-direction: row;
   box-shadow: 0 0 15px rgba(0, 0, 0, 0.6);
 }
 
@@ -137,4 +140,49 @@ body {
 
 .link:hover {
   background: #444;
+}
+
+/* Responsive layout for mobile */
+@media (max-width: 600px) {
+  .id-card {
+    flex-direction: column;
+    align-items: center;
+    padding: 16px;
+  }
+
+  .left-section {
+    width: 100%;
+    border-right: none;
+    border-bottom: 2px solid #333;
+    padding-right: 0;
+    padding-bottom: 15px;
+    margin-bottom: 15px;
+  }
+
+  .right-section {
+    width: 100%;
+    padding-left: 0;
+    align-items: center;
+    text-align: center;
+  }
+
+  .link {
+    width: 100%;
+    max-width: 200px;
+  }
+
+  .discord-box {
+    flex-direction: row;
+    align-items: flex-start;
+  }
+
+  .album-art {
+    width: 72px;
+    height: 72px;
+  }
+
+  .music-info {
+    align-items: flex-start;
+    text-align: left;
+  }
 }
