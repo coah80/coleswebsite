@@ -41,6 +41,9 @@ async function fetchDiscordActivity() {
     const spotify = data.data.spotify;
     const activities = data.data.activities;
 
+    let contentAdded = false;
+
+    // === Spotify Activity ===
     if (spotify) {
       const wrapper = document.createElement('div');
       wrapper.className = 'music-wrapper';
@@ -49,6 +52,7 @@ async function fetchDiscordActivity() {
       wrapper.style.alignItems = 'center';
       wrapper.style.width = '100%';
       wrapper.style.gap = '12px';
+      wrapper.style.marginBottom = '12px';
 
       const albumArt = document.createElement('img');
       albumArt.src = spotify.album_art_url;
@@ -88,25 +92,65 @@ async function fetchDiscordActivity() {
       progressInterval = setInterval(() => {
         updateSpotifyProgress(spotify.timestamps.start, spotify.timestamps.end);
       }, 1000);
-    } else {
-      const rich = activities.find(act => act.type === 0 && act.name !== 'Custom Status');
-      if (rich) {
-        const img = document.createElement('img');
-        if (rich.assets?.large_image?.startsWith('mp:external')) {
-          img.src = `https://cdn.discordapp.com/${rich.assets.large_image}`;
-        } else {
-          img.src = `https://cdn.discordapp.com/app-assets/${rich.application_id}/${rich.assets.large_image}.png`;
-        }
-        img.className = 'album-art';
-        activityBox.appendChild(img);
 
-        const text = document.createElement('div');
-        text.className = 'activity-details';
-        text.innerHTML = `<strong>${rich.name}</strong><br>${rich.details || ''}<br>${rich.state || ''}`;
-        activityBox.appendChild(text);
+      contentAdded = true;
+    }
+
+    // === Rich Presence Activities (Games, etc.) ===
+    const filteredActivities = activities.filter(
+      act => act.type === 0 && act.name !== 'Custom Status'
+    );
+
+    filteredActivities.forEach((act) => {
+      const container = document.createElement('div');
+      container.className = 'music-wrapper';
+      container.style.display = 'flex';
+      container.style.flexDirection = 'row';
+      container.style.alignItems = 'center';
+      container.style.width = '100%';
+      container.style.gap = '12px';
+      container.style.marginBottom = '12px';
+
+      const img = document.createElement('img');
+      if (act.assets?.large_image?.startsWith('mp:external')) {
+        img.src = `https://cdn.discordapp.com/${act.assets.large_image}`;
       } else {
-        activityBox.textContent = 'No activity currently.';
+        img.src = `https://cdn.discordapp.com/app-assets/${act.application_id}/${act.assets.large_image}.png`;
       }
+      img.className = 'album-art';
+      container.appendChild(img);
+
+      const text = document.createElement('div');
+      text.className = 'music-info';
+
+      const name = document.createElement('div');
+      name.className = 'song-title';
+      name.textContent = act.name;
+      text.appendChild(name);
+
+      if (act.details) {
+        const detail = document.createElement('div');
+        detail.className = 'artist';
+        detail.textContent = act.details;
+        text.appendChild(detail);
+      }
+
+      if (act.state) {
+        const state = document.createElement('div');
+        state.className = 'artist';
+        state.textContent = act.state;
+        text.appendChild(state);
+      }
+
+      container.appendChild(text);
+      activityBox.appendChild(container);
+
+      contentAdded = true;
+    });
+
+    // If nothing was added, show a fallback
+    if (!contentAdded) {
+      activityBox.textContent = 'No activity currently.';
     }
   } catch (e) {
     console.error(e);
