@@ -44,6 +44,11 @@ async function fetchDiscordActivity() {
     if (spotify) {
       const wrapper = document.createElement('div');
       wrapper.className = 'music-wrapper';
+      wrapper.style.display = 'flex';
+      wrapper.style.flexDirection = 'row';
+      wrapper.style.alignItems = 'center';
+      wrapper.style.width = '100%';
+      wrapper.style.gap = '12px';
 
       const albumArt = document.createElement('img');
       albumArt.src = spotify.album_art_url;
