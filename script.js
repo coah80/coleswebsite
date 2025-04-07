@@ -1,7 +1,10 @@
 const userId = '355470689089748992';
+const apiKey = 'd462adce227a99a6793c5d1edef7c6db';
 let progressInterval;
+let richInterval;
+let socket;
 
-function msToMinutes(ms) {
+function formatTime(ms) {
   const totalSeconds = Math.floor(ms / 1000);
   const minutes = Math.floor(totalSeconds / 60);
   const seconds = totalSeconds % 60;
@@ -13,15 +16,21 @@ function updateSpotifyProgress(start, end) {
   const total = end - start;
   let elapsed = now - start;
   if (elapsed > total) elapsed = total;
-
   const percent = Math.min(100, (elapsed / total) * 100);
   const bar = document.querySelector('.progress-bar');
   const currentTime = document.getElementById('current-time');
   const totalTime = document.getElementById('total-time');
-
   if (bar) bar.style.width = percent + '%';
-  if (currentTime) currentTime.textContent = msToMinutes(elapsed);
-  if (totalTime) totalTime.textContent = msToMinutes(total);
+  if (currentTime) currentTime.textContent = formatTime(elapsed);
+  if (totalTime) totalTime.textContent = formatTime(total);
+}
+
+function updateRichPresenceTimers() {
+  document.querySelectorAll('.rich-timer').forEach(timer => {
+    const start = parseInt(timer.dataset.start, 10);
+    const elapsed = Date.now() - start;
+    timer.textContent = `Playing for ${formatTime(elapsed)}`;
+  });
 }
 
 function clearProgressUpdater() {
@@ -29,132 +38,254 @@ function clearProgressUpdater() {
     clearInterval(progressInterval);
     progressInterval = null;
   }
-}
-
-async function fetchDiscordActivity() {
-  try {
-    const res = await fetch(`https://api.lanyard.rest/v1/users/${userId}`);
-    const data = await res.json();
-    const activityBox = document.getElementById('discord-activity');
-    activityBox.innerHTML = '';
-    clearProgressUpdater();
-
-    const spotify = data.data.spotify;
-    const activities = data.data.activities;
-
-    let contentAdded = false;
-
-    if (spotify) {
-      const wrapper = document.createElement('div');
-      wrapper.className = 'music-wrapper';
-      wrapper.style.display = 'flex';
-      wrapper.style.flexDirection = 'row';
-      wrapper.style.alignItems = 'center';
-      wrapper.style.width = '100%';
-      wrapper.style.gap = '12px';
-      wrapper.style.marginBottom = '12px';
-
-      const albumArt = document.createElement('img');
-      albumArt.src = spotify.album_art_url;
-      albumArt.className = 'album-art';
-      wrapper.appendChild(albumArt);
-
-      const musicInfo = document.createElement('div');
-      musicInfo.className = 'music-info';
-
-      const title = document.createElement('div');
-      title.className = 'song-title';
-      title.textContent = spotify.song;
-      musicInfo.appendChild(title);
-
-      const artist = document.createElement('div');
-      artist.className = 'artist';
-      artist.textContent = `${spotify.artist} • ${spotify.album}`;
-      musicInfo.appendChild(artist);
-
-      const progress = document.createElement('div');
-      progress.className = 'progress-container';
-      progress.innerHTML = '<div class="progress-bar"></div>';
-      musicInfo.appendChild(progress);
-
-      const timeRow = document.createElement('div');
-      timeRow.className = 'time-stamps';
-      timeRow.innerHTML = `
-        <span id="current-time">${msToMinutes(Date.now() - spotify.timestamps.start)}</span>
-        <span id="total-time">${msToMinutes(spotify.timestamps.end - spotify.timestamps.start)}</span>
-      `;
-      musicInfo.appendChild(timeRow);
-
-      wrapper.appendChild(musicInfo);
-      activityBox.appendChild(wrapper);
-
-      updateSpotifyProgress(spotify.timestamps.start, spotify.timestamps.end);
-      progressInterval = setInterval(() => {
-        updateSpotifyProgress(spotify.timestamps.start, spotify.timestamps.end);
-      }, 1000);
-
-      contentAdded = true;
-    }
-
-    const filteredActivities = activities.filter(
-      act => act.type === 0 && act.name !== 'Custom Status'
-    );
-
-    filteredActivities.forEach((act) => {
-      const container = document.createElement('div');
-      container.className = 'music-wrapper';
-      container.style.display = 'flex';
-      container.style.flexDirection = 'row';
-      container.style.alignItems = 'center';
-      container.style.width = '100%';
-      container.style.gap = '12px';
-      container.style.marginBottom = '12px';
-
-      const img = document.createElement('img');
-      if (act.assets?.large_image?.startsWith('mp:external')) {
-        img.src = `https://cdn.discordapp.com/${act.assets.large_image}`;
-      } else {
-        img.src = `https://cdn.discordapp.com/app-assets/${act.application_id}/${act.assets.large_image}.png`;
-      }
-      img.className = 'album-art';
-      container.appendChild(img);
-
-      const text = document.createElement('div');
-      text.className = 'music-info';
-
-      const name = document.createElement('div');
-      name.className = 'song-title';
-      name.textContent = act.name;
-      text.appendChild(name);
-
-      if (act.details) {
-        const detail = document.createElement('div');
-        detail.className = 'artist';
-        detail.textContent = act.details;
-        text.appendChild(detail);
-      }
-
-      if (act.state) {
-        const state = document.createElement('div');
-        state.className = 'artist';
-        state.textContent = act.state;
-        text.appendChild(state);
-      }
-
-      container.appendChild(text);
-      activityBox.appendChild(container);
-
-      contentAdded = true;
-    });
-
-    if (!contentAdded) {
-      activityBox.textContent = 'No activity currently.';
-    }
-  } catch (e) {
-    console.error(e);
-    document.getElementById('discord-activity').textContent = 'Unable to fetch activity.';
+  if (richInterval) {
+    clearInterval(richInterval);
+    richInterval = null;
   }
 }
 
-fetchDiscordActivity();
-setInterval(fetchDiscordActivity, 30000);
+function renderActivity(data) {
+  const activityBox = document.getElementById('discord-activity');
+  activityBox.innerHTML = '';
+  clearProgressUpdater();
+
+  // === Status Dot (Always Circular) ===
+  const presence = data.discord_status;
+  const statusDot = document.createElement('div');
+  statusDot.classList.add('status-dot', `status-${presence}`);
+
+  let pfpImg = document.querySelector('.left-section img');
+  if (pfpImg && !pfpImg.parentNode.classList.contains('status-wrapper')) {
+    const wrapper = document.createElement('div');
+    wrapper.className = 'status-wrapper';
+    pfpImg.parentNode.replaceChild(wrapper, pfpImg);
+    wrapper.appendChild(pfpImg);
+    wrapper.appendChild(statusDot);
+  } else if (pfpImg && pfpImg.parentNode.classList.contains('status-wrapper')) {
+    const wrapper = pfpImg.parentNode;
+    const existingDot = wrapper.querySelector('.status-dot');
+    if (existingDot) existingDot.remove();
+    wrapper.appendChild(statusDot);
+  }
+
+  // === Render Spotify Activity ===
+  if (data.spotify) {
+    const spotify = data.spotify;
+    const wrapper = document.createElement('div');
+    wrapper.className = 'music-wrapper';
+    wrapper.style.display = 'flex';
+    wrapper.style.flexDirection = 'row';
+    wrapper.style.alignItems = 'center';
+    wrapper.style.width = '100%';
+    wrapper.style.gap = '12px';
+    wrapper.style.marginBottom = '16px';
+
+    const albumArt = document.createElement('img');
+    albumArt.src = spotify.album_art_url;
+    albumArt.className = 'album-art spinning';
+    wrapper.appendChild(albumArt);
+
+    const musicInfo = document.createElement('div');
+    musicInfo.className = 'music-info';
+
+    // Use local spotify.png for the logo
+    const spotifyLogo = document.createElement('img');
+    spotifyLogo.src = 'spotify.png';
+    spotifyLogo.className = 'spotify-logo';
+    musicInfo.appendChild(spotifyLogo);
+
+    // Clickable link for the song title.
+    const songLink = document.createElement('a');
+    songLink.href = `https://open.spotify.com/track/${spotify.track_id}`;
+    songLink.target = '_blank';
+    songLink.className = 'song-title';
+    songLink.textContent = spotify.song;
+    musicInfo.appendChild(songLink);
+
+    // Plain text for artist and album.
+    const artistAlbumText = document.createElement('div');
+    artistAlbumText.className = 'artist';
+    artistAlbumText.textContent = `${spotify.artist} • ${spotify.album}`;
+    musicInfo.appendChild(artistAlbumText);
+
+    const progress = document.createElement('div');
+    progress.className = 'progress-container';
+    progress.innerHTML = '<div class="progress-bar"></div>';
+    musicInfo.appendChild(progress);
+
+    const timeRow = document.createElement('div');
+    timeRow.className = 'time-stamps';
+    timeRow.innerHTML = `
+      <span id="current-time">${formatTime(Date.now() - spotify.timestamps.start)}</span>
+      <span id="total-time">${formatTime(spotify.timestamps.end - spotify.timestamps.start)}</span>
+    `;
+    musicInfo.appendChild(timeRow);
+
+    wrapper.appendChild(musicInfo);
+    activityBox.appendChild(wrapper);
+
+    updateSpotifyProgress(spotify.timestamps.start, spotify.timestamps.end);
+    progressInterval = setInterval(() => {
+      updateSpotifyProgress(spotify.timestamps.start, spotify.timestamps.end);
+    }, 1000);
+  }
+
+  // === Render Game / Rich Presence Activities ===
+  const filteredActivities = data.activities.filter(
+    act => act.type === 0 && act.name !== 'Custom Status'
+  );
+
+  filteredActivities.forEach((act, index) => {
+    const container = document.createElement('div');
+    container.className = 'music-wrapper';
+    container.style.display = 'flex';
+    container.style.flexDirection = 'row';
+    container.style.alignItems = 'center';
+    container.style.width = '100%';
+    container.style.gap = '12px';
+    container.style.marginBottom = '12px';
+
+    // --- Image Handling for Activities ---
+    const img = document.createElement('img');
+    if (act.application_id) {
+      img.src = `https://dcdn.dstn.to/app-icons/${act.application_id}?ext=webp&size=240`;
+    } else if (act.assets?.large_image && act.assets.large_image.startsWith('mp:external')) {
+      img.src = `https://media.discordapp.net/${act.assets.large_image.replace("mp:", "")}.webp?size=240&keep_aspect_ratio=false`;
+    } else {
+      img.src = 'https://cdn.discordapp.com/embed/avatars/0.png';
+    }
+    img.className = 'album-art';
+
+    // --- Small Image Overlay (if available) ---
+    if (act.application_id) {
+      const smallImg = document.createElement('img');
+      smallImg.src = `https://dcdn.dstn.to/app-icons/${act.application_id}?ext=png&size=64`;
+      smallImg.className = 'small-art';
+
+      const imgContainer = document.createElement('div');
+      imgContainer.style.position = 'relative';
+      imgContainer.style.display = 'inline-block';
+      imgContainer.appendChild(img);
+
+      smallImg.style.position = 'absolute';
+      smallImg.style.bottom = '0';
+      smallImg.style.right = '0';
+      smallImg.style.width = '24px';
+      smallImg.style.height = '24px';
+      imgContainer.appendChild(smallImg);
+
+      container.appendChild(imgContainer);
+    } else {
+      container.appendChild(img);
+    }
+
+    // --- Text Info & Live Timer for Activity ---
+    const text = document.createElement('div');
+    text.className = 'music-info';
+
+    const name = document.createElement('div');
+    name.className = 'song-title';
+    name.textContent = act.name;
+    text.appendChild(name);
+
+    if (act.details) {
+      const detail = document.createElement('div');
+      detail.className = 'artist';
+      detail.textContent = act.details;
+      text.appendChild(detail);
+    }
+    if (act.state) {
+      const state = document.createElement('div');
+      state.className = 'artist';
+      state.textContent = act.state;
+      text.appendChild(state);
+    }
+    if (act.timestamps?.start) {
+      const timerDiv = document.createElement('div');
+      timerDiv.className = 'artist rich-timer';
+      timerDiv.id = `rich-timer-${index}`;
+      timerDiv.dataset.start = act.timestamps.start;
+      timerDiv.textContent = `Playing for ${formatTime(Date.now() - act.timestamps.start)}`;
+      text.appendChild(timerDiv);
+    }
+
+    container.appendChild(text);
+    activityBox.appendChild(container);
+  });
+
+  // Hide activity container if empty
+  if (activityBox.innerHTML.trim() === '') {
+    activityBox.style.display = 'none';
+  } else {
+    activityBox.style.display = 'flex';
+  }
+
+  if (document.querySelectorAll('.rich-timer').length > 0) {
+    richInterval = setInterval(updateRichPresenceTimers, 1000);
+  }
+}
+
+function startWebSocket() {
+  socket = new WebSocket('wss://api.lanyard.rest/socket');
+  socket.addEventListener('open', () => {
+    console.log("WebSocket connection opened.");
+    socket.send(JSON.stringify({
+      op: 2,
+      d: { subscribe_to_id: userId, api_key: apiKey }
+    }));
+  });
+  socket.addEventListener('message', event => {
+    try {
+      const parsed = JSON.parse(event.data);
+      const { t: type, d: data, op } = parsed;
+      if (op === 1) {
+        socket.send(JSON.stringify({
+          op: 2,
+          d: { subscribe_to_id: userId, api_key: apiKey }
+        }));
+      }
+      if (type === 'INIT_STATE' || type === 'PRESENCE_UPDATE') {
+        console.log("Received data:", parsed);
+        renderActivity(data);
+      }
+    } catch (error) {
+      console.error("Error parsing WebSocket message:", error, event.data);
+    }
+  });
+  socket.addEventListener('error', event => {
+    console.error("WebSocket error:", event);
+  });
+  socket.addEventListener('close', () => {
+    console.warn("WebSocket closed, reconnecting in 5 seconds...");
+    setTimeout(startWebSocket, 5000);
+  });
+}
+
+document.addEventListener('DOMContentLoaded', () => {
+  document.querySelectorAll('.link').forEach(link => {
+    const previewBox = link.querySelector('.link-preview');
+    const url = link.href;
+    if (!previewBox.dataset.fetched) {
+      fetch(`https://api.allorigins.win/get?url=${encodeURIComponent(url)}`)
+        .then(res => res.json())
+        .then(data => {
+          const html = new DOMParser().parseFromString(data.contents, 'text/html');
+          const ogTitle = html.querySelector("meta[property='og:title']")?.content || url;
+          const ogDesc = html.querySelector("meta[property='og:description']")?.content || '';
+          const ogImage = html.querySelector("meta[property='og:image']")?.content || '';
+          const favicon = `https://www.google.com/s2/favicons?domain=${new URL(url).hostname}`;
+          previewBox.innerHTML = `
+            <img src="${favicon}" />
+            <strong style="margin-top:4px">${ogTitle}</strong>
+            <small style="font-size: 0.75rem; color: #ccc; margin-top:4px">${ogDesc}</small>
+            ${ogImage ? `<img src="${ogImage}" />` : ''}
+          `;
+          previewBox.dataset.fetched = 'true';
+        })
+        .catch(() => {
+          previewBox.innerHTML = `<span style="font-size: 0.75rem; color: #aaa">Could not load preview</span>`;
+        });
+    }
+  });
+  startWebSocket();
+});

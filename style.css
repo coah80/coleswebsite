@@ -31,6 +31,27 @@ body {
   padding-right: 15px;
 }
 
+.status-wrapper {
+  position: relative;
+  display: inline-block;
+}
+
+/* Always circular status dot */
+.status-dot {
+  position: absolute;
+  bottom: 2px;
+  right: 4px;
+  width: 16px;
+  height: 16px;
+  border-radius: 50%;
+  border: 2px solid #1e1e1e;
+}
+
+.status-online { background: #43b581; }
+.status-idle { background: #faa61a; }
+.status-dnd { background: #f04747; }
+.status-offline { background: #747f8d; }
+
 .left-section img {
   width: 100px;
   height: 100px;
@@ -54,17 +75,40 @@ body {
   font-size: 0.85rem;
   width: 100%;
   display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.music-wrapper {
+  display: flex;
   flex-direction: row;
   align-items: center;
+  width: 100%;
   gap: 12px;
 }
 
+/* Album art is fully square (no rounding) and spins */
 .album-art {
   width: 64px;
   height: 64px;
-  border-radius: 8px;
+  border-radius: 0;
   object-fit: cover;
   flex-shrink: 0;
+}
+
+.spinning {
+  animation: spin 5s linear infinite;
+}
+
+@keyframes spin {
+  0% { transform: rotate(0deg); }
+  100% { transform: rotate(360deg); }
+}
+
+/* Small icon overlay remains circular */
+.small-art {
+  border-radius: 50%;
+  border: 1px solid #fff;
 }
 
 .music-info {
@@ -75,17 +119,27 @@ body {
   min-width: 0;
 }
 
-.song-title {
+/* Clickable song title */
+a.song-title {
   font-weight: bold;
   font-size: 0.95rem;
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
+  color: #f1f1f1;
+  text-decoration: none;
+  margin-top: 4px;
 }
 
+a.song-title:hover {
+  text-decoration: underline;
+}
+
+/* Non-clickable artist text */
 .artist {
   font-size: 0.8rem;
   color: #ccc;
+  margin-top: 2px;
   margin-bottom: 4px;
   white-space: nowrap;
   overflow: hidden;
@@ -123,73 +177,98 @@ body {
   display: flex;
   flex-direction: column;
   justify-content: center;
+  align-items: center;
 }
 
 .intro {
   font-size: 1.2rem;
   margin-bottom: 10px;
+  text-align: center;
 }
 
 .link {
   background: #333;
   color: white;
   padding: 8px 12px;
-  margin: 4px 0;
-  text-align: center;
+  margin: 8px 0;
   border-radius: 8px;
   text-decoration: none;
-  width: fit-content;
+  width: 100%;
+  max-width: 260px;
+  text-align: center;
+  position: relative;
+  transition: background 0.3s;
 }
 
 .link:hover {
   background: #444;
 }
 
-/* Mobile Layout */
+.link-preview {
+  position: absolute;
+  top: 110%;
+  left: 50%;
+  transform: translateX(-50%);
+  background: #1e1e1e;
+  padding: 12px;
+  border-radius: 10px;
+  box-shadow: 0 0 12px rgba(0, 0, 0, 0.5);
+  z-index: 10;
+  display: none;
+  flex-direction: column;
+  align-items: center;
+  width: 280px;
+  pointer-events: none;
+  font-size: 0.8rem;
+  text-align: center;
+  overflow: hidden;
+}
+
+.link:hover .link-preview {
+  display: flex;
+}
+
+.link-preview img {
+  max-width: 100%;
+  border-radius: 8px;
+  margin-top: 8px;
+}
+
+/* Smaller Spotify logo using local file, forced to 16px */
+.spotify-logo {
+  width: 16px !important;
+  height: 16px !important;
+  margin-bottom: 2px; /* Reduced margin */
+  display: block;
+  border-radius: 50%;
+  box-shadow: 0 0 4px #1db954;
+}
+
 @media (max-width: 600px) {
   .id-card {
     flex-direction: column;
     align-items: center;
     padding: 16px;
   }
-
   .left-section {
     width: 100%;
     border-right: none;
     border-bottom: 2px solid #333;
-    padding: 0 0 15px;
+    padding: 0;
     margin-bottom: 15px;
   }
-
   .right-section {
     width: 100%;
     padding-left: 0;
-    align-items: center;
-    text-align: center;
   }
-
   .link {
     width: 100%;
-    max-width: 200px;
   }
-
-  .discord-box {
-    flex-direction: row;
-    align-items: flex-start;
-  }
-
-  .album-art {
-    width: 72px;
-    height: 72px;
-  }
-
-  .music-info {
-    align-items: flex-start;
-    text-align: left;
-  }
-
   .time-stamps {
     justify-content: space-between;
     margin-top: 4px;
+  }
+  .discord-box {
+    padding: 12px;
   }
 }
