@@ -1,4 +1,4 @@
-const userId = '355470689089748992'; // your Discord user ID
+const userId = '355470689089748992';
 let progressInterval;
 
 function msToMinutes(ms) {
@@ -11,9 +11,10 @@ function msToMinutes(ms) {
 function updateSpotifyProgress(start, end) {
   const now = Date.now();
   const total = end - start;
-  const elapsed = now - start;
-  const percent = Math.min(100, (elapsed / total) * 100);
+  let elapsed = now - start;
+  if (elapsed > total) elapsed = total;
 
+  const percent = Math.min(100, (elapsed / total) * 100);
   const bar = document.querySelector('.progress-bar');
   const currentTime = document.getElementById('current-time');
   const totalTime = document.getElementById('total-time');
@@ -43,7 +44,6 @@ async function fetchDiscordActivity() {
 
     let contentAdded = false;
 
-    // === Spotify Activity ===
     if (spotify) {
       const wrapper = document.createElement('div');
       wrapper.className = 'music-wrapper';
@@ -96,7 +96,6 @@ async function fetchDiscordActivity() {
       contentAdded = true;
     }
 
-    // === Rich Presence Activities (Games, etc.) ===
     const filteredActivities = activities.filter(
       act => act.type === 0 && act.name !== 'Custom Status'
     );
@@ -148,7 +147,6 @@ async function fetchDiscordActivity() {
       contentAdded = true;
     });
 
-    // If nothing was added, show a fallback
     if (!contentAdded) {
       activityBox.textContent = 'No activity currently.';
     }
