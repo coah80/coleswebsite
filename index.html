@@ -1,93 +1,10 @@
-<!DOCTYPE html><html lang="en">
+<!DOCTYPE html>
+<html lang="en">
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>coles website</title>
-  <style>
-    body {
-      background: #121212;
-      display: flex;
-      justify-content: center;
-      align-items: center;
-      height: 100vh;
-      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-      color: #f1f1f1;
-      margin: 0;
-    }.id-card {
-  background: #1e1e1e;
-  border: 2px solid #333;
-  border-radius: 12px;
-  width: 500px;
-  height: 280px;
-  padding: 20px;
-  display: flex;
-  box-shadow: 0 0 15px rgba(0, 0, 0, 0.6);
-}
-
-.left-section {
-  width: 40%;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: flex-start;
-  border-right: 2px solid #333;
-  padding-right: 15px;
-}
-
-.left-section img {
-  width: 100px;
-  height: 100px;
-  border-radius: 50%;
-  object-fit: cover;
-  border: 2px solid #444;
-  margin-bottom: 10px;
-}
-
-.left-section .username {
-  font-size: 1.3rem;
-  font-weight: bold;
-  margin-bottom: 10px;
-}
-
-.discord-box {
-  background: #5865F2;
-  color: white;
-  padding: 6px 10px;
-  border-radius: 6px;
-  font-size: 0.85rem;
-  text-align: center;
-  margin-top: auto;
-}
-
-.right-section {
-  width: 60%;
-  padding-left: 15px;
-  display: flex;
-  flex-direction: column;
-  justify-content: center;
-}
-
-.right-section .intro {
-  font-size: 1.2rem;
-  margin-bottom: 10px;
-}
-
-.link {
-  background: #333;
-  color: white;
-  padding: 8px 12px;
-  margin: 4px 0;
-  text-align: center;
-  border-radius: 8px;
-  text-decoration: none;
-  width: fit-content;
-}
-
-.link:hover {
-  background: #444;
-}
-
-  </style>
+  <link rel="stylesheet" href="style.css" />
 </head>
 <body>
   <div class="id-card">
@@ -104,27 +21,8 @@
       <a href="#" class="link">Link 2</a>
       <a href="#" class="link">Link 3</a>
     </div>
-  </div>  <script>
-    async function fetchDiscordActivity() {
-      try {
-        const userId = '355470689089748992'; // replace with your actual user ID
-        const response = await fetch(`https://api.lanyard.rest/v1/users/${userId}`);
-        const data = await response.json();
+  </div>
 
-        const activityBox = document.getElementById('discord-activity');
-        if (data.data.activities && data.data.activities.length > 0) {
-          const activity = data.data.activities[0];
-          const details = activity.name + (activity.details ? ` - ${activity.details}` : '');
-          activityBox.textContent = details;
-        } else {
-          activityBox.textContent = 'No activity currently.';
-        }
-      } catch (error) {
-        document.getElementById('discord-activity').textContent = 'Unable to fetch activity.';
-      }
-    }
-
-    fetchDiscordActivity();
-    setInterval(fetchDiscordActivity, 30000); // update every 30 seconds
-  </script></body>
+  <script src="script.js"></script>
+</body>
 </html>
