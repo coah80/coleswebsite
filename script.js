@@ -1,4 +1,5 @@
-const userId = '355470689089748992'; // your actual Discord user ID
+const userId = '355470689089748992'; // your Discord user ID
+let progressInterval;
 
 function msToMinutes(ms) {
   const totalSeconds = Math.floor(ms / 1000);
@@ -7,13 +8,26 @@ function msToMinutes(ms) {
   return `${minutes}:${seconds.toString().padStart(2, '0')}`;
 }
 
-function updateProgressBar(start, end) {
+function updateSpotifyProgress(start, end) {
   const now = Date.now();
   const total = end - start;
   const elapsed = now - start;
   const percent = Math.min(100, (elapsed / total) * 100);
+
   const bar = document.querySelector('.progress-bar');
+  const currentTime = document.getElementById('current-time');
+  const totalTime = document.getElementById('total-time');
+
   if (bar) bar.style.width = percent + '%';
+  if (currentTime) currentTime.textContent = msToMinutes(elapsed);
+  if (totalTime) totalTime.textContent = msToMinutes(total);
+}
+
+function clearProgressUpdater() {
+  if (progressInterval) {
+    clearInterval(progressInterval);
+    progressInterval = null;
+  }
 }
 
 async function fetchDiscordActivity() {
@@ -22,37 +36,63 @@ async function fetchDiscordActivity() {
     const data = await res.json();
     const activityBox = document.getElementById('discord-activity');
     activityBox.innerHTML = '';
-
-    const activities = data.data.activities;
+    clearProgressUpdater();
 
     const spotify = data.data.spotify;
-    if (spotify) {
-      const img = document.createElement('img');
-      img.src = spotify.album_art_url;
-      activityBox.appendChild(img);
+    const activities = data.data.activities;
 
-      const text = document.createElement('div');
-      text.className = 'activity-details';
-      text.innerHTML = `<strong>${spotify.song}</strong><br>${spotify.artist}`;
-      activityBox.appendChild(text);
+    if (spotify) {
+      const wrapper = document.createElement('div');
+      wrapper.className = 'music-wrapper';
+
+      const albumArt = document.createElement('img');
+      albumArt.src = spotify.album_art_url;
+      albumArt.className = 'album-art';
+      wrapper.appendChild(albumArt);
+
+      const musicInfo = document.createElement('div');
+      musicInfo.className = 'music-info';
+
+      const title = document.createElement('div');
+      title.className = 'song-title';
+      title.textContent = spotify.song;
+      musicInfo.appendChild(title);
+
+      const artist = document.createElement('div');
+      artist.className = 'artist';
+      artist.textContent = `${spotify.artist} • ${spotify.album}`;
+      musicInfo.appendChild(artist);
 
       const progress = document.createElement('div');
       progress.className = 'progress-container';
       progress.innerHTML = '<div class="progress-bar"></div>';
-      activityBox.appendChild(progress);
+      musicInfo.appendChild(progress);
 
-      updateProgressBar(spotify.timestamps.start, spotify.timestamps.end);
+      const timeRow = document.createElement('div');
+      timeRow.className = 'time-stamps';
+      timeRow.innerHTML = `
+        <span id="current-time">${msToMinutes(Date.now() - spotify.timestamps.start)}</span>
+        <span id="total-time">${msToMinutes(spotify.timestamps.end - spotify.timestamps.start)}</span>
+      `;
+      musicInfo.appendChild(timeRow);
+
+      wrapper.appendChild(musicInfo);
+      activityBox.appendChild(wrapper);
+
+      updateSpotifyProgress(spotify.timestamps.start, spotify.timestamps.end);
+      progressInterval = setInterval(() => {
+        updateSpotifyProgress(spotify.timestamps.start, spotify.timestamps.end);
+      }, 1000);
     } else {
       const rich = activities.find(act => act.type === 0 && act.name !== 'Custom Status');
       if (rich) {
         const img = document.createElement('img');
         if (rich.assets?.large_image?.startsWith('mp:external')) {
           img.src = `https://cdn.discordapp.com/${rich.assets.large_image}`;
-        } else if (rich.assets?.large_image?.startsWith('spotify:')) {
-          img.src = `https://i.scdn.co/image/${rich.assets.large_image.replace('spotify:', '')}`;
         } else {
           img.src = `https://cdn.discordapp.com/app-assets/${rich.application_id}/${rich.assets.large_image}.png`;
         }
+        img.className = 'album-art';
         activityBox.appendChild(img);
 
         const text = document.createElement('div');
