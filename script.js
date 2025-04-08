@@ -88,7 +88,7 @@ function renderActivity(data) {
     musicInfo.className = 'music-info';
 
     const spotifyLogo = document.createElement('img');
-    spotifyLogo.src = 'icons/spotify.png'; // updated path
+    spotifyLogo.src = 'icons/spotify.png';
     spotifyLogo.className = 'spotify-logo';
     musicInfo.appendChild(spotifyLogo);
 
@@ -219,7 +219,8 @@ function renderActivity(data) {
 }
 
 function startWebSocket() {
-  socket = new WebSocket('wss://api.lanyard.rest/socket');
+  socket = new WebSocket('wss://wss.cole.ong/'); // ⬅️ USING YOUR WORKER PROXY NOW
+
   socket.addEventListener('open', () => {
     console.log("WebSocket connection opened.");
     socket.send(JSON.stringify({
@@ -227,6 +228,7 @@ function startWebSocket() {
       d: { subscribe_to_id: userId, api_key: apiKey }
     }));
   });
+
   socket.addEventListener('message', event => {
     try {
       const parsed = JSON.parse(event.data);
@@ -245,9 +247,11 @@ function startWebSocket() {
       console.error("Error parsing WebSocket message:", error, event.data);
     }
   });
+
   socket.addEventListener('error', event => {
     console.error("WebSocket error:", event);
   });
+
   socket.addEventListener('close', () => {
     console.warn("WebSocket closed, reconnecting in 5 seconds...");
     setTimeout(startWebSocket, 5000);
