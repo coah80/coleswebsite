@@ -1,5 +1,5 @@
 const userId = '761701756119547955';
-const apiKey = 'd462adce227a99a6793c5d1edef7c6db';
+const apiKey = '1cf73df572dac3f3ce085aa2b4d6ef83';
 let progressInterval;
 let richInterval;
 let socket;
