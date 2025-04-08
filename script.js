@@ -46,10 +46,10 @@ function clearProgressUpdater() {
 
 function renderActivity(data) {
   const activityBox = document.getElementById('discord-activity');
+  const idCard = document.querySelector('.id-card');
   activityBox.innerHTML = '';
   clearProgressUpdater();
 
-  // === Status Dot (Always Circular) ===
   const presence = data.discord_status;
   const statusDot = document.createElement('div');
   statusDot.classList.add('status-dot', `status-${presence}`);
@@ -68,7 +68,6 @@ function renderActivity(data) {
     wrapper.appendChild(statusDot);
   }
 
-  // === Render Spotify Activity ===
   if (data.spotify) {
     const spotify = data.spotify;
     const wrapper = document.createElement('div');
@@ -88,13 +87,11 @@ function renderActivity(data) {
     const musicInfo = document.createElement('div');
     musicInfo.className = 'music-info';
 
-    // Use local spotify.png for the logo
     const spotifyLogo = document.createElement('img');
-    spotifyLogo.src = 'spotify.png';
+    spotifyLogo.src = 'icons/spotify.png'; // updated path
     spotifyLogo.className = 'spotify-logo';
     musicInfo.appendChild(spotifyLogo);
 
-    // Clickable link for the song title.
     const songLink = document.createElement('a');
     songLink.href = `https://open.spotify.com/track/${spotify.track_id}`;
     songLink.target = '_blank';
@@ -102,7 +99,6 @@ function renderActivity(data) {
     songLink.textContent = spotify.song;
     musicInfo.appendChild(songLink);
 
-    // Plain text for artist and album.
     const artistAlbumText = document.createElement('div');
     artistAlbumText.className = 'artist';
     artistAlbumText.textContent = `${spotify.artist} • ${spotify.album}`;
@@ -130,7 +126,6 @@ function renderActivity(data) {
     }, 1000);
   }
 
-  // === Render Game / Rich Presence Activities ===
   const filteredActivities = data.activities.filter(
     act => act.type === 0 && act.name !== 'Custom Status'
   );
@@ -145,7 +140,6 @@ function renderActivity(data) {
     container.style.gap = '12px';
     container.style.marginBottom = '12px';
 
-    // --- Image Handling for Activities ---
     const img = document.createElement('img');
     if (act.application_id) {
       img.src = `https://dcdn.dstn.to/app-icons/${act.application_id}?ext=webp&size=240`;
@@ -156,7 +150,6 @@ function renderActivity(data) {
     }
     img.className = 'album-art';
 
-    // --- Small Image Overlay (if available) ---
     if (act.application_id) {
       const smallImg = document.createElement('img');
       smallImg.src = `https://dcdn.dstn.to/app-icons/${act.application_id}?ext=png&size=64`;
@@ -179,7 +172,6 @@ function renderActivity(data) {
       container.appendChild(img);
     }
 
-    // --- Text Info & Live Timer for Activity ---
     const text = document.createElement('div');
     text.className = 'music-info';
 
@@ -213,11 +205,12 @@ function renderActivity(data) {
     activityBox.appendChild(container);
   });
 
-  // Hide activity container if empty
   if (activityBox.innerHTML.trim() === '') {
     activityBox.style.display = 'none';
+    idCard?.classList.remove('expanded');
   } else {
     activityBox.style.display = 'flex';
+    idCard?.classList.add('expanded');
   }
 
   if (document.querySelectorAll('.rich-timer').length > 0) {
@@ -262,30 +255,5 @@ function startWebSocket() {
 }
 
 document.addEventListener('DOMContentLoaded', () => {
-  document.querySelectorAll('.link').forEach(link => {
-    const previewBox = link.querySelector('.link-preview');
-    const url = link.href;
-    if (!previewBox.dataset.fetched) {
-      fetch(`https://api.allorigins.win/get?url=${encodeURIComponent(url)}`)
-        .then(res => res.json())
-        .then(data => {
-          const html = new DOMParser().parseFromString(data.contents, 'text/html');
-          const ogTitle = html.querySelector("meta[property='og:title']")?.content || url;
-          const ogDesc = html.querySelector("meta[property='og:description']")?.content || '';
-          const ogImage = html.querySelector("meta[property='og:image']")?.content || '';
-          const favicon = `https://www.google.com/s2/favicons?domain=${new URL(url).hostname}`;
-          previewBox.innerHTML = `
-            <img src="${favicon}" />
-            <strong style="margin-top:4px">${ogTitle}</strong>
-            <small style="font-size: 0.75rem; color: #ccc; margin-top:4px">${ogDesc}</small>
-            ${ogImage ? `<img src="${ogImage}" />` : ''}
-          `;
-          previewBox.dataset.fetched = 'true';
-        })
-        .catch(() => {
-          previewBox.innerHTML = `<span style="font-size: 0.75rem; color: #aaa">Could not load preview</span>`;
-        });
-    }
-  });
   startWebSocket();
 });
