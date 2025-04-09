@@ -2,12 +2,23 @@ const userId = '761701756119547955';
 const apiKey = '1cf73df572dac3f3ce085aa2b4d6ef83';
 let socket;
 
-let musicLogs = JSON.parse(localStorage.getItem('musicLogs') || '[]');
-let gameLogs = JSON.parse(localStorage.getItem('gameLogs') || '[]');
+let musicLogs = [];
+let gameLogs = [];
 
-function saveLogs() {
-  localStorage.setItem('musicLogs', JSON.stringify(musicLogs));
-  localStorage.setItem('gameLogs', JSON.stringify(gameLogs));
+async function pushMusicLog(newLog) {
+  await fetch("https://log.cole.ong/music", {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify(newLog)
+  });
+}
+
+async function pushGameLog(newLog) {
+  await fetch("https://log.cole.ong/games", {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify(newLog)
+  });
 }
 
 function formatTime(ms) {
@@ -26,7 +37,7 @@ function formatDateTime(ms) {
     hour: 'numeric',
     minute: '2-digit',
     hour12: true,
-    timeZone: 'America/Chicago' // CST
+    timeZone: 'America/Chicago'
   };
   return `Logged at:<br>${date.toLocaleString('en-US', options)} CST`;
 }
@@ -118,17 +129,16 @@ function handleActivity(data) {
     const newTrackId = s.track_id;
 
     if (!musicLogs.length || musicLogs[0].track_id !== newTrackId) {
-      musicLogs.unshift({
+      const newLog = {
         track_id: s.track_id,
         song: s.song,
         artist: s.artist,
         album: s.album,
         album_art_url: s.album_art_url,
         loggedAt: Date.now()
-      });
-
-      if (musicLogs.length > 300) musicLogs.pop();
-      saveLogs();
+      };
+      musicLogs.unshift(newLog);
+      pushMusicLog(newLog);
       renderMusicLogs();
     }
   }
@@ -143,16 +153,15 @@ function handleActivity(data) {
     const topKey = top ? `${top.name}:${top.details || ''}:${top.state || ''}` : '';
 
     if (gameKey !== topKey) {
-      gameLogs.unshift({
+      const newLog = {
         name: currentGame.name,
         details: currentGame.details || '',
         state: currentGame.state || '',
         icon: currentGame.application_id || null,
         loggedAt: Date.now()
-      });
-
-      if (gameLogs.length > 300) gameLogs = gameLogs.slice(0, 300);
-      saveLogs();
+      };
+      gameLogs.unshift(newLog);
+      pushGameLog(newLog);
       renderGameLogs();
     }
   }
@@ -236,8 +245,18 @@ function connectSocket() {
   socket.onerror = err => console.error('WebSocket error:', err);
 }
 
-document.addEventListener('DOMContentLoaded', () => {
+async function fetchUniversalLogs() {
+  const musicRes = await fetch("https://raw.githubusercontent.com/colevrya/coleswebsite-logs/main/music.json");
+  musicLogs = await musicRes.json();
+
+  const gameRes = await fetch("https://raw.githubusercontent.com/colevrya/coleswebsite-logs/main/games.json");
+  gameLogs = await gameRes.json();
+
   renderMusicLogs();
   renderGameLogs();
+}
+
+document.addEventListener("DOMContentLoaded", () => {
+  fetchUniversalLogs();
   connectSocket();
 });
