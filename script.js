@@ -1,8 +1,14 @@
 const userId = '761701756119547955';
 const apiKey = '1cf73df572dac3f3ce085aa2b4d6ef83';
-let progressInterval;
-let richInterval;
 let socket;
+
+let musicLogs = JSON.parse(localStorage.getItem('musicLogs') || '[]');
+let gameLogs = JSON.parse(localStorage.getItem('gameLogs') || '[]');
+
+function saveLogs() {
+  localStorage.setItem('musicLogs', JSON.stringify(musicLogs));
+  localStorage.setItem('gameLogs', JSON.stringify(gameLogs));
+}
 
 function formatTime(ms) {
   const totalSeconds = Math.floor(ms / 1000);
@@ -11,249 +17,227 @@ function formatTime(ms) {
   return `${minutes}:${seconds.toString().padStart(2, '0')}`;
 }
 
-function updateSpotifyProgress(start, end) {
+function formatDateTime(ms) {
+  const date = new Date(ms);
+  const options = {
+    month: 'long',
+    day: 'numeric',
+    year: 'numeric',
+    hour: 'numeric',
+    minute: '2-digit',
+    hour12: true,
+    timeZone: 'America/Chicago' // CST
+  };
+  return `Logged at:<br>${date.toLocaleString('en-US', options)} CST`;
+}
+
+function renderMusicLogs() {
+  const perPage = +document.getElementById('music-per-page').value;
+  const container = document.getElementById('music-logs');
+  const pagination = document.getElementById('music-pages');
+
+  const pageCount = Math.ceil(musicLogs.length / perPage);
+  let currentPage = +pagination.dataset.page || 1;
+  if (currentPage > pageCount) currentPage = pageCount;
+  if (currentPage < 1) currentPage = 1;
+  pagination.dataset.page = currentPage;
+
+  const start = (currentPage - 1) * perPage;
+  const logsToShow = musicLogs.slice(start, start + perPage);
+
+  container.innerHTML = logsToShow.map(log => `
+    <div class="music-wrapper">
+      <img src="${log.album_art_url}" class="album-art">
+      <div class="music-info">
+        <a class="song-title" href="https://open.spotify.com/track/${log.track_id}" target="_blank">${log.song}</a>
+        <div class="artist">${log.artist} • ${log.album}</div>
+        <div class="artist">${formatDateTime(log.loggedAt)}</div>
+      </div>
+    </div>
+  `).join('');
+
+  pagination.innerHTML = Array.from({ length: pageCount }, (_, i) => {
+    const num = i + 1;
+    return `<button onclick="goToMusicPage(${num})">${num}</button>`;
+  }).join('');
+}
+
+function renderGameLogs() {
+  const perPage = +document.getElementById('games-per-page').value;
+  const container = document.getElementById('game-logs');
+  const pagination = document.getElementById('game-pages');
+
+  const pageCount = Math.ceil(gameLogs.length / perPage);
+  let currentPage = +pagination.dataset.page || 1;
+  if (currentPage > pageCount) currentPage = pageCount;
+  if (currentPage < 1) currentPage = 1;
+  pagination.dataset.page = currentPage;
+
+  const start = (currentPage - 1) * perPage;
+  const logsToShow = gameLogs.slice(start, start + perPage);
+
+  container.innerHTML = logsToShow.map(log => {
+    const icon = log.icon
+      ? `https://dcdn.dstn.to/app-icons/${log.icon}?ext=webp&size=64`
+      : 'https://cdn.discordapp.com/embed/avatars/0.png';
+    return `
+      <div class="music-wrapper">
+        <img src="${icon}" class="album-art">
+        <div class="music-info">
+          <div class="song-title">${log.name}</div>
+          <div class="artist">${log.details || ''}</div>
+          <div class="artist">${log.state || ''}</div>
+          <div class="artist">${formatDateTime(log.loggedAt)}</div>
+        </div>
+      </div>
+    `;
+  }).join('');
+
+  pagination.innerHTML = Array.from({ length: pageCount }, (_, i) => {
+    const num = i + 1;
+    return `<button onclick="goToGamePage(${num})">${num}</button>`;
+  }).join('');
+}
+
+function goToMusicPage(num) {
+  document.getElementById('music-pages').dataset.page = num;
+  renderMusicLogs();
+}
+
+function goToGamePage(num) {
+  document.getElementById('game-pages').dataset.page = num;
+  renderGameLogs();
+}
+
+function handleActivity(data) {
   const now = Date.now();
-  const total = end - start;
-  let elapsed = now - start;
-  if (elapsed > total) elapsed = total;
-  const percent = Math.min(100, (elapsed / total) * 100);
-  const bar = document.querySelector('.progress-bar');
-  const currentTime = document.getElementById('current-time');
-  const totalTime = document.getElementById('total-time');
-  if (bar) bar.style.width = percent + '%';
-  if (currentTime) currentTime.textContent = formatTime(elapsed);
-  if (totalTime) totalTime.textContent = formatTime(total);
-}
 
-function updateRichPresenceTimers() {
-  document.querySelectorAll('.rich-timer').forEach(timer => {
-    const start = parseInt(timer.dataset.start, 10);
-    const elapsed = Date.now() - start;
-    timer.textContent = `Playing for ${formatTime(elapsed)}`;
-  });
-}
+  // ==== MUSIC LOGGING ====
+  if (data.spotify) {
+    const s = data.spotify;
+    const newTrackId = s.track_id;
 
-function clearProgressUpdater() {
-  if (progressInterval) {
-    clearInterval(progressInterval);
-    progressInterval = null;
+    if (!musicLogs.length || musicLogs[0].track_id !== newTrackId) {
+      musicLogs.unshift({
+        track_id: s.track_id,
+        song: s.song,
+        artist: s.artist,
+        album: s.album,
+        album_art_url: s.album_art_url,
+        loggedAt: Date.now()
+      });
+
+      if (musicLogs.length > 300) musicLogs.pop();
+      saveLogs();
+      renderMusicLogs();
+    }
   }
-  if (richInterval) {
-    clearInterval(richInterval);
-    richInterval = null;
+
+  // ==== GAME LOGGING ====
+  const games = data.activities.filter(a => a.type === 0 && a.name !== 'Custom Status');
+  const currentGame = games[0];
+
+  if (currentGame) {
+    const gameKey = `${currentGame.name}:${currentGame.details || ''}:${currentGame.state || ''}`;
+    const top = gameLogs[0];
+    const topKey = top ? `${top.name}:${top.details || ''}:${top.state || ''}` : '';
+
+    if (gameKey !== topKey) {
+      gameLogs.unshift({
+        name: currentGame.name,
+        details: currentGame.details || '',
+        state: currentGame.state || '',
+        icon: currentGame.application_id || null,
+        loggedAt: Date.now()
+      });
+
+      if (gameLogs.length > 300) gameLogs = gameLogs.slice(0, 300);
+      saveLogs();
+      renderGameLogs();
+    }
   }
-}
 
-function renderActivity(data) {
-  const activityBox = document.getElementById('discord-activity');
-  const idCard = document.querySelector('.id-card');
-  activityBox.innerHTML = '';
-  clearProgressUpdater();
-
-  const presence = data.discord_status;
-  const statusDot = document.createElement('div');
-  statusDot.classList.add('status-dot', `status-${presence}`);
-
-  let pfpImg = document.querySelector('.left-section img');
-  if (pfpImg && !pfpImg.parentNode.classList.contains('status-wrapper')) {
-    const wrapper = document.createElement('div');
-    wrapper.className = 'status-wrapper';
-    pfpImg.parentNode.replaceChild(wrapper, pfpImg);
-    wrapper.appendChild(pfpImg);
-    wrapper.appendChild(statusDot);
-  } else if (pfpImg && pfpImg.parentNode.classList.contains('status-wrapper')) {
-    const wrapper = pfpImg.parentNode;
-    const existingDot = wrapper.querySelector('.status-dot');
-    if (existingDot) existingDot.remove();
-    wrapper.appendChild(statusDot);
-  }
+  // ==== DISCORD BOX ====
+  const discordBox = document.getElementById('discord-activity');
+  let html = '';
 
   if (data.spotify) {
-    const spotify = data.spotify;
-    const wrapper = document.createElement('div');
-    wrapper.className = 'music-wrapper';
-    wrapper.style.display = 'flex';
-    wrapper.style.flexDirection = 'row';
-    wrapper.style.alignItems = 'center';
-    wrapper.style.width = '100%';
-    wrapper.style.gap = '12px';
-    wrapper.style.marginBottom = '16px';
+    const s = data.spotify;
+    const total = s.timestamps.end - s.timestamps.start;
+    const elapsed = now - s.timestamps.start;
+    const progress = Math.min(Math.max(elapsed / total, 0), 1) * 100;
 
-    const albumArt = document.createElement('img');
-    albumArt.src = spotify.album_art_url;
-    albumArt.className = 'album-art spinning';
-    wrapper.appendChild(albumArt);
-
-    const musicInfo = document.createElement('div');
-    musicInfo.className = 'music-info';
-
-    const spotifyLogo = document.createElement('img');
-    spotifyLogo.src = 'icons/spotify.png'; 
-    spotifyLogo.className = 'spotify-logo';
-    musicInfo.appendChild(spotifyLogo);
-
-    const songLink = document.createElement('a');
-    songLink.href = `https://open.spotify.com/track/${spotify.track_id}`;
-    songLink.target = '_blank';
-    songLink.className = 'song-title';
-    songLink.textContent = spotify.song;
-    musicInfo.appendChild(songLink);
-
-    const artistAlbumText = document.createElement('div');
-    artistAlbumText.className = 'artist';
-    artistAlbumText.textContent = `${spotify.artist} • ${spotify.album}`;
-    musicInfo.appendChild(artistAlbumText);
-
-    const progress = document.createElement('div');
-    progress.className = 'progress-container';
-    progress.innerHTML = '<div class="progress-bar"></div>';
-    musicInfo.appendChild(progress);
-
-    const timeRow = document.createElement('div');
-    timeRow.className = 'time-stamps';
-    timeRow.innerHTML = `
-      <span id="current-time">${formatTime(Date.now() - spotify.timestamps.start)}</span>
-      <span id="total-time">${formatTime(spotify.timestamps.end - spotify.timestamps.start)}</span>
+    html += `
+      <div class="presence-entry spotify-presence">
+        <img src="${s.album_art_url}" class="album-art">
+        <div class="music-info">
+          <a class="song-title" href="https://open.spotify.com/track/${s.track_id}" target="_blank">
+            <img src="icons/spotify.png" class="spotify-icon" />
+            ${s.song}
+          </a>
+          <div class="artist">${s.artist} • ${s.album}</div>
+          <div class="spotify-progress">
+            <div class="time">${formatTime(elapsed)}</div>
+            <div class="bar"><div class="fill" style="width:${progress}%"></div></div>
+            <div class="time">${formatTime(total)}</div>
+          </div>
+        </div>
+      </div>
     `;
-    musicInfo.appendChild(timeRow);
-
-    wrapper.appendChild(musicInfo);
-    activityBox.appendChild(wrapper);
-
-    updateSpotifyProgress(spotify.timestamps.start, spotify.timestamps.end);
-    progressInterval = setInterval(() => {
-      updateSpotifyProgress(spotify.timestamps.start, spotify.timestamps.end);
-    }, 1000);
   }
 
-  const filteredActivities = data.activities.filter(
-    act => act.type === 0 && act.name !== 'Custom Status'
-  );
+  if (games.length > 0) {
+    games.forEach(g => {
+      const icon = g.application_id
+        ? `https://dcdn.dstn.to/app-icons/${g.application_id}?ext=webp&size=64`
+        : 'https://cdn.discordapp.com/embed/avatars/0.png';
 
-  filteredActivities.forEach((act, index) => {
-    const container = document.createElement('div');
-    container.className = 'music-wrapper';
-    container.style.display = 'flex';
-    container.style.flexDirection = 'row';
-    container.style.alignItems = 'center';
-    container.style.width = '100%';
-    container.style.gap = '12px';
-    container.style.marginBottom = '12px';
+      html += `
+        <div class="presence-entry">
+          <img src="${icon}" class="album-art">
+          <div class="music-info">
+            <div class="song-title">${g.name}</div>
+            <div class="artist">${g.details || ''}</div>
+            <div class="artist">${g.state || ''}</div>
+          </div>
+        </div>
+      `;
+    });
+  }
 
-    const img = document.createElement('img');
-    if (act.application_id) {
-      img.src = `https://dcdn.dstn.to/app-icons/${act.application_id}?ext=webp&size=240`;
-    } else if (act.assets?.large_image && act.assets.large_image.startsWith('mp:external')) {
-      img.src = `https://media.discordapp.net/${act.assets.large_image.replace("mp:", "")}.webp?size=240&keep_aspect_ratio=false`;
-    } else {
-      img.src = 'https://cdn.discordapp.com/embed/avatars/0.png';
-    }
-    img.className = 'album-art';
-
-    if (act.application_id) {
-      const smallImg = document.createElement('img');
-      smallImg.src = `https://dcdn.dstn.to/app-icons/${act.application_id}?ext=png&size=64`;
-      smallImg.className = 'small-art';
-
-      const imgContainer = document.createElement('div');
-      imgContainer.style.position = 'relative';
-      imgContainer.style.display = 'inline-block';
-      imgContainer.appendChild(img);
-
-      smallImg.style.position = 'absolute';
-      smallImg.style.bottom = '0';
-      smallImg.style.right = '0';
-      smallImg.style.width = '24px';
-      smallImg.style.height = '24px';
-      imgContainer.appendChild(smallImg);
-
-      container.appendChild(imgContainer);
-    } else {
-      container.appendChild(img);
-    }
-
-    const text = document.createElement('div');
-    text.className = 'music-info';
-
-    const name = document.createElement('div');
-    name.className = 'song-title';
-    name.textContent = act.name;
-    text.appendChild(name);
-
-    if (act.details) {
-      const detail = document.createElement('div');
-      detail.className = 'artist';
-      detail.textContent = act.details;
-      text.appendChild(detail);
-    }
-    if (act.state) {
-      const state = document.createElement('div');
-      state.className = 'artist';
-      state.textContent = act.state;
-      text.appendChild(state);
-    }
-    if (act.timestamps?.start) {
-      const timerDiv = document.createElement('div');
-      timerDiv.className = 'artist rich-timer';
-      timerDiv.id = `rich-timer-${index}`;
-      timerDiv.dataset.start = act.timestamps.start;
-      timerDiv.textContent = `Playing for ${formatTime(Date.now() - act.timestamps.start)}`;
-      text.appendChild(timerDiv);
-    }
-
-    container.appendChild(text);
-    activityBox.appendChild(container);
-  });
-
-  if (activityBox.innerHTML.trim() === '') {
-    activityBox.style.display = 'none';
-    idCard?.classList.remove('expanded');
+  if (!html) {
+    html = 'Not currently playing anything.';
+    discordBox.classList.remove('active');
   } else {
-    activityBox.style.display = 'flex';
-    idCard?.classList.add('expanded');
+    discordBox.classList.add('active');
   }
 
-  if (document.querySelectorAll('.rich-timer').length > 0) {
-    richInterval = setInterval(updateRichPresenceTimers, 1000);
-  }
+  discordBox.innerHTML = html;
 }
 
-function startWebSocket() {
+function connectSocket() {
   socket = new WebSocket('wss://api.lanyard.rest/socket');
-  socket.addEventListener('open', () => {
-    console.log("WebSocket connection opened.");
-    socket.send(JSON.stringify({
-      op: 2,
-      d: { subscribe_to_id: userId, api_key: apiKey }
-    }));
-  });
-  socket.addEventListener('message', event => {
-    try {
-      const parsed = JSON.parse(event.data);
-      const { t: type, d: data, op } = parsed;
-      if (op === 1) {
-        socket.send(JSON.stringify({
-          op: 2,
-          d: { subscribe_to_id: userId, api_key: apiKey }
-        }));
-      }
-      if (type === 'INIT_STATE' || type === 'PRESENCE_UPDATE') {
-        console.log("Received data:", parsed);
-        renderActivity(data);
-      }
-    } catch (error) {
-      console.error("Error parsing WebSocket message:", error, event.data);
+
+  socket.onopen = () => {
+    socket.send(JSON.stringify({ op: 2, d: { subscribe_to_id: userId, api_key: apiKey } }));
+  };
+
+  socket.onmessage = e => {
+    const msg = JSON.parse(e.data);
+    if (msg.t === 'INIT_STATE' || msg.t === 'PRESENCE_UPDATE') {
+      handleActivity(msg.d);
     }
-  });
-  socket.addEventListener('error', event => {
-    console.error("WebSocket error:", event);
-  });
-  socket.addEventListener('close', () => {
-    console.warn("WebSocket closed, reconnecting in 5 seconds...");
-    setTimeout(startWebSocket, 5000);
-  });
+    if (msg.op === 1) {
+      socket.send(JSON.stringify({ op: 2, d: { subscribe_to_id: userId, api_key: apiKey } }));
+    }
+  };
+
+  socket.onclose = () => setTimeout(connectSocket, 5000);
+  socket.onerror = err => console.error('WebSocket error:', err);
 }
 
 document.addEventListener('DOMContentLoaded', () => {
-  startWebSocket();
+  renderMusicLogs();
+  renderGameLogs();
+  connectSocket();
 });

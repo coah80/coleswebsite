@@ -1,7 +1,7 @@
 body {
-  background: #0d0b16; /* deep dark purple black */
-  font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+  background: #0d0b16;
   color: #e6dbff;
+  font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
   margin: 0;
   padding: 0;
   height: 100vh;
@@ -10,11 +10,38 @@ body {
   position: relative;
 }
 
-body > .id-card {
-  position: absolute;
-  top: 50%;
-  left: 50%;
-  transform: translate(-50%, -50%);
+body.scrollable {
+  overflow-y: auto;
+}
+
+.nav-bar {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  background: #1a1329;
+  display: flex;
+  justify-content: center;
+  gap: 12px;
+  padding: 12px;
+  z-index: 10;
+  border-bottom: 2px solid #3b2a60;
+}
+
+.tab-button {
+  background: #2b1f4c;
+  color: white;
+  border: none;
+  padding: 10px 20px;
+  border-radius: 10px;
+  font-weight: bold;
+  cursor: pointer;
+  transition: background 0.3s, box-shadow 0.3s;
+}
+
+.tab-button:hover {
+  background: #8c52ff;
+  box-shadow: 0 0 12px #8c52ff, 0 0 24px #8c52ff99;
 }
 
 .background-scroll {
@@ -66,18 +93,32 @@ body > .id-card {
   100% { transform: translateX(0%); }
 }
 
+.center-wrapper {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  height: 100vh;
+  padding-top: 80px;
+  box-sizing: border-box;
+}
+
 .id-card {
   background: linear-gradient(145deg, #1a1329, #120d1f);
   border: 2px solid #3b2a60;
   border-radius: 20px;
   max-width: 600px;
-  width: 100%;
+  width: 90%;
   padding: 24px;
   display: flex;
   flex-direction: row;
   box-shadow: 0 0 25px rgba(140, 82, 255, 0.4);
   z-index: 1;
-  transition: all 0.3s ease;
+  justify-content: center;
+  align-items: center;
+  position: fixed;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
 }
 
 .left-section {
@@ -133,111 +174,9 @@ body > .id-card {
   font-weight: bold;
   color: #d2c6f8;
   text-shadow: 0 0 6px #8c52ff80;
+  margin-bottom: 10px; /* 👈 add this */
 }
 
-.discord-box {
-  background: #1b1429;
-  color: #e6dbff;
-  padding: 12px;
-  border-radius: 10px;
-  font-size: 0.85rem;
-  width: 100%;
-  display: none;
-  flex-direction: column;
-  gap: 16px;
-  box-shadow: inset 0 0 10px #8c52ff20;
-}
-
-.discord-box.active {
-  display: flex;
-}
-
-.music-wrapper {
-  display: flex;
-  flex-direction: row;
-  align-items: center;
-  width: 100%;
-  gap: 12px;
-}
-
-.album-art {
-  width: 64px;
-  height: 64px;
-  border-radius: 50%;
-  object-fit: cover;
-  flex-shrink: 0;
-  border: 2px solid #b592ff;
-  box-shadow: 0 0 10px #8c52ff90;
-}
-
-.spinning {
-  animation: spin 5s linear infinite;
-}
-
-@keyframes spin {
-  0% { transform: rotate(0deg); }
-  100% { transform: rotate(360deg); }
-}
-
-.music-info {
-  display: flex;
-  flex-direction: column;
-  justify-content: center;
-  flex-grow: 1;
-  min-width: 0;
-}
-
-a.song-title {
-  font-weight: bold;
-  font-size: 0.95rem;
-  white-space: nowrap;
-  overflow: hidden;
-  text-overflow: ellipsis;
-  color: #e6dbff;
-  text-decoration: none;
-  margin-top: 4px;
-}
-
-a.song-title:hover {
-  text-decoration: underline;
-  color: #c9a8ff;
-}
-
-.artist {
-  font-size: 0.8rem;
-  color: #b7a4d4;
-  margin-top: 2px;
-  margin-bottom: 4px;
-  white-space: nowrap;
-  overflow: hidden;
-  text-overflow: ellipsis;
-}
-
-.progress-container {
-  background: #322a45;
-  border-radius: 10px;
-  overflow: hidden;
-  height: 6px;
-  width: 100%;
-  margin: 4px 0 2px;
-}
-
-.progress-bar {
-  background: #bb86fc;
-  height: 100%;
-  width: 0%;
-  box-shadow: 0 0 4px #bb86fc, 0 0 8px #bb86fc66;
-}
-
-.time-stamps {
-  display: flex;
-  justify-content: space-between;
-  font-size: 0.75rem;
-  color: #9a7bdc;
-  width: 100%;
-  white-space: nowrap;
-  margin-top: 4px;
-}
 
 .right-section {
   width: 40%;
@@ -284,7 +223,7 @@ a.song-title:hover {
   gap: 10px;
 }
 
-.social-link .icon {
+.icon {
   width: 16px;
   height: 16px;
   filter: brightness(0) invert(1);
@@ -295,33 +234,239 @@ a.song-title:hover {
   filter: drop-shadow(0 0 2px white);
 }
 
-.spotify-logo {
-  width: 16px !important;
-  height: 16px !important;
-  margin: -2px 0 0 -2px !important;
-  display: block;
-  border-radius: 50%;
-  box-shadow: 0 0 4px #1db954;
+.discord-box {
+  background: #1b1429;
+  color: #e6dbff;
+  padding: 12px;
+  border-radius: 10px;
+  font-size: 0.85rem;
+  width: 100%;
+  display: none;
+  flex-direction: column;
+  gap: 16px;
+  box-shadow: inset 0 0 10px #8c52ff20;
 }
 
-@media (max-width: 600px) {
+.discord-box.active {
+  display: flex;
+}
+
+.presence-entry {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 4px 0;
+}
+
+.presence-entry .album-art {
+  width: 48px;
+  height: 48px;
+  border-radius: 50%;
+  object-fit: cover;
+  flex-shrink: 0;
+  border: 2px solid #b592ff;
+  box-shadow: 0 0 6px #8c52ff80;
+}
+
+.presence-entry .music-info {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+}
+
+.logs-tab {
+  padding: 100px 24px 40px;
+  max-width: 800px;
+  margin: auto;
+  color: #e6dbff;
+}
+
+.logs-tab h2 {
+  text-align: center;
+  color: #c9a8ff;
+  margin-bottom: 24px;
+}
+
+#music-logs, #game-logs {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.music-wrapper {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  background: #1b1429;
+  padding: 12px;
+  border-radius: 12px;
+  box-shadow: inset 0 0 10px #8c52ff20;
+}
+
+.album-art {
+  width: 64px;
+  height: 64px;
+  border-radius: 50%;
+  object-fit: cover;
+  flex-shrink: 0;
+  border: 2px solid #b592ff;
+  box-shadow: 0 0 10px #8c52ff90;
+}
+
+.music-info {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+}
+
+.song-title {
+  font-weight: bold;
+  font-size: 0.95rem;
+  color: #e6dbff;
+  text-decoration: none;
+}
+
+.song-title:hover {
+  text-decoration: underline;
+  color: #c9a8ff;
+}
+
+.artist {
+  font-size: 0.8rem;
+  color: #b7a4d4;
+  margin-top: 2px;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.pagination-controls {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-top: 24px;
+  flex-wrap: wrap;
+  gap: 12px;
+}
+
+.pagination-controls select {
+  background: #2b1f4c;
+  color: white;
+  border: none;
+  padding: 6px;
+  border-radius: 6px;
+}
+
+.pagination-controls button {
+  background: #322a45;
+  color: #e6dbff;
+  border: none;
+  padding: 6px 10px;
+  border-radius: 6px;
+  cursor: pointer;
+  transition: background 0.2s;
+}
+
+.pagination-controls button:hover {
+  background: #8c52ff;
+}
+
+.spotify-icon {
+  height: 18px;
+  width: 18px;
+  margin-right: 6px;
+  border-radius: 50%;
+  object-fit: cover;
+  vertical-align: text-bottom;
+  box-shadow: 0 0 6px #1db954aa;
+}
+
+.spotify-progress {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 0.75rem;
+  margin-top: 4px;
+  color: #c9a8ff;
+}
+
+.spotify-progress .bar {
+  flex: 1;
+  background: #281f3c;
+  height: 4px;
+  border-radius: 6px;
+  overflow: hidden;
+  position: relative;
+}
+
+.spotify-progress .bar .fill {
+  background: #c782ff;
+  height: 100%;
+  transition: width 0.3s ease;
+}
+
+.spotify-progress .time {
+  width: 34px;
+  text-align: center;
+}
+
+.spotify-presence .album-art {
+  animation: spinRecord 5s linear infinite;
+  border-radius: 50%;
+  border: 3px solid #8c52ff;
+  box-shadow: 0 0 10px #8c52ff88;
+}
+
+@media (max-width: 768px), (max-height: 1080px) {
   .id-card {
+    position: relative;
+    top: auto;
+    left: auto;
+    transform: none;
     flex-direction: column;
     align-items: center;
     padding: 16px;
+    margin: 0 auto;
+    width: 90%;
+    background: linear-gradient(145deg, #1a1329, #120d1f);
+    border: 2px solid #3b2a60;
+    border-radius: 20px;
+    box-shadow: 0 0 25px rgba(140, 82, 255, 0.4);
   }
-  .left-section {
+  
+
+  .center-wrapper {
+    height: auto;
+    padding-top: 120px;
+    display: block;
+  }
+
+  .left-section, .right-section {
     width: 100%;
-    border-right: none;
-    border-bottom: 2px solid #2b1e47;
     padding: 0;
+  }
+
+  .left-section {
+    border-bottom: 2px solid #2b1e47;
     margin-bottom: 15px;
   }
-  .right-section {
-    width: 100%;
-    padding-left: 0;
-  }
+
   .link {
     width: 100%;
+  }
+
+  .logs-tab {
+    padding-top: 160px;
+  }
+}
+
+@keyframes spinRecord {
+  0% {
+    transform: rotate(0deg);
+  }
+  100% {
+    transform: rotate(360deg);
   }
 }
