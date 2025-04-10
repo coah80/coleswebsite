@@ -5,6 +5,7 @@ let socket;
 
 let musicLogs = [];
 let gameLogs = [];
+let progressInterval = null;
 
 async function fetchLogs() {
   try {
@@ -140,55 +141,36 @@ function goToGamePage(num) {
   renderGameLogs();
 }
 
+function updateProgressBar(start, end) {
+  clearInterval(progressInterval);
+  const discordBox = document.getElementById('discord-activity');
+
+  progressInterval = setInterval(() => {
+    const elapsed = Date.now() - start;
+    const total = end - start;
+    const progress = Math.min(Math.max(elapsed / total, 0), 1) * 100;
+
+    const timeElems = discordBox.querySelectorAll('.spotify-progress .time');
+    const fillBar = discordBox.querySelector('.spotify-progress .fill');
+
+    if (!fillBar || timeElems.length !== 2) return;
+
+    timeElems[0].textContent = formatTime(elapsed);
+    timeElems[1].textContent = formatTime(total);
+    fillBar.style.width = `${progress}%`;
+
+    if (elapsed >= total) clearInterval(progressInterval);
+  }, 1000);
+}
+
 async function handleActivity(data) {
   const now = Date.now();
-
-  if (data.spotify) {
-    const s = data.spotify;
-    const newTrackId = s.track_id;
-
-    if (!musicLogs.length || musicLogs[0].track_id !== newTrackId || now - musicLogs[0].loggedAt > 30000) {
-      musicLogs.unshift({
-        track_id: s.track_id,
-        song: s.song,
-        artist: s.artist,
-        album: s.album,
-        album_art_url: s.album_art_url,
-        loggedAt: now
-      });
-
-      if (musicLogs.length > 300) musicLogs.pop();
-      await saveLogs();
-    }
-  }
-
-  const games = data.activities.filter(a => a.type === 0 && a.name !== 'Custom Status');
-  const currentGame = games[0];
-
-  if (currentGame) {
-    const gameKey = `${currentGame.name}:${currentGame.details || ''}:${currentGame.state || ''}`;
-    const top = gameLogs[0];
-    const topKey = top ? `${top.name}:${top.details || ''}:${top.state || ''}` : '';
-
-    if (gameKey !== topKey) {
-      gameLogs.unshift({
-        name: currentGame.name,
-        details: currentGame.details || '',
-        state: currentGame.state || '',
-        icon: currentGame.application_id || null,
-        loggedAt: now
-      });
-
-      if (gameLogs.length > 300) gameLogs = gameLogs.slice(0, 300);
-      await saveLogs();
-    }
-  }
-
-  renderMusicLogs();
-  renderGameLogs();
-
   const discordBox = document.getElementById('discord-activity');
   let html = '';
+
+  const statusDot = document.querySelector('.status-dot');
+  const status = data.discord_status;
+  statusDot.className = `status-dot status-${status}`;
 
   if (data.spotify) {
     const s = data.spotify;
@@ -213,6 +195,46 @@ async function handleActivity(data) {
         </div>
       </div>
     `;
+
+    updateProgressBar(s.timestamps.start, s.timestamps.end);
+
+    if (!musicLogs.length || musicLogs[0].track_id !== s.track_id || now - musicLogs[0].loggedAt > 30000) {
+      musicLogs.unshift({
+        track_id: s.track_id,
+        song: s.song,
+        artist: s.artist,
+        album: s.album,
+        album_art_url: s.album_art_url,
+        loggedAt: now
+      });
+
+      if (musicLogs.length > 300) musicLogs.pop();
+      await saveLogs();
+    }
+  } else {
+    clearInterval(progressInterval);
+  }
+
+  const games = data.activities.filter(a => a.type === 0 && a.name !== 'Custom Status');
+  const currentGame = games[0];
+
+  if (currentGame) {
+    const gameKey = `${currentGame.name}:${currentGame.details || ''}:${currentGame.state || ''}`;
+    const top = gameLogs[0];
+    const topKey = top ? `${top.name}:${top.details || ''}:${top.state || ''}` : '';
+
+    if (gameKey !== topKey) {
+      gameLogs.unshift({
+        name: currentGame.name,
+        details: currentGame.details || '',
+        state: currentGame.state || '',
+        icon: currentGame.application_id || null,
+        loggedAt: now
+      });
+
+      if (gameLogs.length > 300) gameLogs = gameLogs.slice(0, 300);
+      await saveLogs();
+    }
   }
 
   if (games.length > 0) {
@@ -234,14 +256,8 @@ async function handleActivity(data) {
     });
   }
 
-  if (!html) {
-    html = 'Not currently playing anything.';
-    discordBox.classList.remove('active');
-  } else {
-    discordBox.classList.add('active');
-  }
-
-  discordBox.innerHTML = html;
+  discordBox.innerHTML = html || 'Not currently playing anything.';
+  discordBox.classList.toggle('active', !!html);
 }
 
 function connectSocket() {
@@ -271,23 +287,34 @@ function switchTab(tabName, fromPop = false) {
   const music = document.getElementById('music-tab');
   const games = document.getElementById('games-tab');
 
-  logs.style.display = 'none';
-  music.style.display = 'none';
-  games.style.display = 'none';
-
   document.querySelectorAll('.card-tab').forEach(btn => {
     btn.classList.toggle('active', btn.dataset.tab === tabName);
   });
 
   if (tabName === 'home') {
     card.classList.remove('expanded');
+    logs.style.display = 'none';
+    card.style.maxHeight = `${card.scrollHeight}px`;
+    requestAnimationFrame(() => {
+      card.style.maxHeight = '700px';
+    });
     if (!fromPop) history.pushState({}, '', '/');
   } else {
     logs.style.display = 'block';
+    music.style.display = 'none';
+    games.style.display = 'none';
+
     card.classList.add('expanded');
+    card.style.maxHeight = `${card.scrollHeight}px`;
     if (!fromPop) history.pushState({}, '', '/' + tabName);
-    if (tabName === 'music') renderMusicLogs();
-    if (tabName === 'games') renderGameLogs();
+    if (tabName === 'music') {
+      music.style.display = 'block';
+      renderMusicLogs();
+    }
+    if (tabName === 'games') {
+      games.style.display = 'block';
+      renderGameLogs();
+    }
   }
 }
 

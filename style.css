@@ -64,7 +64,6 @@ body {
   justify-content: center;
   align-items: center;
   height: 100vh;
-  box-sizing: border-box;
   padding: 0 16px;
 }
 
@@ -83,12 +82,14 @@ body {
   z-index: 1;
   position: relative;
   overflow: visible;
-  height: 100%;
-  max-height: none;
+  height: auto;
+  max-height: 700px;
+  transition: max-height 0.4s ease, padding-bottom 0.3s ease;
+  min-height: 200px;
 }
 
 .id-card.expanded {
-  height: auto;
+  max-height: 2000px;
   padding-bottom: 48px;
 }
 
@@ -96,7 +97,7 @@ body {
   display: flex;
   gap: 8px;
   position: absolute;
-  top: -32px;
+  top: -38px;
   left: 24px;
   z-index: 10;
 }
@@ -424,4 +425,34 @@ body {
   color: #c9a8ff;
   text-align: center;
   text-shadow: 0 0 4px #8c52ff80;
+}
+
+.spotify-progress {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-top: 8px;
+}
+
+.spotify-progress .time {
+  font-size: 0.7rem;
+  color: #b7a4d4;
+  width: 40px;
+  text-align: center;
+}
+
+.spotify-progress .bar {
+  flex: 1;
+  background: #2b1f4c;
+  border-radius: 4px;
+  height: 6px;
+  overflow: hidden;
+  position: relative;
+}
+
+.spotify-progress .fill {
+  height: 100%;
+  background: linear-gradient(to right, #a16eff, #8c52ff);
+  width: 0%;
+  transition: width 0.5s ease;
 }
