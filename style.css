@@ -174,9 +174,8 @@ body.scrollable {
   font-weight: bold;
   color: #d2c6f8;
   text-shadow: 0 0 6px #8c52ff80;
-  margin-bottom: 10px; /* 👈 add this */
+  margin-bottom: 10px;
 }
-
 
 .right-section {
   width: 40%;
@@ -373,100 +372,10 @@ body.scrollable {
   background: #8c52ff;
 }
 
-.spotify-icon {
-  height: 18px;
-  width: 18px;
-  margin-right: 6px;
-  border-radius: 50%;
-  object-fit: cover;
-  vertical-align: text-bottom;
-  box-shadow: 0 0 6px #1db954aa;
-}
-
-.spotify-progress {
-  display: flex;
-  align-items: center;
-  gap: 8px;
-  font-size: 0.75rem;
-  margin-top: 4px;
+#music-loading,
+#game-loading {
+  font-size: 0.9rem;
   color: #c9a8ff;
-}
-
-.spotify-progress .bar {
-  flex: 1;
-  background: #281f3c;
-  height: 4px;
-  border-radius: 6px;
-  overflow: hidden;
-  position: relative;
-}
-
-.spotify-progress .bar .fill {
-  background: #c782ff;
-  height: 100%;
-  transition: width 0.3s ease;
-}
-
-.spotify-progress .time {
-  width: 34px;
   text-align: center;
-}
-
-.spotify-presence .album-art {
-  animation: spinRecord 5s linear infinite;
-  border-radius: 50%;
-  border: 3px solid #8c52ff;
-  box-shadow: 0 0 10px #8c52ff88;
-}
-
-@media (max-width: 768px), (max-height: 1080px) {
-  .id-card {
-    position: relative;
-    top: auto;
-    left: auto;
-    transform: none;
-    flex-direction: column;
-    align-items: center;
-    padding: 16px;
-    margin: 0 auto;
-    width: 90%;
-    background: linear-gradient(145deg, #1a1329, #120d1f);
-    border: 2px solid #3b2a60;
-    border-radius: 20px;
-    box-shadow: 0 0 25px rgba(140, 82, 255, 0.4);
-  }
-  
-
-  .center-wrapper {
-    height: auto;
-    padding-top: 120px;
-    display: block;
-  }
-
-  .left-section, .right-section {
-    width: 100%;
-    padding: 0;
-  }
-
-  .left-section {
-    border-bottom: 2px solid #2b1e47;
-    margin-bottom: 15px;
-  }
-
-  .link {
-    width: 100%;
-  }
-
-  .logs-tab {
-    padding-top: 160px;
-  }
-}
-
-@keyframes spinRecord {
-  0% {
-    transform: rotate(0deg);
-  }
-  100% {
-    transform: rotate(360deg);
-  }
+  text-shadow: 0 0 4px #8c52ff80;
 }

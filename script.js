@@ -7,14 +7,42 @@ let musicLogs = [];
 let gameLogs = [];
 
 async function fetchLogs() {
-  const [musicRes, gameRes] = await Promise.all([
-    fetch(`${firebaseBase}/musicLogs.json`).then(r => r.json()),
-    fetch(`${firebaseBase}/gameLogs.json`).then(r => r.json())
-  ]);
-  musicLogs = Array.isArray(musicRes) ? musicRes : [];
-  gameLogs = Array.isArray(gameRes) ? gameRes : [];
-  renderMusicLogs();
-  renderGameLogs();
+  let musicLoadingShown = false;
+  let gameLoadingShown = false;
+
+  const loadingTimeout = setTimeout(() => {
+    document.getElementById('music-loading').style.display = 'block';
+    document.getElementById('game-loading').style.display = 'block';
+    musicLoadingShown = true;
+    gameLoadingShown = true;
+  }, 150);
+
+  try {
+    const [musicRes, gameRes] = await Promise.all([
+      fetch(`${firebaseBase}/musicLogs.json`).then(r => r.json()),
+      fetch(`${firebaseBase}/gameLogs.json`).then(r => r.json())
+    ]);
+
+    clearTimeout(loadingTimeout);
+
+    if (musicLoadingShown) {
+      document.getElementById('music-loading').style.display = 'none';
+      document.getElementById('game-loading').style.display = 'none';
+    }
+
+    musicLogs = Array.isArray(musicRes) ? musicRes : Object.values(musicRes || {});
+    gameLogs = Array.isArray(gameRes) ? gameRes : Object.values(gameRes || {});
+
+    renderMusicLogs();
+    renderGameLogs();
+  } catch (err) {
+    console.error('failed to fetch logs:', err);
+    clearTimeout(loadingTimeout);
+    document.getElementById('music-loading').textContent = 'error loading music logs 💀';
+    document.getElementById('music-loading').style.display = 'block';
+    document.getElementById('game-loading').textContent = 'error loading game logs 💀';
+    document.getElementById('game-loading').style.display = 'block';
+  }
 }
 
 async function saveLogs() {
