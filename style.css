@@ -185,7 +185,8 @@ body {
 
 .status-wrapper {
   position: relative;
-  display: inline-block;
+  display: flex;
+  justify-content: center;
   margin-bottom: 12px;
 }
 
@@ -196,14 +197,12 @@ body {
   object-fit: cover;
   border: 2px solid #6d44b8;
   box-shadow: 0 0 12px #8c52ff80;
-  display: block;
 }
 
 .status-dot {
   position: absolute;
-  bottom: 0;
-  right: 0;
-  transform: translate(50%, 50%);
+  bottom: 6px;
+  right: 12px; /* adjust this to move dot slightly left */
   width: 16px;
   height: 16px;
   border-radius: 50%;
