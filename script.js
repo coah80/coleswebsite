@@ -166,7 +166,7 @@ async function handleActivity(data) {
     const s = data.spotify;
     const newTrackId = s.track_id;
 
-    if (!musicLogs.length || musicLogs[0].track_id !== newTrackId) {
+    if (!musicLogs.length || musicLogs[0].track_id !== newTrackId || now - musicLogs[0].loggedAt > 30000) {
       musicLogs.unshift({
         track_id: s.track_id,
         song: s.song,
@@ -285,7 +285,7 @@ function connectSocket() {
 
 document.addEventListener('DOMContentLoaded', async () => {
   await fetchLogs();
-  renderMusicLogs();
+  renderMusicLogs(); // 🔥 this line makes it all show on load
   renderGameLogs();
   connectSocket();
 });
