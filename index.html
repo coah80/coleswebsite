@@ -25,49 +25,51 @@
   <div class="center-wrapper">
     <div class="id-card" id="main-card">
       
-      <!-- ✅ browser-style tabs -->
+      <!-- tabs -->
       <div class="card-tabs">
         <button class="card-tab" data-tab="home">Home</button>
         <button class="card-tab" data-tab="music">Music</button>
         <button class="card-tab" data-tab="games">Games</button>
       </div>
 
-      <!-- ✅ proper side-by-side layout -->
-      <div class="content-wrapper">
-        <div class="left-section">
-          <div class="center-content">
-            <div class="status-wrapper">
-              <img src="icons/colespfp.gif" alt="Profile Picture" />
-              <div class="status-dot status-offline"></div>
+      <!-- home content -->
+      <div id="home-tab" class="tab-page">
+        <div class="content-wrapper">
+          <div class="left-section">
+            <div class="center-content">
+              <div class="status-wrapper">
+                <img src="icons/colespfp.gif" alt="Profile Picture" />
+                <div class="status-dot status-offline"></div>
+              </div>
+              <div class="username">colevr</div>
             </div>
-            <div class="username">colevr</div>
+            <div class="discord-box" id="discord-activity">Loading Discord activity...</div>
           </div>
-          <div class="discord-box" id="discord-activity">Loading Discord activity...</div>
-        </div>
 
-        <div class="right-section">
-          <div class="intro">Hi, I'm Cole!</div>
-          <a href="https://www.youtube.com/@colevr." class="link social-link" target="_blank">
-            <img src="icons/yt.svg" class="icon" /> YouTube
-          </a>
-          <a href="https://github.com/colevrya" class="link social-link" target="_blank">
-            <img src="icons/github.svg" class="icon" /> GitHub
-          </a>
-          <a href="https://discord.gg/nqJv5czwQG" class="link social-link" target="_blank">
-            <img src="icons/discord.svg" class="icon" /> Discord
-          </a>
-          <a href="https://x.com/coledotvr" class="link social-link" target="_blank">
-            <img src="icons/twitter.svg" class="icon" /> Twitter
-          </a>
-          <a href="https://steamcommunity.com/id/colevryt/" class="link social-link" target="_blank">
-            <img src="icons/steam.svg" class="icon" /> Steam
-          </a>
+          <div class="right-section">
+            <div class="intro">Hi, I'm Cole!</div>
+            <a href="https://www.youtube.com/@colevr." class="link social-link" target="_blank">
+              <img src="icons/yt.svg" class="icon" /> YouTube
+            </a>
+            <a href="https://github.com/colevrya" class="link social-link" target="_blank">
+              <img src="icons/github.svg" class="icon" /> GitHub
+            </a>
+            <a href="https://discord.gg/nqJv5czwQG" class="link social-link" target="_blank">
+              <img src="icons/discord.svg" class="icon" /> Discord
+            </a>
+            <a href="https://x.com/coledotvr" class="link social-link" target="_blank">
+              <img src="icons/twitter.svg" class="icon" /> Twitter
+            </a>
+            <a href="https://steamcommunity.com/id/colevryt/" class="link social-link" target="_blank">
+              <img src="icons/steam.svg" class="icon" /> Steam
+            </a>
+          </div>
         </div>
       </div>
 
-      <!-- ✅ expandable logs section -->
-      <div class="logs-tab-content" id="logs-tab" style="display:none">
-        <div id="music-tab" style="display:none">
+      <!-- music content -->
+      <div id="music-tab" class="tab-page" style="display: none;">
+        <div class="logs-tab-content">
           <h2>Recently Played Music</h2>
           <div id="music-loading">loading stuff lol...</div>
           <div id="music-logs"></div>
@@ -80,8 +82,11 @@
             <div id="music-pages" data-page="1"></div>
           </div>
         </div>
+      </div>
 
-        <div id="games-tab" style="display:none">
+      <!-- games content -->
+      <div id="games-tab" class="tab-page" style="display: none;">
+        <div class="logs-tab-content">
           <h2>Recently Played Games</h2>
           <div id="game-loading">loading stuff lol...</div>
           <div id="game-logs"></div>

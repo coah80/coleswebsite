@@ -76,8 +76,8 @@ body {
   padding: 24px;
   display: flex;
   flex-direction: column;
-  justify-content: flex-start;
   align-items: stretch;
+  justify-content: flex-start;
   box-shadow: 0 0 25px rgba(140, 82, 255, 0.4);
   z-index: 1;
   position: relative;
@@ -122,6 +122,16 @@ body {
   background: #8c52ff;
   color: #fff;
   z-index: 3;
+}
+
+.tab-page {
+  width: 100%;
+  animation: fadeIn 0.3s ease;
+}
+
+@keyframes fadeIn {
+  from { opacity: 0; transform: translateY(10px); }
+  to { opacity: 1; transform: translateY(0); }
 }
 
 .content-wrapper {
@@ -320,16 +330,6 @@ body {
   flex-direction: column;
   gap: 24px;
   align-items: stretch;
-}
-
-#music-tab,
-#games-tab {
-  animation: fadeIn 0.3s ease;
-}
-
-@keyframes fadeIn {
-  from { opacity: 0; transform: translateY(10px); }
-  to { opacity: 1; transform: translateY(0); }
 }
 
 #music-logs, #game-logs {
