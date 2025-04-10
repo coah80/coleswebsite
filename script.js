@@ -24,17 +24,17 @@ async function fetchLogs() {
     ]);
 
     clearTimeout(loadingTimeout);
-
-    if (musicLoadingShown) {
-      document.getElementById('music-loading').style.display = 'none';
-      document.getElementById('game-loading').style.display = 'none';
-    }
+    if (musicLoadingShown) document.getElementById('music-loading').style.display = 'none';
+    if (gameLoadingShown) document.getElementById('game-loading').style.display = 'none';
 
     musicLogs = Array.isArray(musicRes) ? musicRes : Object.values(musicRes || {});
     gameLogs = Array.isArray(gameRes) ? gameRes : Object.values(gameRes || {});
+
+    musicLogs.sort((a, b) => b.loggedAt - a.loggedAt);
+    gameLogs.sort((a, b) => b.loggedAt - a.loggedAt);
   } catch (err) {
-    console.error('failed to fetch logs:', err);
     clearTimeout(loadingTimeout);
+    console.error('failed to fetch logs:', err);
     document.getElementById('music-loading').textContent = 'error loading music logs 💀';
     document.getElementById('music-loading').style.display = 'block';
     document.getElementById('game-loading').textContent = 'error loading game logs 💀';
@@ -43,6 +43,9 @@ async function fetchLogs() {
 }
 
 async function saveLogs() {
+  musicLogs.sort((a, b) => b.loggedAt - a.loggedAt);
+  gameLogs.sort((a, b) => b.loggedAt - a.loggedAt);
+
   await Promise.all([
     fetch(`${firebaseBase}/musicLogs.json`, {
       method: 'PUT',
