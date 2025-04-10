@@ -1,12 +1,13 @@
 const userId = '761701756119547955';
 const apiKey = '1cf73df572dac3f3ce085aa2b4d6ef83';
-let socket;
+const endpoint = "https://log.cole.ong";
 
+let socket;
 let musicLogs = [];
 let gameLogs = [];
 
 async function pushMusicLog(newLog) {
-  await fetch("https://log.cole.ong/music", {
+  await fetch(`${endpoint}/music`, {
     method: "POST",
     headers: { "Content-Type": "application/json" },
     body: JSON.stringify(newLog)
@@ -14,7 +15,7 @@ async function pushMusicLog(newLog) {
 }
 
 async function pushGameLog(newLog) {
-  await fetch("https://log.cole.ong/games", {
+  await fetch(`${endpoint}/games`, {
     method: "POST",
     headers: { "Content-Type": "application/json" },
     body: JSON.stringify(newLog)
@@ -123,7 +124,6 @@ function goToGamePage(num) {
 function handleActivity(data) {
   const now = Date.now();
 
-  // ==== MUSIC LOGGING ====
   if (data.spotify) {
     const s = data.spotify;
     const newTrackId = s.track_id;
@@ -135,7 +135,7 @@ function handleActivity(data) {
         artist: s.artist,
         album: s.album,
         album_art_url: s.album_art_url,
-        loggedAt: Date.now()
+        loggedAt: now
       };
       musicLogs.unshift(newLog);
       pushMusicLog(newLog);
@@ -143,7 +143,6 @@ function handleActivity(data) {
     }
   }
 
-  // ==== GAME LOGGING ====
   const games = data.activities.filter(a => a.type === 0 && a.name !== 'Custom Status');
   const currentGame = games[0];
 
@@ -158,7 +157,7 @@ function handleActivity(data) {
         details: currentGame.details || '',
         state: currentGame.state || '',
         icon: currentGame.application_id || null,
-        loggedAt: Date.now()
+        loggedAt: now
       };
       gameLogs.unshift(newLog);
       pushGameLog(newLog);
@@ -166,7 +165,6 @@ function handleActivity(data) {
     }
   }
 
-  // ==== DISCORD BOX ====
   const discordBox = document.getElementById('discord-activity');
   let html = '';
 
@@ -246,10 +244,10 @@ function connectSocket() {
 }
 
 async function fetchUniversalLogs() {
-  const musicRes = await fetch("https://raw.githubusercontent.com/colevrya/coleswebsite-logs/main/music.json");
+  const musicRes = await fetch(`${endpoint}/music`);
   musicLogs = await musicRes.json();
 
-  const gameRes = await fetch("https://raw.githubusercontent.com/colevrya/coleswebsite-logs/main/games.json");
+  const gameRes = await fetch(`${endpoint}/games`);
   gameLogs = await gameRes.json();
 
   renderMusicLogs();
