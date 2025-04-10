@@ -465,3 +465,10 @@ body {
   min-width: 32px;
   text-align: center;
 }
+
+.left-section .status-wrapper .status-online{
+  padding-left:0px;
+  margin-right:187px;
+ }
+ 
+ 
