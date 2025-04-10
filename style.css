@@ -197,16 +197,18 @@ body {
   object-fit: cover;
   border: 2px solid #6d44b8;
   box-shadow: 0 0 12px #8c52ff80;
+  display: block;
 }
 
 .status-dot {
   position: absolute;
-  bottom: 6px;
-  right: 12px; /* adjust this to move dot slightly left */
+  bottom: 4px;
+  right: 4px;
   width: 16px;
   height: 16px;
   border-radius: 50%;
-  border: 2px solid #120d1f;
+  border: 2px solid #0d0b16;
+  background: #43b581;
 }
 
 .status-online { background: #43b581; }
