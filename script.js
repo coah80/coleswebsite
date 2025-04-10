@@ -1,38 +1,13 @@
 const userId = '761701756119547955';
 const apiKey = '1cf73df572dac3f3ce085aa2b4d6ef83';
-const firebaseUrl = "https://cole-logs-a8c81-default-rtdb.firebaseio.com";
-
 let socket;
-let musicLogs = [];
-let gameLogs = [];
 
-async function pushMusicLog(newLog) {
-  await fetch(`${firebaseUrl}/music.json`, {
-    method: "POST",
-    headers: { "Content-Type": "application/json" },
-    body: JSON.stringify(newLog)
-  });
-}
+let musicLogs = JSON.parse(localStorage.getItem('musicLogs') || '[]');
+let gameLogs = JSON.parse(localStorage.getItem('gameLogs') || '[]');
 
-async function pushGameLog(newLog) {
-  await fetch(`${firebaseUrl}/games.json`, {
-    method: "POST",
-    headers: { "Content-Type": "application/json" },
-    body: JSON.stringify(newLog)
-  });
-}
-
-async function fetchUniversalLogs() {
-  const musicRes = await fetch(`${firebaseUrl}/music.json`);
-  const musicData = await musicRes.json();
-  musicLogs = Object.values(musicData || {}).reverse();
-
-  const gameRes = await fetch(`${firebaseUrl}/games.json`);
-  const gameData = await gameRes.json();
-  gameLogs = Object.values(gameData || {}).reverse();
-
-  renderMusicLogs();
-  renderGameLogs();
+function saveLogs() {
+  localStorage.setItem('musicLogs', JSON.stringify(musicLogs));
+  localStorage.setItem('gameLogs', JSON.stringify(gameLogs));
 }
 
 function formatTime(ms) {
@@ -51,7 +26,7 @@ function formatDateTime(ms) {
     hour: 'numeric',
     minute: '2-digit',
     hour12: true,
-    timeZone: 'America/Chicago'
+    timeZone: 'America/Chicago' // CST
   };
   return `Logged at:<br>${date.toLocaleString('en-US', options)} CST`;
 }
@@ -137,25 +112,28 @@ function goToGamePage(num) {
 function handleActivity(data) {
   const now = Date.now();
 
+  // ==== MUSIC LOGGING ====
   if (data.spotify) {
     const s = data.spotify;
     const newTrackId = s.track_id;
 
     if (!musicLogs.length || musicLogs[0].track_id !== newTrackId) {
-      const newLog = {
+      musicLogs.unshift({
         track_id: s.track_id,
         song: s.song,
         artist: s.artist,
         album: s.album,
         album_art_url: s.album_art_url,
-        loggedAt: now
-      };
-      musicLogs.unshift(newLog);
-      pushMusicLog(newLog);
+        loggedAt: Date.now()
+      });
+
+      if (musicLogs.length > 300) musicLogs.pop();
+      saveLogs();
       renderMusicLogs();
     }
   }
 
+  // ==== GAME LOGGING ====
   const games = data.activities.filter(a => a.type === 0 && a.name !== 'Custom Status');
   const currentGame = games[0];
 
@@ -165,19 +143,21 @@ function handleActivity(data) {
     const topKey = top ? `${top.name}:${top.details || ''}:${top.state || ''}` : '';
 
     if (gameKey !== topKey) {
-      const newLog = {
+      gameLogs.unshift({
         name: currentGame.name,
         details: currentGame.details || '',
         state: currentGame.state || '',
         icon: currentGame.application_id || null,
-        loggedAt: now
-      };
-      gameLogs.unshift(newLog);
-      pushGameLog(newLog);
+        loggedAt: Date.now()
+      });
+
+      if (gameLogs.length > 300) gameLogs = gameLogs.slice(0, 300);
+      saveLogs();
       renderGameLogs();
     }
   }
 
+  // ==== DISCORD BOX ====
   const discordBox = document.getElementById('discord-activity');
   let html = '';
 
@@ -256,7 +236,8 @@ function connectSocket() {
   socket.onerror = err => console.error('WebSocket error:', err);
 }
 
-document.addEventListener("DOMContentLoaded", () => {
-  fetchUniversalLogs();
+document.addEventListener('DOMContentLoaded', () => {
+  renderMusicLogs();
+  renderGameLogs();
   connectSocket();
 });
