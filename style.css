@@ -124,15 +124,21 @@ body {
 .tab-page {
   width: 100%;
   flex: 1;
-  overflow-y: auto;
-  padding-right: 8px;
   animation: fadeIn 0.3s ease;
 }
 
-.tab-page::-webkit-scrollbar {
+#music-tab,
+#games-tab {
+  overflow-y: auto;
+  padding-right: 8px;
+}
+
+#music-tab::-webkit-scrollbar,
+#games-tab::-webkit-scrollbar {
   width: 8px;
 }
-.tab-page::-webkit-scrollbar-thumb {
+#music-tab::-webkit-scrollbar-thumb,
+#games-tab::-webkit-scrollbar-thumb {
   background: #8c52ff66;
   border-radius: 4px;
 }
@@ -249,4 +255,34 @@ body {
   color: #c9a8ff;
   text-align: center;
   text-shadow: 0 0 4px #8c52ff80;
+}
+
+.spotify-progress {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-top: 8px;
+}
+
+.spotify-progress .time {
+  font-size: 0.7rem;
+  color: #b7a4d4;
+  width: 40px;
+  text-align: center;
+}
+
+.spotify-progress .bar {
+  flex: 1;
+  background: #2b1f4c;
+  border-radius: 4px;
+  height: 6px;
+  overflow: hidden;
+  position: relative;
+}
+
+.spotify-progress .fill {
+  height: 100%;
+  background: linear-gradient(to right, #a16eff, #8c52ff);
+  width: 0%;
+  transition: width 0.5s ease;
 }
