@@ -1,13 +1,35 @@
 const userId = '761701756119547955';
 const apiKey = '1cf73df572dac3f3ce085aa2b4d6ef83';
+const firebaseBase = 'https://cole-logs-a8c81-default-rtdb.firebaseio.com';
 let socket;
 
-let musicLogs = JSON.parse(localStorage.getItem('musicLogs') || '[]');
-let gameLogs = JSON.parse(localStorage.getItem('gameLogs') || '[]');
+let musicLogs = [];
+let gameLogs = [];
 
-function saveLogs() {
-  localStorage.setItem('musicLogs', JSON.stringify(musicLogs));
-  localStorage.setItem('gameLogs', JSON.stringify(gameLogs));
+async function fetchLogs() {
+  const [musicRes, gameRes] = await Promise.all([
+    fetch(`${firebaseBase}/musicLogs.json`).then(r => r.json()),
+    fetch(`${firebaseBase}/gameLogs.json`).then(r => r.json())
+  ]);
+  musicLogs = Array.isArray(musicRes) ? musicRes : [];
+  gameLogs = Array.isArray(gameRes) ? gameRes : [];
+  renderMusicLogs();
+  renderGameLogs();
+}
+
+async function saveLogs() {
+  await Promise.all([
+    fetch(`${firebaseBase}/musicLogs.json`, {
+      method: 'PUT',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(musicLogs)
+    }),
+    fetch(`${firebaseBase}/gameLogs.json`, {
+      method: 'PUT',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(gameLogs)
+    })
+  ]);
 }
 
 function formatTime(ms) {
@@ -26,7 +48,7 @@ function formatDateTime(ms) {
     hour: 'numeric',
     minute: '2-digit',
     hour12: true,
-    timeZone: 'America/Chicago' // CST
+    timeZone: 'America/Chicago'
   };
   return `Logged at:<br>${date.toLocaleString('en-US', options)} CST`;
 }
@@ -109,10 +131,9 @@ function goToGamePage(num) {
   renderGameLogs();
 }
 
-function handleActivity(data) {
+async function handleActivity(data) {
   const now = Date.now();
 
-  // ==== MUSIC LOGGING ====
   if (data.spotify) {
     const s = data.spotify;
     const newTrackId = s.track_id;
@@ -124,16 +145,15 @@ function handleActivity(data) {
         artist: s.artist,
         album: s.album,
         album_art_url: s.album_art_url,
-        loggedAt: Date.now()
+        loggedAt: now
       });
 
       if (musicLogs.length > 300) musicLogs.pop();
-      saveLogs();
+      await saveLogs();
       renderMusicLogs();
     }
   }
 
-  // ==== GAME LOGGING ====
   const games = data.activities.filter(a => a.type === 0 && a.name !== 'Custom Status');
   const currentGame = games[0];
 
@@ -148,16 +168,15 @@ function handleActivity(data) {
         details: currentGame.details || '',
         state: currentGame.state || '',
         icon: currentGame.application_id || null,
-        loggedAt: Date.now()
+        loggedAt: now
       });
 
       if (gameLogs.length > 300) gameLogs = gameLogs.slice(0, 300);
-      saveLogs();
+      await saveLogs();
       renderGameLogs();
     }
   }
 
-  // ==== DISCORD BOX ====
   const discordBox = document.getElementById('discord-activity');
   let html = '';
 
@@ -236,8 +255,7 @@ function connectSocket() {
   socket.onerror = err => console.error('WebSocket error:', err);
 }
 
-document.addEventListener('DOMContentLoaded', () => {
-  renderMusicLogs();
-  renderGameLogs();
+document.addEventListener('DOMContentLoaded', async () => {
+  await fetchLogs();
   connectSocket();
 });
