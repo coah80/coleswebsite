@@ -32,9 +32,6 @@ async function fetchLogs() {
 
     musicLogs = Array.isArray(musicRes) ? musicRes : Object.values(musicRes || {});
     gameLogs = Array.isArray(gameRes) ? gameRes : Object.values(gameRes || {});
-
-    renderMusicLogs();
-    renderGameLogs();
   } catch (err) {
     console.error('failed to fetch logs:', err);
     clearTimeout(loadingTimeout);
@@ -285,5 +282,7 @@ function connectSocket() {
 
 document.addEventListener('DOMContentLoaded', async () => {
   await fetchLogs();
+  renderMusicLogs();
+  renderGameLogs();
   connectSocket();
 });
