@@ -1,13 +1,13 @@
 const userId = '761701756119547955';
 const apiKey = '1cf73df572dac3f3ce085aa2b4d6ef83';
-const endpoint = "https://log.cole.ong";
+const firebaseUrl = "https://cole-logs-a8c81-default-rtdb.firebaseio.com";
 
 let socket;
 let musicLogs = [];
 let gameLogs = [];
 
 async function pushMusicLog(newLog) {
-  await fetch(`${endpoint}/music`, {
+  await fetch(`${firebaseUrl}/music.json`, {
     method: "POST",
     headers: { "Content-Type": "application/json" },
     body: JSON.stringify(newLog)
@@ -15,11 +15,24 @@ async function pushMusicLog(newLog) {
 }
 
 async function pushGameLog(newLog) {
-  await fetch(`${endpoint}/games`, {
+  await fetch(`${firebaseUrl}/games.json`, {
     method: "POST",
     headers: { "Content-Type": "application/json" },
     body: JSON.stringify(newLog)
   });
+}
+
+async function fetchUniversalLogs() {
+  const musicRes = await fetch(`${firebaseUrl}/music.json`);
+  const musicData = await musicRes.json();
+  musicLogs = Object.values(musicData || {}).reverse();
+
+  const gameRes = await fetch(`${firebaseUrl}/games.json`);
+  const gameData = await gameRes.json();
+  gameLogs = Object.values(gameData || {}).reverse();
+
+  renderMusicLogs();
+  renderGameLogs();
 }
 
 function formatTime(ms) {
@@ -241,17 +254,6 @@ function connectSocket() {
 
   socket.onclose = () => setTimeout(connectSocket, 5000);
   socket.onerror = err => console.error('WebSocket error:', err);
-}
-
-async function fetchUniversalLogs() {
-  const musicRes = await fetch(`${endpoint}/music`);
-  musicLogs = await musicRes.json();
-
-  const gameRes = await fetch(`${endpoint}/games`);
-  gameLogs = await gameRes.json();
-
-  renderMusicLogs();
-  renderGameLogs();
 }
 
 document.addEventListener("DOMContentLoaded", () => {
