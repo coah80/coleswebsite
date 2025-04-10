@@ -10,31 +10,30 @@
   <meta property="og:description" content="fuck you!" />
   <meta property="og:image" content="icons/webicon2.png" />
   <meta property="og:type" content="website" />
-  <meta property="og:url" content="https://yourdomain.com" />
+  <meta property="og:url" content="https://cole.ong" />
 </head>
 <body>
   <div class="background-scroll">
     <div class="scrolling-row scroll-left">
-      <div class="inner-scroll">
-        colevr ・ colevr ・ colevr ・ colevr ・ colevr ・ colevr ・ colevr ・ colevr ・ colevr ・ colevr ・colevr ・ colevr ・ colevr ・ colevr ・ colevr ・ colevr ・ colevr ・ colevr ・ colevr ・ colevr ・
-      </div>
+      <div class="inner-scroll">colevr ・ colevr ・ colevr ・ colevr ・ colevr ・colevr ・ colevr ・ colevr ・ colevr ・ colevr ・colevr ・ colevr ・ colevr ・ colevr ・ colevr ・</div>
     </div>
     <div class="scrolling-row scroll-right">
-      <div class="inner-scroll">
-        colevr ・ colevr ・ colevr ・ colevr ・ colevr ・ colevr ・ colevr ・ colevr ・ colevr ・ colevr ・colevr ・ colevr ・ colevr ・ colevr ・ colevr ・ colevr ・ colevr ・ colevr ・ colevr ・ colevr ・
-      </div>
+      <div class="inner-scroll">colevr ・ colevr ・ colevr ・ colevr ・ colevr ・colevr ・ colevr ・ colevr ・ colevr ・ colevr ・colevr ・ colevr ・ colevr ・ colevr ・ colevr ・</div>
     </div>
   </div>
 
-  <div class="nav-bar">
-    <button class="tab-button" onclick="switchTab('main')">Home</button>
-    <button class="tab-button" onclick="switchTab('music')">Music</button>
-    <button class="tab-button" onclick="switchTab('games')">Games</button>
-  </div>
+  <div class="center-wrapper">
+    <div class="id-card" id="main-card">
+      
+      <!-- ✅ browser-style tabs -->
+      <div class="card-tabs">
+        <button class="card-tab" data-tab="home">Home</button>
+        <button class="card-tab" data-tab="music">Music</button>
+        <button class="card-tab" data-tab="games">Games</button>
+      </div>
 
-  <div class="tab-content" id="main-tab">
-    <div class="center-wrapper">
-      <div class="id-card">
+      <!-- ✅ proper side-by-side layout -->
+      <div class="content-wrapper">
         <div class="left-section">
           <div class="center-content">
             <div class="status-wrapper">
@@ -43,92 +42,63 @@
             </div>
             <div class="username">colevr</div>
           </div>
-          <div class="discord-box" id="discord-activity">
-            Loading Discord activity...
-          </div>
+          <div class="discord-box" id="discord-activity">Loading Discord activity...</div>
         </div>
 
         <div class="right-section">
           <div class="intro">Hi, I'm Cole!</div>
-
           <a href="https://www.youtube.com/@colevr." class="link social-link" target="_blank">
-            <img src="icons/yt.svg" class="icon" alt="YouTube Icon" />
-            YouTube
+            <img src="icons/yt.svg" class="icon" /> YouTube
           </a>
-
           <a href="https://github.com/colevrya" class="link social-link" target="_blank">
-            <img src="icons/github.svg" class="icon" alt="GitHub Icon" />
-            GitHub
+            <img src="icons/github.svg" class="icon" /> GitHub
           </a>
-
           <a href="https://discord.gg/nqJv5czwQG" class="link social-link" target="_blank">
-            <img src="icons/discord.svg" class="icon" alt="Discord Icon" />
-            Discord
+            <img src="icons/discord.svg" class="icon" /> Discord
           </a>
-
           <a href="https://x.com/coledotvr" class="link social-link" target="_blank">
-            <img src="icons/twitter.svg" class="icon" alt="Twitter Icon" />
-            Twitter
+            <img src="icons/twitter.svg" class="icon" /> Twitter
           </a>
-
-          <a href="https://steamcommunity.com/id/colevryt/" class="link social-link" id="steam-button">
-            <img src="icons/steam.svg" class="icon" alt="Steam Icon" />
-            Steam
+          <a href="https://steamcommunity.com/id/colevryt/" class="link social-link" target="_blank">
+            <img src="icons/steam.svg" class="icon" /> Steam
           </a>
         </div>
       </div>
+
+      <!-- ✅ expandable logs section -->
+      <div class="logs-tab-content" id="logs-tab" style="display:none">
+        <div id="music-tab" style="display:none">
+          <h2>Recently Played Music</h2>
+          <div id="music-loading">loading stuff lol...</div>
+          <div id="music-logs"></div>
+          <div class="pagination-controls">
+            <label>Show per page:
+              <select id="music-per-page" onchange="renderMusicLogs()">
+                <option>10</option><option selected>30</option><option>50</option><option>100</option>
+              </select>
+            </label>
+            <div id="music-pages" data-page="1"></div>
+          </div>
+        </div>
+
+        <div id="games-tab" style="display:none">
+          <h2>Recently Played Games</h2>
+          <div id="game-loading">loading stuff lol...</div>
+          <div id="game-logs"></div>
+          <div class="pagination-controls">
+            <label>Show per page:
+              <select id="games-per-page" onchange="renderGameLogs()">
+                <option>10</option><option selected>30</option><option>50</option><option>100</option>
+              </select>
+            </label>
+            <div id="game-pages" data-page="1"></div>
+          </div>
+        </div>
+      </div>
+
     </div>
   </div>
 
-  <div class="logs-tab tab-content" id="music-tab" style="display:none">
-    <h2>Recently Played Music</h2>
-    <div id="music-loading" style="text-align:center; margin-bottom:12px; display:none;">loading stuff lol...</div>
-    <div id="music-logs"></div>
-    <div class="pagination-controls">
-      <label>Show per page:
-        <select id="music-per-page" onchange="renderMusicLogs()">
-          <option>10</option>
-          <option selected>30</option>
-          <option>50</option>
-          <option>100</option>
-        </select>
-      </label>
-      <div id="music-pages" data-page="1"></div>
-    </div>
-  </div>
-
-  <div class="logs-tab tab-content" id="games-tab" style="display:none">
-    <h2>Recently Played Games</h2>
-    <div id="game-loading" style="text-align:center; margin-bottom:12px; display:none;">loading stuff lol...</div>
-    <div id="game-logs"></div>
-    <div class="pagination-controls">
-      <label>Show per page:
-        <select id="games-per-page" onchange="renderGameLogs()">
-          <option>10</option>
-          <option selected>30</option>
-          <option>50</option>
-          <option>100</option>
-        </select>
-      </label>
-      <div id="game-pages" data-page="1"></div>
-    </div>
-  </div>
-
-  <script>
-    function switchTab(tabName) {
-      document.querySelectorAll('.tab-content').forEach(tab => tab.style.display = 'none');
-      document.getElementById(`${tabName}-tab`).style.display = 'block';
-      if (tabName === 'main') {
-        document.body.classList.remove('scrollable');
-      } else {
-        document.body.classList.add('scrollable');
-      }
-    }
-
-    document.addEventListener('DOMContentLoaded', () => {
-      switchTab('main');
-    });
-  </script>
   <script src="script.js"></script>
 </body>
 </html>

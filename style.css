@@ -10,40 +10,6 @@ body {
   position: relative;
 }
 
-body.scrollable {
-  overflow-y: auto;
-}
-
-.nav-bar {
-  position: fixed;
-  top: 0;
-  left: 0;
-  width: 100%;
-  background: #1a1329;
-  display: flex;
-  justify-content: center;
-  gap: 12px;
-  padding: 12px;
-  z-index: 10;
-  border-bottom: 2px solid #3b2a60;
-}
-
-.tab-button {
-  background: #2b1f4c;
-  color: white;
-  border: none;
-  padding: 10px 20px;
-  border-radius: 10px;
-  font-weight: bold;
-  cursor: pointer;
-  transition: background 0.3s, box-shadow 0.3s;
-}
-
-.tab-button:hover {
-  background: #8c52ff;
-  box-shadow: 0 0 12px #8c52ff, 0 0 24px #8c52ff99;
-}
-
 .background-scroll {
   position: fixed;
   top: 50%;
@@ -90,7 +56,7 @@ body.scrollable {
 
 @keyframes scroll-right {
   0% { transform: translateX(-50%); }
-  100% { transform: translateX(0%); }
+  100% { transform: translateX(0); }
 }
 
 .center-wrapper {
@@ -98,36 +64,96 @@ body.scrollable {
   justify-content: center;
   align-items: center;
   height: 100vh;
-  padding-top: 80px;
   box-sizing: border-box;
+  padding: 0 16px;
 }
 
 .id-card {
   background: linear-gradient(145deg, #1a1329, #120d1f);
   border: 2px solid #3b2a60;
   border-radius: 20px;
-  max-width: 600px;
-  width: 90%;
+  max-width: 900px;
+  width: 100%;
   padding: 24px;
   display: flex;
-  flex-direction: row;
-  box-shadow: 0 0 25px rgba(140, 82, 255, 0.4);
-  z-index: 1;
+  flex-direction: column;
   justify-content: center;
   align-items: center;
-  position: fixed;
-  top: 50%;
-  left: 50%;
-  transform: translate(-50%, -50%);
+  box-shadow: 0 0 25px rgba(140, 82, 255, 0.4);
+  z-index: 1;
+  position: relative;
+  overflow: visible;
+  height: 100%;
+  max-height: none;
 }
 
-.left-section {
-  width: 60%;
+.id-card.expanded {
+  height: auto;
+  padding-bottom: 48px;
+}
+
+.card-tabs {
+  display: flex;
+  gap: 8px;
+  position: absolute;
+  top: -32px;
+  left: 24px;
+  z-index: 10;
+}
+
+.card-tab {
+  background: #1a1329;
+  color: #bfaaff;
+  border: 2px solid #3b2a60;
+  border-bottom: none;
+  padding: 6px 16px;
+  border-top-left-radius: 12px;
+  border-top-right-radius: 12px;
+  font-weight: bold;
+  cursor: pointer;
+  box-shadow: 0 4px 8px #00000033;
+  transition: background 0.3s, color 0.3s;
+  position: relative;
+  top: 2px;
+}
+
+.card-tab.active {
+  background: #8c52ff;
+  color: #fff;
+  z-index: 3;
+}
+
+.content-wrapper {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  flex-direction: row;
+  gap: 48px;
+  width: 100%;
+}
+
+.left-section, .right-section {
+  flex: 1;
+  min-width: 0;
+}
+
+.right-section {
   display: flex;
   flex-direction: column;
   align-items: center;
-  padding-right: 15px;
-  justify-content: center;
+  text-align: center;
+}
+
+@media (max-width: 768px) {
+  .content-wrapper {
+    flex-direction: column;
+    align-items: center;
+    gap: 24px;
+  }
+
+  .left-section, .right-section {
+    width: 100%;
+  }
 }
 
 .center-content {
@@ -175,15 +201,6 @@ body.scrollable {
   color: #d2c6f8;
   text-shadow: 0 0 6px #8c52ff80;
   margin-bottom: 10px;
-}
-
-.right-section {
-  width: 40%;
-  padding-left: 15px;
-  display: flex;
-  flex-direction: column;
-  justify-content: center;
-  align-items: center;
 }
 
 .intro {
@@ -267,6 +284,15 @@ body.scrollable {
   box-shadow: 0 0 6px #8c52ff80;
 }
 
+.presence-entry.spotify-presence .album-art {
+  animation: spin 3s linear infinite;
+}
+
+@keyframes spin {
+  0% { transform: rotate(0deg); }
+  100% { transform: rotate(360deg); }
+}
+
 .presence-entry .music-info {
   flex: 1;
   display: flex;
@@ -274,17 +300,34 @@ body.scrollable {
   justify-content: center;
 }
 
-.logs-tab {
-  padding: 100px 24px 40px;
-  max-width: 800px;
-  margin: auto;
-  color: #e6dbff;
+.spotify-icon {
+  width: 18px;
+  height: 18px;
+  border-radius: 50%;
+  background: #1db954;
+  padding: 2px;
+  margin-right: 6px;
+  vertical-align: middle;
+  display: inline-block;
+  transform: translateY(-1px);
 }
 
-.logs-tab h2 {
-  text-align: center;
-  color: #c9a8ff;
-  margin-bottom: 24px;
+.logs-tab-content {
+  margin-top: 24px;
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+  gap: 24px;
+}
+
+#music-tab,
+#games-tab {
+  animation: fadeIn 0.3s ease;
+}
+
+@keyframes fadeIn {
+  from { opacity: 0; transform: translateY(10px); }
+  to { opacity: 1; transform: translateY(0); }
 }
 
 #music-logs, #game-logs {
@@ -325,6 +368,9 @@ body.scrollable {
   font-size: 0.95rem;
   color: #e6dbff;
   text-decoration: none;
+  display: flex;
+  align-items: center;
+  gap: 6px;
 }
 
 .song-title:hover {

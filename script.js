@@ -265,9 +265,47 @@ function connectSocket() {
   socket.onerror = err => console.error('WebSocket error:', err);
 }
 
+function switchTab(tabName, fromPop = false) {
+  const card = document.getElementById('main-card');
+  const logs = document.getElementById('logs-tab');
+  const music = document.getElementById('music-tab');
+  const games = document.getElementById('games-tab');
+
+  logs.style.display = 'none';
+  music.style.display = 'none';
+  games.style.display = 'none';
+
+  document.querySelectorAll('.card-tab').forEach(btn => {
+    btn.classList.toggle('active', btn.dataset.tab === tabName);
+  });
+
+  if (tabName === 'home') {
+    card.classList.remove('expanded');
+    if (!fromPop) history.pushState({}, '', '/');
+  } else {
+    logs.style.display = 'block';
+    card.classList.add('expanded');
+    if (!fromPop) history.pushState({}, '', '/' + tabName);
+    if (tabName === 'music') renderMusicLogs();
+    if (tabName === 'games') renderGameLogs();
+  }
+}
+
+window.onpopstate = () => {
+  const tab = location.pathname.replace('/', '') || 'home';
+  switchTab(tab, true);
+};
+
 document.addEventListener('DOMContentLoaded', async () => {
   await fetchLogs();
   renderMusicLogs();
   renderGameLogs();
   connectSocket();
+
+  document.querySelectorAll('.card-tab').forEach(btn => {
+    btn.addEventListener('click', () => switchTab(btn.dataset.tab));
+  });
+
+  const initial = location.pathname.replace('/', '') || 'home';
+  switchTab(initial);
 });
