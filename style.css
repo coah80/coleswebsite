@@ -15,27 +15,14 @@ body {
   100% { transform: rotate(360deg); }
 }
 
-@keyframes scroll-left {
-  from { transform: translateX(0); }
-  to { transform: translateX(-100%); }
-}
-
-@keyframes scroll-right {
-  from { transform: translateX(0); }
-  to { transform: translateX(100%); }
-}
-
 .background-scroll {
   position: absolute;
   top: 50%;
   left: 0;
   transform: translateY(-50%);
   width: 100%;
-  pointer-events: none;
   z-index: 0;
-  display: flex;
-  flex-direction: column;
-  gap: 10px;
+  pointer-events: none;
 }
 
 .scrolling-row {
@@ -48,16 +35,25 @@ body {
   overflow: hidden;
 }
 
-.scroll-left .inner-scroll {
+.scroll-left .inner-scroll,
+.scroll-right .inner-scroll {
   display: inline-block;
   padding-left: 100%;
   animation: scroll-left 40s linear infinite;
 }
 
 .scroll-right .inner-scroll {
-  display: inline-block;
-  padding-left: 100%;
   animation: scroll-right 40s linear infinite;
+}
+
+@keyframes scroll-left {
+  from { transform: translateX(0); }
+  to { transform: translateX(-100%); }
+}
+
+@keyframes scroll-right {
+  from { transform: translateX(0); }
+  to { transform: translateX(100%); }
 }
 
 .center-wrapper {
@@ -66,8 +62,6 @@ body {
   align-items: center;
   height: 100vh;
   padding: 0 16px;
-  z-index: 1;
-  position: relative;
 }
 
 .id-card {
@@ -84,6 +78,8 @@ body {
   justify-content: flex-start;
   align-items: stretch;
   box-shadow: 0 0 25px rgba(140, 82, 255, 0.4);
+  z-index: 1;
+  position: relative;
   overflow: hidden;
   transition: height 0.3s ease, max-width 0.3s ease;
 }
@@ -207,8 +203,8 @@ body {
 
 .status-dot {
   position: absolute;
-  bottom: 6px;
-  right: 8px;
+  bottom: 2px;
+  right: 4px;
   width: 16px;
   height: 16px;
   border-radius: 50%;
@@ -406,10 +402,6 @@ body {
   box-shadow: inset 0 0 10px #8c52ff20;
 }
 
-.presence-entry.spotify-presence .album-art {
-  animation: spin 4s linear infinite;
-}
-
 .presence-entry .album-art {
   width: 64px;
   height: 64px;
@@ -417,6 +409,7 @@ body {
   object-fit: cover;
   border: 2px solid #b592ff;
   box-shadow: 0 0 10px #8c52ff90;
+  animation: spin 4s linear infinite;
 }
 
 .presence-entry .music-info {
