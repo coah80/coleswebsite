@@ -184,10 +184,10 @@ body {
 }
 
 .status-wrapper {
+  position: relative;
   display: flex;
   align-items: center;
   justify-content: center;
-  gap: 10px;
   margin-bottom: 12px;
 }
 
@@ -201,6 +201,9 @@ body {
 }
 
 .status-dot {
+  position: absolute;
+  bottom: 6px;
+  right: 6px;
   width: 16px;
   height: 16px;
   border-radius: 50%;
