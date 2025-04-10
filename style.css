@@ -10,61 +10,37 @@ body {
   position: relative;
 }
 
-.background-scroll {
-  position: fixed;
-  top: 50%;
-  left: 50%;
-  transform: translate(-50%, -50%);
-  width: 100vw;
-  z-index: 0;
-  pointer-events: none;
-  display: flex;
-  flex-direction: column;
-  gap: 0;
-  align-items: center;
-}
-
-.scrolling-row {
-  width: 100%;
-  overflow: hidden;
-  font-size: 5rem;
-  font-weight: bold;
-  color: #8c52ff;
-  opacity: 0.1;
-  white-space: nowrap;
-  line-height: 1;
-  filter: blur(1px);
-}
-
-.inner-scroll {
-  display: inline-block;
-  min-width: 200%;
-}
-
-.scroll-left .inner-scroll {
-  animation: scroll-left 40s linear infinite;
-}
-
-.scroll-right .inner-scroll {
-  animation: scroll-right 40s linear infinite;
-}
-
-@keyframes scroll-left {
-  0% { transform: translateX(0%); }
-  100% { transform: translateX(-50%); }
-}
-
-@keyframes scroll-right {
-  0% { transform: translateX(-50%); }
-  100% { transform: translateX(0); }
-}
-
 .center-wrapper {
   display: flex;
   justify-content: center;
   align-items: center;
   height: 100vh;
   padding: 0 16px;
+}
+
+.id-card {
+  background: linear-gradient(145deg, #1a1329, #120d1f);
+  border: 2px solid #3b2a60;
+  border-radius: 20px;
+  width: 100%;
+  max-width: 1000px;
+  height: 550px;
+  padding: 24px;
+  padding-top: 60px;
+  display: flex;
+  flex-direction: column;
+  justify-content: flex-start;
+  align-items: stretch;
+  box-shadow: 0 0 25px rgba(140, 82, 255, 0.4);
+  z-index: 1;
+  position: relative;
+  overflow: hidden;
+  transition: height 0.3s ease, max-width 0.3s ease;
+}
+
+.id-card.expanded {
+  height: 700px;
+  max-width: 900px;
 }
 
 .card-tabs {
@@ -93,30 +69,6 @@ body {
   color: #fff;
 }
 
-.id-card {
-  background: linear-gradient(145deg, #1a1329, #120d1f);
-  border: 2px solid #3b2a60;
-  border-radius: 20px;
-  max-width: 900px;
-  width: 100%;
-  height: 550px;
-  padding: 24px;
-  padding-top: 60px;
-  display: flex;
-  flex-direction: column;
-  justify-content: flex-start;
-  align-items: stretch;
-  box-shadow: 0 0 25px rgba(140, 82, 255, 0.4);
-  z-index: 1;
-  position: relative;
-  overflow: hidden;
-  transition: height 0.3s ease;
-}
-
-.id-card.expanded {
-  height: 700px;
-}
-
 .tab-page {
   flex: 1;
   width: 100%;
@@ -125,12 +77,17 @@ body {
   flex-direction: column;
 }
 
-/* scroll only on these */
+/* music/games only scrollable */
 #music-tab,
 #games-tab {
   overflow-y: auto;
   padding-right: 8px;
   height: 100%;
+}
+
+#music-tab h2,
+#games-tab h2 {
+  margin-top: 0;
 }
 
 #music-tab::-webkit-scrollbar,
@@ -182,13 +139,6 @@ body {
   }
 }
 
-.center-content {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
-}
-
 .status-wrapper {
   position: relative;
   display: flex;
@@ -227,6 +177,7 @@ body {
   color: #d2c6f8;
   text-shadow: 0 0 6px #8c52ff80;
   margin-bottom: 10px;
+  text-align: center;
 }
 
 .intro {
@@ -283,18 +234,42 @@ body {
   border-radius: 10px;
   font-size: 0.85rem;
   width: 100%;
-  display: none;
+  display: flex;
   flex-direction: column;
   gap: 16px;
+  margin-top: 12px;
   box-shadow: inset 0 0 10px #8c52ff20;
 }
 
-.discord-box.active {
+.discord-box .activity {
   display: flex;
+  flex-direction: row;
+  align-items: center;
+  gap: 12px;
+}
+
+.discord-box .activity img {
+  width: 48px;
+  height: 48px;
+  border-radius: 8px;
+  object-fit: cover;
+}
+
+.discord-box .activity-details {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  font-size: 0.85rem;
+}
+
+.discord-box .activity-details strong {
+  font-weight: bold;
+  color: #fff;
 }
 
 .logs-tab-content {
-  margin-top: 24px;
+  margin-top: 8px;
   width: 100%;
   display: flex;
   flex-direction: column;
