@@ -10,14 +10,18 @@ body {
   position: relative;
 }
 
+@keyframes spin {
+  0% { transform: rotate(0deg); }
+  100% { transform: rotate(360deg); }
+}
+
 .background-scroll {
-  position: fixed;
-  top: 0;
+  position: absolute;
+  top: 50%;
   left: 0;
+  transform: translateY(-50%);
   width: 100%;
   z-index: 0;
-  overflow: hidden;
-  height: 100vh;
   pointer-events: none;
 }
 
@@ -43,21 +47,13 @@ body {
 }
 
 @keyframes scroll-left {
-  from {
-    transform: translateX(0);
-  }
-  to {
-    transform: translateX(-100%);
-  }
+  from { transform: translateX(0); }
+  to { transform: translateX(-100%); }
 }
 
 @keyframes scroll-right {
-  from {
-    transform: translateX(0);
-  }
-  to {
-    transform: translateX(100%);
-  }
+  from { transform: translateX(0); }
+  to { transform: translateX(100%); }
 }
 
 .center-wrapper {
@@ -409,10 +405,11 @@ body {
 .presence-entry .album-art {
   width: 64px;
   height: 64px;
-  border-radius: 12px;
+  border-radius: 50%;
   object-fit: cover;
   border: 2px solid #b592ff;
   box-shadow: 0 0 10px #8c52ff90;
+  animation: spin 4s linear infinite;
 }
 
 .presence-entry .music-info {
@@ -425,8 +422,10 @@ body {
 .presence-entry .spotify-icon {
   width: 16px;
   height: 16px;
-  vertical-align: middle;
-  filter: brightness(0) invert(1);
+  border-radius: 50%;
+  background: #1db954;
+  padding: 2px;
+  box-shadow: 0 0 4px #1db95480;
 }
 
 .spotify-progress {
