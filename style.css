@@ -18,11 +18,6 @@ body {
   width: 100%;
   z-index: 0;
   pointer-events: none;
-  display: flex;
-  flex-direction: column;
-  gap: 20px;
-  align-items: center;
-  justify-content: center;
 }
 
 .scrolling-row {
@@ -35,6 +30,16 @@ body {
   overflow: hidden;
   width: 100%;
   max-width: 100%;
+  position: absolute;
+  left: 0;
+}
+
+.scroll-left {
+  top: -30px;
+}
+
+.scroll-right {
+  top: 30px;
 }
 
 .scroll-left .inner-scroll {
@@ -470,7 +475,26 @@ body {
   text-align: center;
 }
 
-.left-section .status-wrapper .status-online{
-  padding-left:0px;
-  margin-right:187px;
+.left-section .status-wrapper .status-online {
+  padding-left: 0px;
+  margin-right: 187px;
 }
+#main-card{
+  height:432px;
+  transform:translatex(0px) translatey(0px);
+ }
+ 
+ /* Right section */
+ #home-tab .right-section{
+  min-height:347px;
+  transform:translatex(7px) translatey(-6px);
+ }
+ 
+ @media (min-width:769px){
+ 
+  /* Right section */
+  #home-tab .right-section{
+   width:476px;
+  }
+  
+ }
