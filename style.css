@@ -41,27 +41,34 @@ body {
   top: 30px;
 }
 
-.scroll-left .inner-scroll {
-  display: inline-block;
-  min-width: 100%;
-  animation: scroll-left 20s linear infinite;
-}
+.scroll-left .inner-scroll,
 .scroll-right .inner-scroll {
   display: inline-block;
-  min-width: 100%;
-  animation: scroll-right 20s linear infinite;
+  white-space: nowrap;
+  animation-duration: 60s;
+  animation-iteration-count: infinite;
+  animation-timing-function: linear;
+}
+
+.scroll-left .inner-scroll {
+  animation-name: scroll-left;
+}
+
+.scroll-right .inner-scroll {
+  animation-name: scroll-right;
 }
 
 @keyframes scroll-left {
-  from { transform: translateX(0); }
-  to { transform: translateX(-100%); }
+  0% { transform: translateX(0); }
+  100% { transform: translateX(-50%); }
 }
 
 @keyframes scroll-right {
-  from { transform: translateX(0); }
-  to { transform: translateX(100%); }
+  0% { transform: translateX(-50%); }
+  100% { transform: translateX(0); }
 }
 
+/* rest unchanged below */
 .center-wrapper {
   display: flex;
   justify-content: center;
