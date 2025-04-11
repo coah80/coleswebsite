@@ -41,20 +41,15 @@ body {
   top: 30px;
 }
 
-.scroll-left .inner-scroll,
+.scroll-left .inner-scroll {
+  display: inline-block;
+  min-width: 100%;
+  animation: scroll-left 20s linear infinite;
+}
 .scroll-right .inner-scroll {
   display: inline-block;
   min-width: 100%;
-}
-
-.scroll-left .inner-scroll {
-  animation: scroll-left 20s linear infinite;
-  padding-left: 100%;
-}
-
-.scroll-right .inner-scroll {
   animation: scroll-right 20s linear infinite;
-  padding-right: 100%;
 }
 
 @keyframes scroll-left {
@@ -63,8 +58,8 @@ body {
 }
 
 @keyframes scroll-right {
-  from { transform: translateX(100%); }
-  to { transform: translateX(0); }
+  from { transform: translateX(0); }
+  to { transform: translateX(100%); }
 }
 
 .center-wrapper {
