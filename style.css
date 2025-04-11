@@ -71,12 +71,19 @@ body {
 
 /* rest unchanged below */
 .center-wrapper {
+  position: fixed;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
   display: flex;
   justify-content: center;
   align-items: center;
-  height: 100vh;
   padding: 0 16px;
+  width: 100%;
+  height: auto;
+  z-index: 1;
 }
+
 
 .id-card {
   background: linear-gradient(145deg, #1a1329, #120d1f);
