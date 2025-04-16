@@ -37,11 +37,11 @@ body {
 }
 
 .scroll-left {
-  top: calc(50% - 60px);
+  top: calc(50% - 30px);
 }
 
 .scroll-right {
-  top: calc(50% + 60px);
+  top: calc(50% + 30px);
 }
 
 .scroll-left .inner-scroll,

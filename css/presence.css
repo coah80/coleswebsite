@@ -6,9 +6,8 @@
   height: 16px;
   border-radius: 50%;
   border: 2px solid #0d0b16;
-  background: #43b581;
-  padding: 0;
-  margin: 0;
+  padding-left: 0px;
+  margin-right: 187px;
 }
 
 .status-online { background: #43b581; }
