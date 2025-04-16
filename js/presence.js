@@ -12,6 +12,14 @@ function updateProgressBar(start, end) {
 
     if (!fillBar || timeElems.length !== 2) return;
 
+    timeElems[0].textContent = formatTime(elapsed);
+    timeElems[1].textContent = formatTime(total);
+    fillBar.style.width = `${progress}%`;
+
+    if (elapsed >= total) clearInterval(progressInterval);
+  }, 1000);
+}
+
 async function handleActivity(data) {
   const now = Date.now();
   const discordBox = document.getElementById('discord-activity');
@@ -37,6 +45,14 @@ async function handleActivity(data) {
           </a>
           <div class="artist">${s.artist} • ${s.album}</div>
           <div class="spotify-progress">
+            <div class="time">${formatTime(elapsed)}</div>
+            <div class="bar"><div class="fill" style="width:${progress}%"></div></div>
+            <div class="time">${formatTime(total)}</div>
+          </div>
+        </div>
+      </div>
+    `;
+
     updateProgressBar(s.timestamps.start, s.timestamps.end);
 
     if (!musicLogs.length || musicLogs[0].track_id !== s.track_id || now - musicLogs[0].loggedAt > 30000) {
@@ -50,9 +66,53 @@ async function handleActivity(data) {
       });
 
       if (musicLogs.length > 300) musicLogs.pop();
-      handleActivity(msg.d);
+      await saveLogs();
     }
-    if (msg.op === 1) {
-      socket.send(JSON.stringify({ op: 2, d: { subscribe_to_id: userId, api_key: apiKey } }));
+  } else {
+    clearInterval(progressInterval);
+  }
+
+  const games = data.activities ? data.activities.filter(a => a.type === 0 && a.name !== 'Custom Status') : [];
+  const currentGame = games[0];
+
+  if (currentGame) {
+    const gameKey = `${currentGame.name}:${currentGame.details || ''}:${currentGame.state || ''}`;
+    const top = gameLogs[0];
+    const topKey = top ? `${top.name}:${top.details || ''}:${top.state || ''}` : '';
+
+    if (gameKey !== topKey) {
+      gameLogs.unshift({
+        name: currentGame.name,
+        details: currentGame.details || '',
+        state: currentGame.state || '',
+        icon: currentGame.application_id || null,
+        loggedAt: now
+      });
+
+      if (gameLogs.length > 300) gameLogs = gameLogs.slice(0, 300);
+      await saveLogs();
     }
-  };
+  }
+
+  if (games.length > 0) {
+    games.forEach(g => {
+      const icon = g.application_id
+        ? `https://dcdn.dstn.to/app-icons/${g.application_id}?ext=webp&size=64`
+        : 'https://cdn.discordapp.com/embed/avatars/0.png';
+
+      html += `
+        <div class="presence-entry">
+          <img src="${icon}" class="album-art">
+          <div class="music-info">
+            <div class="song-title">${g.name}</div>
+            <div class="artist">${g.details || ''}</div>
+            <div class="artist">${g.state || ''}</div>
+          </div>
+        </div>
+      `;
+    });
+  }
+
+  discordBox.innerHTML = html || 'Not currently playing anything.';
+  discordBox.classList.toggle('active', !!html);
+}

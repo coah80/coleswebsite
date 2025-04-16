@@ -18,6 +18,13 @@ function renderMusicLogs() {
       <div class="music-info">
         <a class="song-title" href="https://open.spotify.com/track/${log.track_id}" target="_blank">${log.song}</a>
         <div class="artist">${log.artist} • ${log.album}</div>
+        <div class="artist">${formatDateTime(log.loggedAt)}</div>
+      </div>
+    </div>
+  `).join('');
+
+  pagination.innerHTML = Array.from({ length: pageCount }, (_, i) => {
+    const num = i + 1;
     return `<button onclick="goToMusicPage(${num})">${num}</button>`;
   }).join('');
 }
@@ -26,9 +33,3 @@ function goToMusicPage(num) {
   document.getElementById('music-pages').dataset.page = num;
   renderMusicLogs();
 }
-
-  renderMusicLogs();
-      renderMusicLogs();
-      if (!fromPop) history.pushState({}, '', '/music');
-    } else if (tabName === 'games') {
-      target = games;

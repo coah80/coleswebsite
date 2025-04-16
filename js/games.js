@@ -23,6 +23,14 @@ function renderGameLogs() {
           <div class="song-title">${log.name}</div>
           <div class="artist">${log.details || ''}</div>
           <div class="artist">${log.state || ''}</div>
+          <div class="artist">${formatDateTime(log.loggedAt)}</div>
+        </div>
+      </div>
+    `;
+  }).join('');
+
+  pagination.innerHTML = Array.from({ length: pageCount }, (_, i) => {
+    const num = i + 1;
     return `<button onclick="goToGamePage(${num})">${num}</button>`;
   }).join('');
 }
@@ -30,16 +38,4 @@ function renderGameLogs() {
 function goToGamePage(num) {
   document.getElementById('game-pages').dataset.page = num;
   renderGameLogs();
-}
-
-  renderGameLogs();
-      renderGameLogs();
-      if (!fromPop) history.pushState({}, '', '/games');
-    }
-  }
-
-  if (target) {
-    target.style.display = 'block';
-    card.style.maxHeight = `${target.scrollHeight + 100}px`;
-  }
 }
