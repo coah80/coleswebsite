@@ -1,0 +1,163 @@
+.status-dot {
+  position: absolute;
+  bottom: 4px;
+  right: 4px;
+  width: 16px;
+  height: 16px;
+  border-radius: 50%;
+  border: 2px solid #0d0b16;
+  background: #43b581;
+}
+
+.status-online { background: #43b581; }
+.status-idle { background: #faa61a; }
+.status-dnd { background: #f04747; }
+.status-offline { background: #55556c; }
+
+.username {
+  font-size: 1.4rem;
+  font-weight: bold;
+  color: #d2c6f8;
+  text-shadow: 0 0 6px #8c52ff80;
+  margin-bottom: 10px;
+  text-align: center;
+}
+
+.intro {
+  font-size: 1.2rem;
+  margin-bottom: 10px;
+  text-align: center;
+  color: #e6dbff;
+  text-shadow: 0 0 5px #8c52ff55;
+}
+
+.link {
+  background: #2b1f4c;
+  color: white;
+  padding: 10px 14px;
+  margin: 8px 0;
+  border-radius: 10px;
+  text-decoration: none;
+  width: 100%;
+  max-width: 260px;
+  text-align: center;
+  position: relative;
+  transition: background 0.3s, color 0.3s, box-shadow 0.3s;
+  box-shadow: 0 0 8px #8c52ff40;
+}
+
+.link:hover {
+  background: #8c52ff;
+  color: #fff;
+  box-shadow: 0 0 12px #8c52ff, 0 0 24px #8c52ff99;
+}
+
+.social-link {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+}
+
+.icon {
+  width: 16px;
+  height: 16px;
+  filter: brightness(0) invert(1);
+  transition: filter 0.3s;
+}
+
+.social-link:hover .icon {
+  filter: drop-shadow(0 0 2px white);
+}
+
+.discord-box {
+  background: #1b1429;
+  color: #e6dbff;
+  padding: 12px;
+  border-radius: 10px;
+  font-size: 0.85rem;
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  margin-top: 12px;
+  box-shadow: inset 0 0 10px #8c52ff20;
+}
+
+.logs-tab-content {
+  margin-top: 8px;
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+  gap: 24px;
+  align-items: stretch;
+}
+
+.presence-entry {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  background: #1b1429;
+  padding: 12px;
+  border-radius: 12px;
+  box-shadow: inset 0 0 10px #8c52ff20;
+}
+
+.presence-entry .album-art {
+  width: 64px;
+  height: 64px;
+  border-radius: 50%;
+  object-fit: cover;
+  border: 2px solid #b592ff;
+  box-shadow: 0 0 10px #8c52ff90;
+}
+
+.spotify-presence .album-art {
+  animation: spin 4s linear infinite;
+}
+
+.presence-entry .music-info {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.presence-entry .spotify-icon {
+  width: 16px;
+  height: 16px;
+  border-radius: 50%;
+  background: #1db954;
+  padding: 2px;
+  box-shadow: 0 0 4px #1db95480;
+}
+
+.spotify-progress {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-top: 4px;
+  font-size: 0.75rem;
+  color: #ccc;
+}
+
+.spotify-progress .bar {
+  flex: 1;
+  height: 6px;
+  background: #3b2a60;
+  border-radius: 4px;
+  overflow: hidden;
+  position: relative;
+}
+
+.spotify-progress .fill {
+  background: #8c52ff;
+  height: 100%;
+  width: 0%;
+  transition: width 0.5s ease;
+}
+
+.spotify-progress .time {
+  min-width: 32px;
+  text-align: center;
+}

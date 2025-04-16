@@ -1,0 +1,17 @@
+#games-tab {
+  overflow-y: auto;
+  padding-right: 8px;
+  height: 100%;
+}
+
+#games-tab h2 {
+  margin-top: 0;
+}
+
+#games-tab::-webkit-scrollbar {
+  width: 8px;
+}
+#games-tab::-webkit-scrollbar-thumb {
+  background: #8c52ff66;
+  border-radius: 4px;
+}

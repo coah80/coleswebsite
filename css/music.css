@@ -1,0 +1,100 @@
+#music-tab,
+#music-tab h2,
+#music-tab::-webkit-scrollbar,
+#music-tab::-webkit-scrollbar-thumb,
+#music-logs, #game-logs {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.music-wrapper {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  background: #1b1429;
+  padding: 12px;
+  border-radius: 12px;
+  box-shadow: inset 0 0 10px #8c52ff20;
+}
+
+.album-art {
+  width: 64px;
+  height: 64px;
+  border-radius: 50%;
+  object-fit: cover;
+  flex-shrink: 0;
+  border: 2px solid #b592ff;
+  box-shadow: 0 0 10px #8c52ff90;
+}
+
+.music-info {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+}
+
+.song-title {
+  font-weight: bold;
+  font-size: 0.95rem;
+  color: #e6dbff;
+  text-decoration: none;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.song-title:hover {
+  text-decoration: underline;
+  color: #c9a8ff;
+}
+
+.artist {
+  font-size: 0.8rem;
+  color: #b7a4d4;
+  margin-top: 2px;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.pagination-controls {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  margin-top: 24px;
+  gap: 12px;
+  width: 100%;
+  position: relative;
+}
+
+.pagination-controls select {
+  background: #2b1f4c;
+  color: white;
+  border: none;
+  padding: 6px;
+  border-radius: 6px;
+  position: absolute;
+  left: 0;
+  bottom: -32px;
+}
+
+.pagination-controls button {
+  background: #322a45;
+  color: #e6dbff;
+  border: none;
+  padding: 6px 10px;
+  border-radius: 6px;
+  cursor: pointer;
+  transition: background 0.2s;
+}
+
+.pagination-controls button:hover {
+  background: #8c52ff;
+}
+
+#music-loading,
+#game-loading {
+  display: none;
+}
