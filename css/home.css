@@ -39,11 +39,6 @@
   display: block;
 }
 
-.left-section .status-wrapper .status-online {
-  padding-left: 0px;
-  margin-right: 187px;
-}
-
 #main-card {
   height: 432px;
   transform: translatex(0px) translatey(0px);

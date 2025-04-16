@@ -7,6 +7,8 @@
   border-radius: 50%;
   border: 2px solid #0d0b16;
   background: #43b581;
+  padding: 0;
+  margin: 0;
 }
 
 .status-online { background: #43b581; }

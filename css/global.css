@@ -12,34 +12,36 @@ body {
 
 .background-scroll {
   position: fixed;
-  top: 600px;
   left: 0;
   width: 100%;
-  height: auto;
+  height: 100vh;
   z-index: 0;
   pointer-events: none;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  overflow: hidden;
 }
-
 
 .scrolling-row {
   white-space: nowrap;
-  font-size: 4rem;
+  font-size: clamp(2rem, 5vw, 4rem); /* Responsive font size */
   font-weight: bold;
   color: #2d1d4a;
   text-shadow: 0 0 10px #8c52ff20;
   user-select: none;
-  overflow: hidden;
   width: 100%;
-  max-width: 100%;
   position: absolute;
-  left: 0;
+  text-align: center;
 }
 
 .scroll-left {
-  top: -30px;
+  top: calc(50% - 60px);
 }
+
 .scroll-right {
-  top: 30px;
+  top: calc(50% + 60px);
 }
 
 .scroll-left .inner-scroll,
@@ -69,7 +71,6 @@ body {
   100% { transform: translateX(0); }
 }
 
-/* rest unchanged below */
 .center-wrapper {
   position: fixed;
   top: 50%;
@@ -81,9 +82,8 @@ body {
   padding: 0 16px;
   width: 100%;
   height: auto;
-  z-index: 1;
+  z-index: 2;
 }
-
 
 .id-card {
   background: linear-gradient(145deg, #1a1329, #120d1f);
