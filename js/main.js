@@ -12,17 +12,11 @@ function _p(input) {
   return String.fromCharCode.apply(null, _arr);
 }
 
-function _n() {
-  const _h = [
-    "687474", "70733a", "2f2f63", "6f6c65", "2d6c6f", "67732d",
-    "61386338", "312d64", "656661", "756c74", "2d7274", "64622e", 
-    "666972", "656261", "73652e", "696f"
-  ];
-  return _h.map(_p).join('');
-}
+const _h = ["687474", "70733a", "2f2f63", "6f6c65", "2d6c6f", "67732d", "61386338", "312d64", "656661", "756c74", "2d7274", "64622e", "666972", "656261", "73652e", "696f"];
+const _fb = _h.map(_p).join('');
 
 function _g() {
-  return _n();
+  return _fb;
 }
 
 function _a(_t) {
@@ -39,16 +33,7 @@ function _a(_t) {
 }
 
 function _b() {
-  const _y = [
-    "u7fW8k",
-    "mVX3lP",
-    "K9pO4q",
-    "T2aZ6c",
-    "R5vB7n",
-    "E1sD0j",
-    "G4hY3m"
-  ];
-  
+  const _y = ["u7fW8k", "mVX3lP", "K9pO4q", "T2aZ6c", "R5vB7n", "E1sD0j", "G4hY3m"];
   const _q = [4, 1, 6, 2, 0, 5, 3];
   
   let _w = "";
@@ -61,9 +46,7 @@ function _b() {
   
   try {
     const _v = atob(_w);
-    if (_v.length !== 32) {
-      return "invalid_key";
-    }
+    if (_v.length !== 32) return "invalid_key";
     
     return _v.split('').map((c, i) => {
       return String.fromCharCode(c.charCodeAt(0) ^ ((i * 3) % 13));
@@ -73,12 +56,13 @@ function _b() {
   }
 }
 
+const _apiKey = _b();
+
 function _c() {
   socket = new WebSocket('wss://api.lanyard.rest/socket');
 
   socket.onopen = () => {
-    const _t = _b();
-    socket.send(JSON.stringify({ op: 2, d: { subscribe_to_id: _i, api_key: _t } }));
+    socket.send(JSON.stringify({ op: 2, d: { subscribe_to_id: _i, api_key: _apiKey } }));
   };
 
   socket.onmessage = e => {
@@ -88,8 +72,7 @@ function _c() {
         handleActivityFromPresence(msg.d);
       }
       if (msg.op === 1) {
-        const _t = _b();
-        socket.send(JSON.stringify({ op: 2, d: { subscribe_to_id: _i, api_key: _t } }));
+        socket.send(JSON.stringify({ op: 2, d: { subscribe_to_id: _i, api_key: _apiKey } }));
       }
     } catch (err) {}
   };
@@ -111,13 +94,11 @@ function updateProfile(data) {
   document.querySelector('.discord-name').textContent = user.username;
   
   const statusDot = document.querySelector('.status-dot');
-  const status = data.discord_status;
-  statusDot.className = `status-dot status-${status}`;
+  statusDot.className = `status-dot status-${data.discord_status}`;
 }
 
 function updateSpotify(data) {
   const spotifyContainer = document.querySelector('.spotify-container');
-  const spotifyNowPlaying = document.querySelector('.spotify-now-playing');
   const spotifyTrack = document.querySelector('.spotify-track');
   const spotifyArtist = document.querySelector('.spotify-artist');
   const spotifyAlbum = document.querySelector('.spotify-album');
@@ -169,14 +150,13 @@ function updateActivity(data) {
 }
 
 window._g = _g;
-window._p = _p;
-window._n = _n;
-window._a = _a;
-window._b = _b;
+window._apiKey = _apiKey;
 
 document.addEventListener('DOMContentLoaded', async () => {
-  await fetchLogs();
-  renderMusicLogs();
-  renderGameLogs();
   _c();
+  
+  fetchLogs().then(() => {
+    renderMusicLogs();
+    renderGameLogs();
+  });
 });
