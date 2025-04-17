@@ -1,8 +1,28 @@
+#music-tab {
+  overflow-y: auto;
+  padding-right: 8px;
+  height: 100%;
+}
+
+#music-tab h2 {
+  margin-top: 0;
+}
+
+#music-tab::-webkit-scrollbar {
+  width: 8px;
+}
+
+#music-tab::-webkit-scrollbar-thumb {
+  background: #8c52ff66;
+  border-radius: 4px;
+}
+
 #music-tab,
 #music-tab h2,
 #music-tab::-webkit-scrollbar,
 #music-tab::-webkit-scrollbar-thumb,
-#music-logs, #game-logs {
+#music-logs,
+#game-logs {
   display: flex;
   flex-direction: column;
   gap: 12px;
