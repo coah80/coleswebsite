@@ -155,8 +155,13 @@ window._apiKey = _apiKey;
 document.addEventListener('DOMContentLoaded', async () => {
   _c();
   
-  fetchLogs().then(() => {
+  try {
+    await fetchLogs();
+  } catch (err) {
+    window.musicLogs = window.musicLogs || [];
+    window.gameLogs = window.gameLogs || [];
+  } finally {
     renderMusicLogs();
     renderGameLogs();
-  });
+  }
 });
