@@ -1,25 +1,45 @@
+const MAX_RETRIES = 3;
+const RETRY_DELAY = 2000;
+
+async function fetchWithRetry(url, options = {}, retries = MAX_RETRIES) {
+  try {
+    return await fetch(url, options);
+  } catch (error) {
+    if (retries <= 0) throw error;
+    
+    await new Promise(resolve => setTimeout(resolve, RETRY_DELAY));
+    return fetchWithRetry(url, options, retries - 1);
+  }
+}
+
 async function fetchLogs() {
   try {
     const baseUrl = window._g();
     
-    const [musicRes, gameRes] = await Promise.all([
-      fetch(`${baseUrl}/musicLogs.json`),
-      fetch(`${baseUrl}/gameLogs.json`)
-    ]);
+    const loadEmptyIfFailed = async (url) => {
+      try {
+        const response = await fetchWithRetry(url);
+        if (!response.ok) return null;
+        return await response.json();
+      } catch (err) {
+        console.error(`Failed to fetch ${url}: ${err.message}`);
+        return null;
+      }
+    };
     
     const [musicData, gameData] = await Promise.all([
-      musicRes.json(),
-      gameRes.json()
+      loadEmptyIfFailed(`${baseUrl}/musicLogs.json`),
+      loadEmptyIfFailed(`${baseUrl}/gameLogs.json`)
     ]);
 
-    musicLogs = musicData ? (Array.isArray(musicData) ? musicData : Object.values(musicData)) : [];
-    gameLogs = gameData ? (Array.isArray(gameData) ? gameData : Object.values(gameData)) : [];
-
-    musicLogs.sort((a, b) => b.loggedAt - a.loggedAt);
-    gameLogs.sort((a, b) => b.loggedAt - a.loggedAt);
+    window.musicLogs = musicData ? (Array.isArray(musicData) ? musicData : Object.values(musicData)) : [];
+    window.gameLogs = gameData ? (Array.isArray(gameData) ? gameData : Object.values(gameData)) : [];
     
-    window.musicLogs = musicLogs;
-    window.gameLogs = gameLogs;
+    musicLogs = window.musicLogs;
+    gameLogs = window.gameLogs;
+
+    if (musicLogs.length > 0) musicLogs.sort((a, b) => b.loggedAt - a.loggedAt);
+    if (gameLogs.length > 0) gameLogs.sort((a, b) => b.loggedAt - a.loggedAt);
     
     return { musicLogs, gameLogs };
   } catch (err) {
@@ -32,6 +52,7 @@ async function fetchLogs() {
 const saveLogs = (() => {
   let saveTimer = null;
   let pendingSave = false;
+  let failedSaves = 0;
   
   return async function() {
     if (saveTimer) {
@@ -47,25 +68,32 @@ const saveLogs = (() => {
         const gamesToSave = window.gameLogs || gameLogs;
         
         if (pendingSave) {
-          musicToSave.sort((a, b) => b.loggedAt - a.loggedAt);
-          gamesToSave.sort((a, b) => b.loggedAt - a.loggedAt);
+          if (musicToSave.length > 0) musicToSave.sort((a, b) => b.loggedAt - a.loggedAt);
+          if (gamesToSave.length > 0) gamesToSave.sort((a, b) => b.loggedAt - a.loggedAt);
         }
 
         await Promise.all([
-          fetch(`${baseUrl}/musicLogs.json`, {
+          fetchWithRetry(`${baseUrl}/musicLogs.json`, {
             method: 'PUT',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify(musicToSave)
           }),
-          fetch(`${baseUrl}/gameLogs.json`, {
+          fetchWithRetry(`${baseUrl}/gameLogs.json`, {
             method: 'PUT',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify(gamesToSave)
           })
         ]);
         
+        failedSaves = 0;
         pendingSave = false;
-      } catch (err) {}
+      } catch (err) {
+        failedSaves++;
+        
+        if (failedSaves < 5) {
+          setTimeout(saveLogs, 5000 * failedSaves);
+        }
+      }
       
       saveTimer = null;
       if (pendingSave) {
