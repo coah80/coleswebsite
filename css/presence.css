@@ -8,15 +8,12 @@
   border: 2px solid #0d0b16;
   padding-left: 0px;
   margin-right: 187px;
-  background-size: cover;
-  background-position: center;
-  background-repeat: no-repeat;
 }
 
-.status-online { background-image: url('icons/ONLINE.png'); }
-.status-idle { background-image: url('icons/IDLE.png'); }
-.status-dnd { background-image: url('icons/DO_NOT_DISTURB.png'); }
-.status-offline { background-image: url('icons/OFFLINE.png'); }
+.status-online { background-color: #3ba55d; }
+.status-idle { background-color: #faa81a; }
+.status-dnd { background-color: #ed4245; }
+.status-offline { background-color: #747f8d; }
 
 .username {
   font-size: 1.4rem;
