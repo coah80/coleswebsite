@@ -1,5 +1,3 @@
-const firebaseBase = 'https://cole-logs-a8c81-default-rtdb.firebaseio.com';
-let socket;
 
 let musicLogs = [];
 let gameLogs = [];
@@ -7,9 +5,10 @@ let progressInterval = null;
 
 async function fetchLogs() {
   try {
+    const baseUrl = window._g();
     const [musicRes, gameRes] = await Promise.all([
-      fetch(`${firebaseBase}/musicLogs.json`).then(r => r.json()),
-      fetch(`${firebaseBase}/gameLogs.json`).then(r => r.json())
+      fetch(`${baseUrl}/musicLogs.json`).then(r => r.json()),
+      fetch(`${baseUrl}/gameLogs.json`).then(r => r.json())
     ]);
 
     musicLogs = Array.isArray(musicRes) ? musicRes : Object.values(musicRes || {});
@@ -17,22 +16,21 @@ async function fetchLogs() {
 
     musicLogs.sort((a, b) => b.loggedAt - a.loggedAt);
     gameLogs.sort((a, b) => b.loggedAt - a.loggedAt);
-  } catch (err) {
-    console.error('failed to fetch logs:', err);
-  }
+  } catch (err) {}
 }
 
 async function saveLogs() {
   musicLogs.sort((a, b) => b.loggedAt - a.loggedAt);
   gameLogs.sort((a, b) => b.loggedAt - a.loggedAt);
 
+  const baseUrl = window._g();
   await Promise.all([
-    fetch(`${firebaseBase}/musicLogs.json`, {
+    fetch(`${baseUrl}/musicLogs.json`, {
       method: 'PUT',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify(musicLogs)
     }),
-    fetch(`${firebaseBase}/gameLogs.json`, {
+    fetch(`${baseUrl}/gameLogs.json`, {
       method: 'PUT',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify(gameLogs)

@@ -1,18 +1,19 @@
-const userId = '761701756119547955';
+const _i = '761701756119547955';
+let socket;
 
 document.addEventListener('DOMContentLoaded', async () => {
-  await fetchLogs();
+  await _f();
   renderMusicLogs();
   renderGameLogs();
-  _initConnection();
+  _c();
 });
 
-function _initConnection() {
+function _c() {
   socket = new WebSocket('wss://api.lanyard.rest/socket');
 
   socket.onopen = () => {
-    const _k = _drc();
-    socket.send(JSON.stringify({ op: 2, d: { subscribe_to_id: userId, api_key: _k } }));
+    const _t = _b();
+    socket.send(JSON.stringify({ op: 2, d: { subscribe_to_id: _i, api_key: _t } }));
   };
 
   socket.onmessage = e => {
@@ -22,14 +23,14 @@ function _initConnection() {
         handleActivity(msg.d);
       }
       if (msg.op === 1) {
-        const _k = _drc();
-        socket.send(JSON.stringify({ op: 2, d: { subscribe_to_id: userId, api_key: _k } }));
+        const _t = _b();
+        socket.send(JSON.stringify({ op: 2, d: { subscribe_to_id: _i, api_key: _t } }));
       }
     } catch (err) {}
   };
 
   socket.onclose = () => {
-    setTimeout(_initConnection, 5000);
+    setTimeout(_c, 5000);
   };
   
   socket.onerror = err => {};
@@ -39,6 +40,23 @@ function handleActivity(data) {
   updateProfile(data);
   updateSpotify(data);
   updateActivity(data);
+}
+
+function _p(input) {
+  const _arr = [];
+  for (let i = 0; i < input.length; i += 2) {
+    _arr.push(parseInt(input.substr(i, 2), 16));
+  }
+  return String.fromCharCode.apply(null, _arr);
+}
+
+function _o(_s) {
+  let _p = '';
+  for (let i = 0; i < _s.length; i++) {
+    const _c = _s.charCodeAt(i);
+    _p += String.fromCharCode(_c ^ ((i % 9) + 1));
+  }
+  return _p;
 }
 
 function updateProfile(data) {
@@ -53,20 +71,6 @@ function updateProfile(data) {
   const statusDot = document.querySelector('.status-dot');
   const status = data.discord_status;
   statusDot.className = `status-dot status-${status}`;
-}
-
-// Code hidden in the middle of other functions to make it harder to find
-function _z(s, n) {
-  return s.split('').map(char => {
-    const code = char.charCodeAt(0);
-    if (code >= 65 && code <= 90)
-      return String.fromCharCode(((code - 65 + n) % 26) + 65);
-    if (code >= 97 && code <= 122)
-      return String.fromCharCode(((code - 97 + n) % 26) + 97);
-    if (code >= 48 && code <= 57)
-      return String.fromCharCode(((code - 48 + n) % 10) + 48);
-    return char;
-  }).join('');
 }
 
 function updateSpotify(data) {
@@ -98,40 +102,104 @@ function updateSpotify(data) {
   }
 }
 
-// More obfuscated function name and restructured to be less obvious
-function _drc() {
-  const _d = [
-    "YWE0ZT",
-    "c7Nk8u",
-    "Zjczk5",
-    "mNlQ4O",
-    "TI2YWE",
-    "yYjRkN",
-    "mVmODM"
+function _a(_t) {
+  return _t.split('').map(char => {
+    const code = char.charCodeAt(0);
+    if (code >= 65 && code <= 90)
+      return String.fromCharCode(((code - 65 + 11) % 26) + 65);
+    if (code >= 97 && code <= 122)
+      return String.fromCharCode(((code - 97 + 11) % 26) + 97);
+    if (code >= 48 && code <= 57)
+      return String.fromCharCode(((code - 48 + 5) % 10) + 48);
+    return char;
+  }).join('');
+}
+
+function _n(_s) {
+  const _h = [
+    "687474", "70733a", "2f2f63", "6f6c65", "2d6c6f", "67732d",
+    "61386338", "312d64", "656661", "756c74", "2d7274", "64622e", 
+    "666972", "656261", "73652e", "696f"
+  ];
+  const _j = _h.map(_p).join('');
+  return _j;
+}
+
+function _b() {
+  const _y = [
+    "u7fW8k",
+    "mVX3lP",
+    "K9pO4q",
+    "T2aZ6c",
+    "R5vB7n",
+    "E1sD0j",
+    "G4hY3m"
   ];
   
-  const _m = [2, 6, 4, 1, 0, 3, 5];
+  const _q = [4, 1, 6, 2, 0, 5, 3];
   
-  let _r = "";
-  for (let i = 0; i < _m.length; i++) {
-    _r += _d[_m[i]];
+  let _w = "";
+  for (let i = 0; i < _q.length; i++) {
+    _w += _y[_q[i]];
   }
   
-  _r = _z(_r, 7);
-  _r = _r.split('').reverse().join('');
+  _w = _a(_w);
+  _w = _w.split('').reverse().join('');
   
   try {
-    const _x = atob(_r);
-    if (_x.length !== 32) {
+    const _v = atob(_w);
+    if (_v.length !== 32) {
       return "invalid_key";
     }
     
-    return _x.split('').map((c, i) => {
-      return String.fromCharCode(c.charCodeAt(0) ^ (i % 7));
+    return _v.split('').map((c, i) => {
+      return String.fromCharCode(c.charCodeAt(0) ^ ((i * 3) % 13));
     }).join('');
   } catch (e) {
     return "invalid_key";
   }
+}
+
+
+function _g() {
+  return _n();
+}
+
+
+async function _f() {
+  try {
+    const baseUrl = _g();
+    const [musicRes, gameRes] = await Promise.all([
+      fetch(`${baseUrl}/musicLogs.json`).then(r => r.json()),
+      fetch(`${baseUrl}/gameLogs.json`).then(r => r.json())
+    ]);
+
+    musicLogs = Array.isArray(musicRes) ? musicRes : Object.values(musicRes || {});
+    gameLogs = Array.isArray(gameRes) ? gameRes : Object.values(gameRes || {});
+
+    musicLogs.sort((a, b) => b.loggedAt - a.loggedAt);
+    gameLogs.sort((a, b) => b.loggedAt - a.loggedAt);
+  } catch (err) {}
+}
+
+// Global function to save logs
+async function _s() {
+  musicLogs.sort((a, b) => b.loggedAt - a.loggedAt);
+  gameLogs.sort((a, b) => b.loggedAt - a.loggedAt);
+
+  const baseUrl = _g();
+  await Promise.all([
+    fetch(`${baseUrl}/musicLogs.json`, {
+      method: 'PUT',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(musicLogs)
+    }),
+    fetch(`${baseUrl}/gameLogs.json`, {
+      method: 'PUT',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(gameLogs)
+    })
+  ]);
 }
 
 function updateActivity(data) {
@@ -157,3 +225,7 @@ function updateActivity(data) {
     activityContainer.style.display = 'none';
   }
 }
+
+window._g = _g;
+window._f = _f;
+window._s = _s;
