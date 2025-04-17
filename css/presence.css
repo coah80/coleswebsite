@@ -1,3 +1,20 @@
+.status-wrapper {
+  position: relative;
+  display: flex;
+  justify-content: center;
+  margin-bottom: 12px;
+}
+
+.status-wrapper img {
+  width: 100px;
+  height: 100px;
+  border-radius: 50%;
+  object-fit: cover;
+  border: 2px solid #6d44b8;
+  box-shadow: 0 0 12px #8c52ff80;
+  display: block;
+}
+
 .status-dot {
   position: absolute;
   bottom: 4px;
@@ -11,10 +28,10 @@
   background-repeat: no-repeat;
 }
 
-.status-online { background-image: url('../icons/ONLINE.png'); }
-.status-idle   { background-image: url('../icons/IDLE.png'); }
-.status-dnd    { background-image: url('../icons/DO_NOT_DISTURB.png'); }
-.status-offline{ background-image: url('../icons/OFFLINE.png'); }
+.status-online   { background-image: url('../icons/ONLINE.png'); }
+.status-idle     { background-image: url('../icons/IDLE.png'); }
+.status-dnd      { background-image: url('../icons/DO_NOT_DISTURB.png'); }
+.status-offline  { background-image: url('../icons/OFFLINE.png'); }
 
 .username {
   font-size: 1.4rem;
