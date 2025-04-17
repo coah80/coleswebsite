@@ -2,6 +2,8 @@ const userId = '761701756119547955';
 const _kp = ['1cf73df5','72dac3f3','ce085aa2','b4d6ef83'];
 const apiKey = _kp.join('');
 
+const isMobile = /iPhone|iPad|iPod|Android|webOS|BlackBerry|Windows Phone/i.test(navigator.userAgent);
+
 function connectSocket(){
   socket = new WebSocket('wss://api.lanyard.rest/socket');
   socket.onopen = () => {
