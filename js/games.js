@@ -1,16 +1,18 @@
 function renderGameLogs() {
+  const gameLogsData = window.gameLogs || [];
+  
   const perPage = +document.getElementById('games-per-page').value;
   const container = document.getElementById('game-logs');
   const pagination = document.getElementById('game-pages');
 
-  const pageCount = Math.ceil(gameLogs.length / perPage);
+  const pageCount = Math.ceil(gameLogsData.length / perPage);
   let currentPage = +pagination.dataset.page || 1;
   if (currentPage > pageCount) currentPage = pageCount;
   if (currentPage < 1) currentPage = 1;
   pagination.dataset.page = currentPage;
 
   const start = (currentPage - 1) * perPage;
-  const logsToShow = gameLogs.slice(start, start + perPage);
+  const logsToShow = gameLogsData.slice(start, start + perPage);
 
   container.innerHTML = logsToShow.map(log => {
     const icon = log.icon
@@ -39,3 +41,6 @@ function goToGamePage(num) {
   document.getElementById('game-pages').dataset.page = num;
   renderGameLogs();
 }
+
+window.renderGameLogs = renderGameLogs;
+window.goToGamePage = goToGamePage;

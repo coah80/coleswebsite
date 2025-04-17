@@ -1,12 +1,77 @@
 const _i = '761701756119547955';
 let socket;
+let musicLogs = [];
+let gameLogs = [];
+let progressInterval = null;
 
-document.addEventListener('DOMContentLoaded', async () => {
-  await _f();
-  renderMusicLogs();
-  renderGameLogs();
-  _c();
-});
+function _p(input) {
+  const _arr = [];
+  for (let i = 0; i < input.length; i += 2) {
+    _arr.push(parseInt(input.substr(i, 2), 16));
+  }
+  return String.fromCharCode.apply(null, _arr);
+}
+
+function _n() {
+  const _h = [
+    "687474", "70733a", "2f2f63", "6f6c65", "2d6c6f", "67732d",
+    "61386338", "312d64", "656661", "756c74", "2d7274", "64622e", 
+    "666972", "656261", "73652e", "696f"
+  ];
+  return _h.map(_p).join('');
+}
+
+function _g() {
+  return _n();
+}
+
+function _a(_t) {
+  return _t.split('').map(char => {
+    const code = char.charCodeAt(0);
+    if (code >= 65 && code <= 90)
+      return String.fromCharCode(((code - 65 + 11) % 26) + 65);
+    if (code >= 97 && code <= 122)
+      return String.fromCharCode(((code - 97 + 11) % 26) + 97);
+    if (code >= 48 && code <= 57)
+      return String.fromCharCode(((code - 48 + 5) % 10) + 48);
+    return char;
+  }).join('');
+}
+
+function _b() {
+  const _y = [
+    "u7fW8k",
+    "mVX3lP",
+    "K9pO4q",
+    "T2aZ6c",
+    "R5vB7n",
+    "E1sD0j",
+    "G4hY3m"
+  ];
+  
+  const _q = [4, 1, 6, 2, 0, 5, 3];
+  
+  let _w = "";
+  for (let i = 0; i < _q.length; i++) {
+    _w += _y[_q[i]];
+  }
+  
+  _w = _a(_w);
+  _w = _w.split('').reverse().join('');
+  
+  try {
+    const _v = atob(_w);
+    if (_v.length !== 32) {
+      return "invalid_key";
+    }
+    
+    return _v.split('').map((c, i) => {
+      return String.fromCharCode(c.charCodeAt(0) ^ ((i * 3) % 13));
+    }).join('');
+  } catch (e) {
+    return "invalid_key";
+  }
+}
 
 function _c() {
   socket = new WebSocket('wss://api.lanyard.rest/socket');
@@ -20,7 +85,7 @@ function _c() {
     try {
       const msg = JSON.parse(e.data);
       if (msg.t === 'INIT_STATE' || msg.t === 'PRESENCE_UPDATE') {
-        handleActivity(msg.d);
+        handleActivityFromPresence(msg.d);
       }
       if (msg.op === 1) {
         const _t = _b();
@@ -34,29 +99,6 @@ function _c() {
   };
   
   socket.onerror = err => {};
-}
-
-function handleActivity(data) {
-  updateProfile(data);
-  updateSpotify(data);
-  updateActivity(data);
-}
-
-function _p(input) {
-  const _arr = [];
-  for (let i = 0; i < input.length; i += 2) {
-    _arr.push(parseInt(input.substr(i, 2), 16));
-  }
-  return String.fromCharCode.apply(null, _arr);
-}
-
-function _o(_s) {
-  let _p = '';
-  for (let i = 0; i < _s.length; i++) {
-    const _c = _s.charCodeAt(i);
-    _p += String.fromCharCode(_c ^ ((i % 9) + 1));
-  }
-  return _p;
 }
 
 function updateProfile(data) {
@@ -102,106 +144,6 @@ function updateSpotify(data) {
   }
 }
 
-function _a(_t) {
-  return _t.split('').map(char => {
-    const code = char.charCodeAt(0);
-    if (code >= 65 && code <= 90)
-      return String.fromCharCode(((code - 65 + 11) % 26) + 65);
-    if (code >= 97 && code <= 122)
-      return String.fromCharCode(((code - 97 + 11) % 26) + 97);
-    if (code >= 48 && code <= 57)
-      return String.fromCharCode(((code - 48 + 5) % 10) + 48);
-    return char;
-  }).join('');
-}
-
-function _n(_s) {
-  const _h = [
-    "687474", "70733a", "2f2f63", "6f6c65", "2d6c6f", "67732d",
-    "61386338", "312d64", "656661", "756c74", "2d7274", "64622e", 
-    "666972", "656261", "73652e", "696f"
-  ];
-  const _j = _h.map(_p).join('');
-  return _j;
-}
-
-function _b() {
-  const _y = [
-    "u7fW8k",
-    "mVX3lP",
-    "K9pO4q",
-    "T2aZ6c",
-    "R5vB7n",
-    "E1sD0j",
-    "G4hY3m"
-  ];
-  
-  const _q = [4, 1, 6, 2, 0, 5, 3];
-  
-  let _w = "";
-  for (let i = 0; i < _q.length; i++) {
-    _w += _y[_q[i]];
-  }
-  
-  _w = _a(_w);
-  _w = _w.split('').reverse().join('');
-  
-  try {
-    const _v = atob(_w);
-    if (_v.length !== 32) {
-      return "invalid_key";
-    }
-    
-    return _v.split('').map((c, i) => {
-      return String.fromCharCode(c.charCodeAt(0) ^ ((i * 3) % 13));
-    }).join('');
-  } catch (e) {
-    return "invalid_key";
-  }
-}
-
-
-function _g() {
-  return _n();
-}
-
-
-async function _f() {
-  try {
-    const baseUrl = _g();
-    const [musicRes, gameRes] = await Promise.all([
-      fetch(`${baseUrl}/musicLogs.json`).then(r => r.json()),
-      fetch(`${baseUrl}/gameLogs.json`).then(r => r.json())
-    ]);
-
-    musicLogs = Array.isArray(musicRes) ? musicRes : Object.values(musicRes || {});
-    gameLogs = Array.isArray(gameRes) ? gameRes : Object.values(gameRes || {});
-
-    musicLogs.sort((a, b) => b.loggedAt - a.loggedAt);
-    gameLogs.sort((a, b) => b.loggedAt - a.loggedAt);
-  } catch (err) {}
-}
-
-// Global function to save logs
-async function _s() {
-  musicLogs.sort((a, b) => b.loggedAt - a.loggedAt);
-  gameLogs.sort((a, b) => b.loggedAt - a.loggedAt);
-
-  const baseUrl = _g();
-  await Promise.all([
-    fetch(`${baseUrl}/musicLogs.json`, {
-      method: 'PUT',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify(musicLogs)
-    }),
-    fetch(`${baseUrl}/gameLogs.json`, {
-      method: 'PUT',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify(gameLogs)
-    })
-  ]);
-}
-
 function updateActivity(data) {
   const activityContainer = document.querySelector('.activity-container');
   
@@ -227,5 +169,14 @@ function updateActivity(data) {
 }
 
 window._g = _g;
-window._f = _f;
-window._s = _s;
+window._p = _p;
+window._n = _n;
+window._a = _a;
+window._b = _b;
+
+document.addEventListener('DOMContentLoaded', async () => {
+  await fetchLogs();
+  renderMusicLogs();
+  renderGameLogs();
+  _c();
+});

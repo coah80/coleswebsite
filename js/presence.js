@@ -20,7 +20,7 @@ function updateProgressBar(start, end) {
   }, 1000);
 }
 
-async function handleActivity(data) {
+async function handleActivityFromPresence(data) {
   const now = Date.now();
   const discordBox = document.getElementById('discord-activity');
   let html = '';
@@ -28,6 +28,9 @@ async function handleActivity(data) {
   const statusDot = document.querySelector('.status-dot');
   const status = data.discord_status;
   statusDot.className = `status-dot status-${status}`;
+
+  const musicLogsVar = window.musicLogs || [];
+  const gameLogsVar = window.gameLogs || [];
 
   if (data.spotify) {
     const s = data.spotify;
@@ -55,8 +58,8 @@ async function handleActivity(data) {
 
     updateProgressBar(s.timestamps.start, s.timestamps.end);
 
-    if (!musicLogs.length || musicLogs[0].track_id !== s.track_id || now - musicLogs[0].loggedAt > 30000) {
-      musicLogs.unshift({
+    if (!musicLogsVar.length || musicLogsVar[0].track_id !== s.track_id || now - musicLogsVar[0].loggedAt > 30000) {
+      musicLogsVar.unshift({
         track_id: s.track_id,
         song: s.song,
         artist: s.artist,
@@ -65,7 +68,8 @@ async function handleActivity(data) {
         loggedAt: now
       });
 
-      if (musicLogs.length > 300) musicLogs.pop();
+      if (musicLogsVar.length > 300) musicLogsVar.pop();
+      window.musicLogs = musicLogsVar;
       await saveLogs();
     }
   } else {
@@ -77,11 +81,11 @@ async function handleActivity(data) {
 
   if (currentGame) {
     const gameKey = `${currentGame.name}:${currentGame.details || ''}:${currentGame.state || ''}`;
-    const top = gameLogs[0];
+    const top = gameLogsVar[0];
     const topKey = top ? `${top.name}:${top.details || ''}:${top.state || ''}` : '';
 
     if (gameKey !== topKey) {
-      gameLogs.unshift({
+      gameLogsVar.unshift({
         name: currentGame.name,
         details: currentGame.details || '',
         state: currentGame.state || '',
@@ -89,7 +93,8 @@ async function handleActivity(data) {
         loggedAt: now
       });
 
-      if (gameLogs.length > 300) gameLogs = gameLogs.slice(0, 300);
+      if (gameLogsVar.length > 300) gameLogsVar = gameLogsVar.slice(0, 300);
+      window.gameLogs = gameLogsVar;
       await saveLogs();
     }
   }
@@ -116,3 +121,6 @@ async function handleActivity(data) {
   discordBox.innerHTML = html || 'Not currently playing anything.';
   discordBox.classList.toggle('active', !!html);
 }
+
+window.handleActivityFromPresence = handleActivityFromPresence;
+window.updateProgressBar = updateProgressBar;

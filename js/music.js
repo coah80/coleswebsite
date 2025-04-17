@@ -1,16 +1,18 @@
 function renderMusicLogs() {
+  const musicLogsData = window.musicLogs || [];
+  
   const perPage = +document.getElementById('music-per-page').value;
   const container = document.getElementById('music-logs');
   const pagination = document.getElementById('music-pages');
 
-  const pageCount = Math.ceil(musicLogs.length / perPage);
+  const pageCount = Math.ceil(musicLogsData.length / perPage);
   let currentPage = +pagination.dataset.page || 1;
   if (currentPage > pageCount) currentPage = pageCount;
   if (currentPage < 1) currentPage = 1;
   pagination.dataset.page = currentPage;
 
   const start = (currentPage - 1) * perPage;
-  const logsToShow = musicLogs.slice(start, start + perPage);
+  const logsToShow = musicLogsData.slice(start, start + perPage);
 
   container.innerHTML = logsToShow.map(log => `
     <div class="music-wrapper">
@@ -33,3 +35,6 @@ function goToMusicPage(num) {
   document.getElementById('music-pages').dataset.page = num;
   renderMusicLogs();
 }
+
+window.renderMusicLogs = renderMusicLogs;
+window.goToMusicPage = goToMusicPage;
