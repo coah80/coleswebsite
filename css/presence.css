@@ -6,14 +6,15 @@
   height: 16px;
   border-radius: 50%;
   border: 2px solid #0d0b16;
-  padding-left: 0px;
-  margin-right: 187px;
+  background-size: cover;
+  background-position: center;
+  background-repeat: no-repeat;
 }
 
-.status-online { background-color: #3ba55d; }
-.status-idle { background-color: #faa81a; }
-.status-dnd { background-color: #ed4245; }
-.status-offline { background-color: #747f8d; }
+.status-online { background-image: url('../icons/ONLINE.png'); }
+.status-idle   { background-image: url('../icons/IDLE.png'); }
+.status-dnd    { background-image: url('../icons/DO_NOT_DISTURB.png'); }
+.status-offline{ background-image: url('../icons/OFFLINE.png'); }
 
 .username {
   font-size: 1.4rem;
@@ -42,7 +43,6 @@
   width: 100%;
   max-width: 260px;
   text-align: center;
-  position: relative;
   transition: background 0.3s, color 0.3s, box-shadow 0.3s;
   box-shadow: 0 0 8px #8c52ff40;
 }
@@ -92,73 +92,4 @@
   flex-direction: column;
   gap: 24px;
   align-items: stretch;
-}
-
-.presence-entry {
-  display: flex;
-  align-items: center;
-  gap: 12px;
-  background: #1b1429;
-  padding: 12px;
-  border-radius: 12px;
-  box-shadow: inset 0 0 10px #8c52ff20;
-}
-
-.presence-entry .album-art {
-  width: 64px;
-  height: 64px;
-  border-radius: 50%;
-  object-fit: cover;
-  border: 2px solid #b592ff;
-  box-shadow: 0 0 10px #8c52ff90;
-}
-
-.spotify-presence .album-art {
-  animation: spin 4s linear infinite;
-}
-
-.presence-entry .music-info {
-  flex: 1;
-  display: flex;
-  flex-direction: column;
-  gap: 4px;
-}
-
-.presence-entry .spotify-icon {
-  width: 16px;
-  height: 16px;
-  border-radius: 50%;
-  background: #1db954;
-  padding: 2px;
-  box-shadow: 0 0 4px #1db95480;
-}
-
-.spotify-progress {
-  display: flex;
-  align-items: center;
-  gap: 8px;
-  margin-top: 4px;
-  font-size: 0.75rem;
-  color: #ccc;
-}
-
-.spotify-progress .bar {
-  flex: 1;
-  height: 6px;
-  background: #3b2a60;
-  border-radius: 4px;
-  overflow: hidden;
-  position: relative;
-}
-
-.spotify-progress .fill {
-  background: #8c52ff;
-  height: 100%;
-  width: 0%;
-  transition: width 0.5s ease;
-}
-
-.spotify-progress .time {
-  min-width: 32px;
-  text-align: center;
 }

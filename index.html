@@ -3,15 +3,14 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <meta name="lanyard-key" content="BASE64_API_KEY_HERE"/>
   <title>cole's website</title>
   <link rel="icon" type="image/png" href="icons/webicon.png" />
-  
   <link rel="stylesheet" href="css/global.css" />
   <link rel="stylesheet" href="css/home.css" />
   <link rel="stylesheet" href="css/music.css" />
   <link rel="stylesheet" href="css/games.css" />
   <link rel="stylesheet" href="css/presence.css" />
-
   <meta property="og:title" content="coles website! its awesome!" />
   <meta property="og:description" content="fuck you!" />
   <meta property="og:image" content="icons/webicon2.png" />
@@ -19,8 +18,6 @@
   <meta property="og:url" content="https://cole.ong" />
 </head>
 <body>
-
-  <!-- moved OUTSIDE the card wrapper -->
   <div class="background-scroll">
     <div class="scrolling-row scroll-left">
       <div class="inner-scroll">
@@ -39,14 +36,12 @@
   <div class="center-wrapper">
     <div class="id-card" id="main-card">
 
-      <!-- tabs -->
       <div class="card-tabs">
         <button class="card-tab active" data-tab="home">Home</button>
         <button class="card-tab" data-tab="music">Music</button>
         <button class="card-tab" data-tab="games">Games</button>
       </div>
 
-      <!-- home content -->
       <div id="home-tab" class="tab-page">
         <div class="content-wrapper">
           <div class="left-section">
@@ -81,7 +76,6 @@
         </div>
       </div>
 
-      <!-- music content -->
       <div id="music-tab" class="tab-page" style="display: none;">
         <div class="logs-tab-content">
           <h2>Recently Played Music</h2>
@@ -98,7 +92,6 @@
         </div>
       </div>
 
-      <!-- games content -->
       <div id="games-tab" class="tab-page" style="display: none;">
         <div class="logs-tab-content">
           <h2>Recently Played Games</h2>
@@ -118,7 +111,6 @@
     </div>
   </div>
 
-  
   <script src="js/utils.js"></script>
   <script src="js/firebase.js"></script>
   <script src="js/music.js"></script>
