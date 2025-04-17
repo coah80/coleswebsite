@@ -39,8 +39,11 @@
   display: block;
 }
 
-.left-section .status-wrapper .status-online {
-  padding-left: 0px;
+.left-section .status-wrapper .status-online,
+.left-section .status-wrapper .status-idle,
+.left-section .status-wrapper .status-dnd,
+.left-section .status-wrapper .status-offline {
+  padding-left: 0;
   margin-right: 187px;
 }
 
