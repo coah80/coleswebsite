@@ -364,3 +364,40 @@
   min-width: 70px;
   max-width: 80px;
 }
+
+/* Projects tab mobile styling */
+#projects-tab {
+  padding: 0 !important;
+  overflow-y: auto;
+  height: auto !important;
+  width: 100%;
+}
+
+.projects-content {
+  padding: 10px 5px !important;
+}
+
+.projects-grid {
+  gap: 10px !important;
+}
+
+.project-card {
+  min-width: 140px !important;
+}
+
+.project-image {
+  height: 120px !important;
+}
+
+.project-title {
+  font-size: 1rem !important;
+}
+
+.project-desc {
+  font-size: 0.8rem !important;
+}
+
+.coming-soon {
+  font-size: 0.9rem !important;
+  margin-top: 5px !important;
+}

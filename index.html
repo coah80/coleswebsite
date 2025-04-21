@@ -10,6 +10,7 @@
   <link rel="stylesheet" href="css/home.css" />
   <link rel="stylesheet" href="css/activity.css" />
   <link rel="stylesheet" href="css/presence.css" />
+  <link rel="stylesheet" href="css/projects.css" />
 
   <script>
     const isMobile = /iPhone|iPad|iPod|Android|webOS|BlackBerry|Windows Phone/i.test(navigator.userAgent);
@@ -41,6 +42,7 @@
       <div class="card-tabs">
         <button class="card-tab active" data-tab="home">Home</button>
         <button class="card-tab" data-tab="activity">Recent Activity</button>
+        <button class="card-tab" data-tab="projects">Projects</button>
       </div>
 
       <div id="home-tab" class="tab-page">
@@ -98,6 +100,24 @@
         </div>
       </div>
 
+      <div id="projects-tab" class="tab-page" style="display: none;">
+        <div class="projects-content">
+          <h2>My Projects</h2>
+          <div class="projects-grid">
+            <a href="https://cole.ong" class="project-card">
+              <div class="project-image">
+                <span>Image up here</span>
+              </div>
+              <div class="project-info">
+                <div class="project-title">cole.ong</div>
+                <div class="project-desc">my personal website</div>
+              </div>
+            </a>
+          </div>
+          <div class="coming-soon">more stuff here soon!!</div>
+        </div>
+      </div>
+      
     </div>
   </div>
 

@@ -2,9 +2,11 @@ function switchTab(tabName, fromPop = false) {
   const card = document.getElementById('main-card');
   const home = document.getElementById('home-tab');
   const activity = document.getElementById('activity-tab');
+  const projects = document.getElementById('projects-tab');
 
   home.style.display = 'none';
   activity.style.display = 'none';
+  projects.style.display = 'none';
 
   document.querySelectorAll('.card-tab').forEach(btn => {
     btn.classList.toggle('active', btn.dataset.tab === tabName);
@@ -21,6 +23,9 @@ function switchTab(tabName, fromPop = false) {
       target = activity;
       renderActivityLogs();
       if (!fromPop) history.pushState({}, '', '/activity');
+    } else if (tabName === 'projects') {
+      target = projects;
+      if (!fromPop) history.pushState({}, '', '/projects');
     }
   }
 
