@@ -257,10 +257,15 @@
   vertical-align: middle;
 }
 
-/* Album art positioning */
+/* Album art positioning and sizing for mobile */
 .presence-entry .album-art {
+  width: 50px !important;
+  height: 50px !important;
   margin: 0 auto 8px auto !important;
   display: block !important;
+  border-radius: 50% !important;
+  border: 2px solid #b592ff !important;
+  object-fit: cover !important;
 }
 
 /* Structure album art and text vertically on mobile */
@@ -343,4 +348,19 @@
   width: 100% !important;
   color: inherit !important;
   text-decoration: none !important;
+}
+
+/* Activity filters for mobile */
+.activity-filters {
+  flex-wrap: wrap;
+  gap: 6px;
+  margin-bottom: 10px;
+}
+
+.filter-btn {
+  padding: 4px 10px;
+  font-size: 0.8rem;
+  flex: 1;
+  min-width: 70px;
+  max-width: 80px;
 }

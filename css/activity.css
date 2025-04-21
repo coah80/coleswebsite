@@ -27,6 +27,33 @@
   gap: 12px;
 }
 
+.activity-filters {
+  display: flex;
+  justify-content: center;
+  gap: 10px;
+  margin-bottom: 12px;
+}
+
+.filter-btn {
+  background: #1b1429;
+  color: #e6dbff;
+  border: none;
+  padding: 6px 12px;
+  border-radius: 8px;
+  cursor: pointer;
+  transition: background 0.2s, box-shadow 0.2s;
+  font-size: 0.9rem;
+}
+
+.filter-btn:hover {
+  background: #322a45;
+}
+
+.filter-btn.active {
+  background: #6d44b8;
+  box-shadow: 0 0 8px #8c52ff;
+}
+
 .activity-wrapper {
   display: flex;
   align-items: center;

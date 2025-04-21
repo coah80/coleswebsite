@@ -173,54 +173,7 @@ async function handleActivity(data) {
     discordBox.innerHTML = html || 'Not currently playing anything.';
     discordBox.classList.toggle('active', !!html);
     
-    // Make sure all presence entries are properly styled with centered text
-    setTimeout(() => {
-      const presenceEntries = discordBox.querySelectorAll('.presence-entry');
-      presenceEntries.forEach(entry => {
-        entry.style.textAlign = 'center';
-        
-        const musicInfo = entry.querySelector('.music-info');
-        if (musicInfo) {
-          musicInfo.style.display = 'flex';
-          musicInfo.style.flexDirection = 'column';
-          musicInfo.style.alignItems = 'center';
-          musicInfo.style.justifyContent = 'center';
-          musicInfo.style.textAlign = 'center';
-          musicInfo.style.width = '100%';
-          
-          // Specifically target the song title anchor tag to ensure it's centered
-          const songTitle = musicInfo.querySelector('.song-title');
-          if (songTitle) {
-            songTitle.style.textAlign = 'center';
-            songTitle.style.width = '100%';
-            songTitle.style.display = 'inline-flex';
-            songTitle.style.justifyContent = 'center';
-            songTitle.style.alignItems = 'center';
-            songTitle.style.margin = '0 auto';
-            
-            // Make sure spotify icon is aligned properly in the title
-            const spotifyIcon = songTitle.querySelector('img');
-            if (spotifyIcon) {
-              spotifyIcon.style.marginRight = '4px';
-              spotifyIcon.style.flexShrink = '0';
-            }
-          }
-          
-          const artistElements = musicInfo.querySelectorAll('.artist');
-          artistElements.forEach(el => el.style.textAlign = 'center');
-        }
-        
-        // Make album art spin if it's a Spotify entry
-        if (entry.classList.contains('spotify-presence')) {
-          const albumArt = entry.querySelector('.album-art');
-          if (albumArt) {
-            albumArt.style.animation = 'spin 10s linear infinite';
-            albumArt.style.margin = '0 auto 8px auto';
-            albumArt.style.display = 'block';
-          }
-        }
-      });
-    }, 50);
+    // No need for inline styles since we've properly styled the elements in CSS
   } catch (err) {
     console.error("Error updating Discord box:", err);
   }

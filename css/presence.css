@@ -119,6 +119,23 @@
 
 .spotify-presence .album-art {
   animation: spin 10s linear infinite;
+  width: 64px;
+  height: 64px;
+  border-radius: 50%;
+  object-fit: cover;
+  border: 2px solid #b592ff;
+  box-shadow: 0 0 10px #8c52ff90;
+  margin: 0 auto;
+}
+
+.presence-entry .album-art {
+  width: 64px;
+  height: 64px;
+  border-radius: 50%;
+  object-fit: cover;
+  flex-shrink: 0;
+  border: 2px solid #b592ff;
+  box-shadow: 0 0 10px #8c52ff90;
 }
 
 /* Center text in Spotify activity */

@@ -1,4 +1,5 @@
 let activityLogs = [];
+let currentFilter = 'all';
 
 function renderActivityLogs() {
   try {
@@ -21,16 +22,21 @@ function renderActivityLogs() {
     // Sort all logs by timestamp (newest first)
     activityLogs.sort((a, b) => b.loggedAt - a.loggedAt);
 
+    // Filter logs based on current filter
+    const filteredLogs = currentFilter === 'all' 
+      ? activityLogs 
+      : activityLogs.filter(log => log.type === currentFilter);
+
     const perPage = +perPageElement.value || 30;
     
-    const pageCount = Math.ceil(activityLogs.length / perPage) || 1;
+    const pageCount = Math.ceil(filteredLogs.length / perPage) || 1;
     let currentPage = +pagination.dataset.page || 1;
     if (currentPage > pageCount) currentPage = pageCount;
     if (currentPage < 1) currentPage = 1;
     pagination.dataset.page = currentPage;
 
     const start = (currentPage - 1) * perPage;
-    const logsToShow = activityLogs.slice(start, start + perPage);
+    const logsToShow = filteredLogs.slice(start, start + perPage);
 
     container.innerHTML = logsToShow.map(log => {
       if (!log) return '';
@@ -113,4 +119,30 @@ function goToActivityPage(num) {
   } catch (err) {
     console.error("Error navigating activity pages:", err);
   }
-} 
+}
+
+function setActivityFilter(filter) {
+  currentFilter = filter;
+  
+  // Update active state on filter buttons
+  document.querySelectorAll('.filter-btn').forEach(btn => {
+    btn.classList.toggle('active', btn.dataset.filter === filter);
+  });
+  
+  // Reset to page 1 and re-render
+  const pagination = document.getElementById('activity-pages');
+  if (pagination) {
+    pagination.dataset.page = 1;
+  }
+  
+  renderActivityLogs();
+}
+
+// Set up filter button event listeners
+document.addEventListener('DOMContentLoaded', () => {
+  document.querySelectorAll('.filter-btn').forEach(btn => {
+    btn.addEventListener('click', () => {
+      setActivityFilter(btn.dataset.filter);
+    });
+  });
+}); 
