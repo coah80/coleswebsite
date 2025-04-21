@@ -8,6 +8,9 @@
   overflow-y: auto;
   box-sizing: border-box;
   max-height: 85vh !important;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
 }
 
 .card-tabs {
@@ -32,10 +35,10 @@
 .content-wrapper {
   flex-direction: column !important;
   padding: 0;
-  gap: 12px;
+  gap: 8px;
   width: 100%;
   align-items: center;
-  margin-top: 10px;
+  margin-top: 5px;
 }
 
 .left-section,
@@ -44,48 +47,69 @@
   display: flex;
   flex-direction: column;
   align-items: center;
+  margin: 0;
+  padding: 0;
 }
 
 .center-content {
   display: flex;
   flex-direction: column;
   align-items: center;
-  margin-bottom: 10px;
+  justify-content: center;
+  width: 100%;
+  margin-bottom: 5px;
+  position: relative;
 }
 
 .status-wrapper {
-  margin-bottom: 8px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin: 0 auto 5px auto;
   position: relative;
+  width: 86px;
+  height: 86px;
 }
 
 .status-wrapper img {
   width: 80px;
   height: 80px;
   border-width: 3px;
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  margin: auto;
 }
 
 .status-dot {
-  bottom: 2px;
-  right: 2px;
   width: 14px;
   height: 14px;
+  position: absolute;
+  bottom: 3px;
+  right: 3px;
+  z-index: 10;
 }
 
 .username {
   font-size: 1.2rem;
-  margin-top: 4px;
-  margin-bottom: 2px;
+  margin: 4px 0 2px 0;
+  text-align: center;
+  width: 100%;
 }
 
 .intro {
   font-size: 1rem;
-  margin: 4px 0 8px;
+  margin: 2px 0 6px 0;
+  text-align: center;
+  width: 100%;
 }
 
 .link {
   width: 100%;
   max-width: 280px;
-  margin: 6px 0;
+  margin: 4px 0;
   padding: 8px 14px;
   font-size: 0.95rem;
 }
@@ -93,10 +117,18 @@
 .discord-box {
   padding: 10px;
   border-radius: 8px;
-  margin-top: 5px;
+  margin: 5px auto;
   width: 100%;
   box-sizing: border-box;
   max-width: 280px;
+  text-align: center;
+}
+
+#home-tab {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  width: 100%;
 }
 
 #music-tab,
@@ -192,11 +224,22 @@
 .tab-page {
   overflow-y: auto;
   -webkit-overflow-scrolling: touch;
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
 }
 
-/* Ensure status dot is positioned correctly */
+/* Reset transform that might be causing layout issues */
+#home-tab .left-section,
+#home-tab .right-section {
+  transform: none !important;
+}
+
 #home-tab .status-dot {
   position: absolute;
-  bottom: 0;
-  right: 0;
+  z-index: 10;
+  transform: none !important;
+  margin: 0 !important;
+  padding: 0 !important;
 }
