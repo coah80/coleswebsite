@@ -34,7 +34,7 @@ function switchTab(tabName, fromPop = false) {
     target.style.display = 'block';
     
     setTimeout(() => {
-      if (isMobile) {
+      if (typeof isMobile !== 'undefined' && isMobile) {
         const viewportHeight = window.innerHeight;
         const maxHeight = Math.min(viewportHeight * 0.8, target.scrollHeight + 100);
         card.style.maxHeight = `${maxHeight}px`;
@@ -63,7 +63,7 @@ document.addEventListener('DOMContentLoaded', () => {
     if (activeTab) {
       const card = document.getElementById('main-card');
       
-      if (isMobile) {
+      if (typeof isMobile !== 'undefined' && isMobile) {
         const viewportHeight = window.innerHeight;
         const maxHeight = Math.min(viewportHeight * 0.8, activeTab.scrollHeight + 100);
         card.style.maxHeight = `${maxHeight}px`;

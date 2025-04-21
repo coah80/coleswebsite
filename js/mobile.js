@@ -57,11 +57,11 @@ document.addEventListener('DOMContentLoaded', () => {
     gamesTab.style.WebkitOverflowScrolling = 'touch';
   }
   
+  // Improve touch scrolling for Discord activity box
+  const discordBox = document.getElementById('discord-activity');
+  if (discordBox) {
+    discordBox.style.WebkitOverflowScrolling = 'touch';
+  }
+  
   console.log('Mobile optimizations applied');
-});
-
-// Improve touch scrolling for Discord activity box
-const discordBox = document.getElementById('discord-activity');
-if (discordBox) {
-  discordBox.style.WebkitOverflowScrolling = 'touch';
-} 
+}); 
