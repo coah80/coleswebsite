@@ -38,6 +38,7 @@
   gap: 8px;
   width: 100%;
   align-items: center;
+  justify-content: center;
   margin-top: 5px;
 }
 
@@ -49,6 +50,7 @@
   align-items: center;
   margin: 0;
   padding: 0;
+  transform: none !important;
 }
 
 .center-content {
@@ -57,39 +59,44 @@
   align-items: center;
   justify-content: center;
   width: 100%;
-  margin-bottom: 5px;
+  margin: 0 auto;
+  padding: 0;
   position: relative;
 }
 
+/* Profile Picture Container */
 .status-wrapper {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  margin: 0 auto 5px auto;
   position: relative;
   width: 86px;
   height: 86px;
+  margin: 0 auto 10px auto;
+  padding: 0;
+  display: block;
 }
 
+/* Profile Picture */
 .status-wrapper img {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
   width: 80px;
   height: 80px;
   border-width: 3px;
-  position: absolute;
-  top: 0;
-  left: 0;
-  right: 0;
-  bottom: 0;
-  margin: auto;
+  margin: 0;
+  padding: 0;
 }
 
+/* Status Indicator Dot */
 .status-dot {
+  position: absolute;
+  bottom: 0;
+  right: 0;
   width: 14px;
   height: 14px;
-  position: absolute;
-  bottom: 3px;
-  right: 3px;
   z-index: 10;
+  margin: 0;
+  padding: 0;
 }
 
 .username {
@@ -106,14 +113,7 @@
   width: 100%;
 }
 
-.link {
-  width: 100%;
-  max-width: 280px;
-  margin: 4px 0;
-  padding: 8px 14px;
-  font-size: 0.95rem;
-}
-
+/* Discord Activity Box */
 .discord-box {
   padding: 10px;
   border-radius: 8px;
@@ -122,6 +122,15 @@
   box-sizing: border-box;
   max-width: 280px;
   text-align: center;
+  align-self: center;
+}
+
+.link {
+  width: 100%;
+  max-width: 280px;
+  margin: 4px 0;
+  padding: 8px 14px;
+  font-size: 0.95rem;
 }
 
 #home-tab {
@@ -230,16 +239,20 @@
   align-items: center;
 }
 
-/* Reset transform that might be causing layout issues */
+/* Reset any problematic styles */
 #home-tab .left-section,
 #home-tab .right-section {
   transform: none !important;
 }
 
-#home-tab .status-dot {
-  position: absolute;
-  z-index: 10;
-  transform: none !important;
-  margin: 0 !important;
+/* Override any styles that might interfere with our positioning */
+.left-section .status-wrapper .status-online,
+.left-section .status-wrapper .status-idle,
+.left-section .status-wrapper .status-dnd,
+.left-section .status-wrapper .status-offline {
   padding: 0 !important;
+  margin: 0 !important;
+  position: absolute !important;
+  bottom: 0 !important;
+  right: 0 !important;
 }
