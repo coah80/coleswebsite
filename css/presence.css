@@ -124,6 +124,9 @@
 /* Center text in Spotify activity */
 .presence-entry {
   text-align: center;
+  display: flex;
+  align-items: center;
+  gap: 12px;
 }
 
 .presence-entry .music-info {
@@ -132,6 +135,7 @@
   align-items: center;
   justify-content: center;
   text-align: center;
+  flex: 1;
 }
 
 .presence-entry .song-title,
@@ -147,13 +151,42 @@
   margin-right: 4px;
 }
 
+/* Fix progress bar styling for all devices */
 .spotify-progress {
   display: flex;
   align-items: center;
-  justify-content: center;
   width: 100%;
+  margin-top: 4px;
+  gap: 8px;
+}
+
+.spotify-progress .time {
+  font-size: 0.75rem;
+  color: #b7a4d4;
+  flex-shrink: 0;
 }
 
 .spotify-progress .bar {
   flex: 1;
+  height: 4px;
+  background: #2b1f4c;
+  border-radius: 2px;
+  overflow: hidden;
+  position: relative;
+}
+
+.spotify-progress .fill {
+  height: 100%;
+  background: #8c52ff;
+  border-radius: 2px;
+  position: absolute;
+  top: 0;
+  left: 0;
+}
+
+/* Only center progress bar on mobile */
+@media (max-width: 768px) {
+  .spotify-progress {
+    justify-content: center;
+  }
 }

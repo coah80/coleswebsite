@@ -178,6 +178,7 @@
   font-size: 0.75rem;
 }
 
+/* Mobile-specific progress bar styles */
 .spotify-progress {
   display: flex;
   align-items: center;
@@ -195,43 +196,67 @@
 
 .spotify-progress .bar {
   flex: 1;
+  max-width: 160px; /* Limit width to help with centering */
   height: 3px;
   background: #2b1f4c;
   border-radius: 2px;
   overflow: hidden;
+  position: relative;
 }
 
 .spotify-progress .fill {
   height: 100%;
   background: #8c52ff;
   border-radius: 2px;
+  position: absolute;
+  top: 0;
+  left: 0;
 }
 
+/* Force centered text with important for mobile */
 .presence-entry {
   margin-bottom: 8px;
   width: 100%;
-  text-align: center;
+  text-align: center !important;
+  justify-content: center !important;
+  display: flex !important;
+  flex-direction: column !important;
+  align-items: center !important;
 }
 
 .presence-entry .music-info {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
-  text-align: center;
+  display: flex !important;
+  flex-direction: column !important;
+  align-items: center !important;
+  justify-content: center !important;
+  text-align: center !important;
+  width: 100%;
 }
 
 .presence-entry .music-info .song-title,
 .presence-entry .music-info .artist {
-  text-align: center;
+  text-align: center !important;
   width: 100%;
+  margin: 0 auto;
 }
 
+/* Smaller Spotify icon for mobile */
 .spotify-icon {
   width: 12px;
   height: 12px;
   margin-right: 3px;
   vertical-align: middle;
+}
+
+/* Album art positioning */
+.presence-entry .album-art {
+  margin: 0 auto 8px auto !important;
+  display: block !important;
+}
+
+/* Structure album art and text vertically on mobile */
+.presence-entry {
+  flex-direction: column !important;
 }
 
 .pagination-controls {
