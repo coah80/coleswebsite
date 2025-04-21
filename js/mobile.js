@@ -214,25 +214,24 @@ document.addEventListener('DOMContentLoaded', () => {
     });
   });
   
-  // Fix for music and games tabs
-  const musicTab = document.getElementById('music-tab');
-  const gamesTab = document.getElementById('games-tab');
+  // Fix for activity tab
+  const activityTab = document.getElementById('activity-tab');
   
-  // Ensure proper display of music and games tabs
-  if (musicTab) {
-    musicTab.style.maxHeight = 'none';
-    musicTab.style.overflowY = 'auto';
-    musicTab.style.paddingLeft = '0';
-    musicTab.style.paddingRight = '0';
-    musicTab.style.width = '100%';
+  // Ensure proper display of activity tab
+  if (activityTab) {
+    activityTab.style.maxHeight = 'none';
+    activityTab.style.overflowY = 'auto';
+    activityTab.style.paddingLeft = '0';
+    activityTab.style.paddingRight = '0';
+    activityTab.style.width = '100%';
     
-    // Make music logs more compact
-    const musicLogs = musicTab.querySelector('#music-logs');
-    if (musicLogs) {
+    // Make activity logs more compact
+    const activityLogs = activityTab.querySelector('#activity-logs');
+    if (activityLogs) {
       const observer = new MutationObserver(() => {
-        const items = musicLogs.querySelectorAll('.music-wrapper');
+        const items = activityLogs.querySelectorAll('.activity-wrapper');
         items.forEach(item => {
-          const img = item.querySelector('img');
+          const img = item.querySelector('img.activity-icon');
           if (img) {
             img.style.width = '50px';
             img.style.height = '50px';
@@ -240,32 +239,7 @@ document.addEventListener('DOMContentLoaded', () => {
         });
       });
       
-      observer.observe(musicLogs, { childList: true, subtree: true });
-    }
-  }
-  
-  if (gamesTab) {
-    gamesTab.style.maxHeight = 'none';
-    gamesTab.style.overflowY = 'auto';
-    gamesTab.style.paddingLeft = '0';
-    gamesTab.style.paddingRight = '0';
-    gamesTab.style.width = '100%';
-    
-    // Make games logs more compact
-    const gameLogs = gamesTab.querySelector('#game-logs');
-    if (gameLogs) {
-      const observer = new MutationObserver(() => {
-        const items = gameLogs.querySelectorAll('.music-wrapper');
-        items.forEach(item => {
-          const img = item.querySelector('img');
-          if (img) {
-            img.style.width = '50px';
-            img.style.height = '50px';
-          }
-        });
-      });
-      
-      observer.observe(gameLogs, { childList: true, subtree: true });
+      observer.observe(activityLogs, { childList: true, subtree: true });
     }
   }
   

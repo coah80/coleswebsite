@@ -1,34 +1,33 @@
-#music-tab {
+#activity-tab {
   overflow-y: auto;
   padding-right: 8px;
   height: 100%;
 }
 
-#music-tab h2 {
+#activity-tab h2 {
   margin-top: 0;
 }
 
-#music-tab::-webkit-scrollbar {
+#activity-tab::-webkit-scrollbar {
   width: 8px;
 }
 
-#music-tab::-webkit-scrollbar-thumb {
+#activity-tab::-webkit-scrollbar-thumb {
   background: #8c52ff66;
   border-radius: 4px;
 }
 
-#music-tab,
-#music-tab h2,
-#music-tab::-webkit-scrollbar,
-#music-tab::-webkit-scrollbar-thumb,
-#music-logs,
-#game-logs {
+#activity-tab,
+#activity-tab h2,
+#activity-tab::-webkit-scrollbar,
+#activity-tab::-webkit-scrollbar-thumb,
+#activity-logs {
   display: flex;
   flex-direction: column;
   gap: 12px;
 }
 
-.music-wrapper {
+.activity-wrapper {
   display: flex;
   align-items: center;
   gap: 12px;
@@ -38,7 +37,7 @@
   box-shadow: inset 0 0 10px #8c52ff20;
 }
 
-.album-art {
+.activity-icon {
   width: 64px;
   height: 64px;
   border-radius: 50%;
@@ -48,14 +47,14 @@
   box-shadow: 0 0 10px #8c52ff90;
 }
 
-.music-info {
+.activity-info {
   flex: 1;
   display: flex;
   flex-direction: column;
   justify-content: center;
 }
 
-.song-title {
+.activity-title {
   font-weight: bold;
   font-size: 0.95rem;
   color: #e6dbff;
@@ -65,18 +64,36 @@
   gap: 6px;
 }
 
-.song-title:hover {
+.activity-title:hover {
   text-decoration: underline;
   color: #c9a8ff;
 }
 
-.artist {
+.activity-subtitle {
   font-size: 0.8rem;
   color: #b7a4d4;
   margin-top: 2px;
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
+}
+
+.activity-type {
+  position: absolute;
+  top: 8px;
+  right: 8px;
+  font-size: 0.7rem;
+  padding: 2px 6px;
+  border-radius: 10px;
+  color: white;
+}
+
+.type-music {
+  background: #1DB954;
+}
+
+.type-game {
+  background: #5865F2;
 }
 
 .pagination-controls {
@@ -114,7 +131,6 @@
   background: #8c52ff;
 }
 
-#music-loading,
-#game-loading {
+#activity-loading {
   display: none;
-}
+} 

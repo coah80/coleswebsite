@@ -10,8 +10,7 @@ async function fetchLogs() {
     console.log("Fetching logs from Firebase...");
     
     // Hide any previous error messages
-    document.getElementById('music-loading').innerHTML = 'loading stuff lol...';
-    document.getElementById('game-loading').innerHTML = 'loading stuff lol...';
+    document.getElementById('activity-loading').innerHTML = 'loading stuff lol...';
     
     const [musicRes, gameRes] = await Promise.all([
       fetch(`${firebaseBase}/musicLogs.json`).then(r => {
@@ -49,8 +48,7 @@ async function fetchLogs() {
     console.error('Failed to fetch logs:', err);
     
     // Show error messages in the loading divs
-    document.getElementById('music-loading').innerHTML = 'Failed to load music data. Please try again later.';
-    document.getElementById('game-loading').innerHTML = 'Failed to load game data. Please try again later.';
+    document.getElementById('activity-loading').innerHTML = 'Failed to load activity data. Please try again later.';
     
     // Initialize empty arrays to prevent errors in rendering functions
     musicLogs = musicLogs || [];

@@ -8,8 +8,7 @@
 
   <link rel="stylesheet" href="css/global.css" />
   <link rel="stylesheet" href="css/home.css" />
-  <link rel="stylesheet" href="css/music.css" />
-  <link rel="stylesheet" href="css/games.css" />
+  <link rel="stylesheet" href="css/activity.css" />
   <link rel="stylesheet" href="css/presence.css" />
 
   <script>
@@ -41,8 +40,7 @@
 
       <div class="card-tabs">
         <button class="card-tab active" data-tab="home">Home</button>
-        <button class="card-tab" data-tab="music">Music</button>
-        <button class="card-tab" data-tab="games">Games</button>
+        <button class="card-tab" data-tab="activity">Recent Activity</button>
       </div>
 
       <div id="home-tab" class="tab-page">
@@ -79,34 +77,18 @@
         </div>
       </div>
 
-      <div id="music-tab" class="tab-page" style="display: none;">
+      <div id="activity-tab" class="tab-page" style="display: none;">
         <div class="logs-tab-content">
-          <h2>Recently Played Music</h2>
-          <div id="music-loading">loading stuff lol...</div>
-          <div id="music-logs"></div>
+          <h2>Recent Activity</h2>
+          <div id="activity-loading">loading stuff lol...</div>
+          <div id="activity-logs"></div>
           <div class="pagination-controls">
             <label>Show per page:
-              <select id="music-per-page" onchange="renderMusicLogs()">
+              <select id="activity-per-page" onchange="renderActivityLogs()">
                 <option>10</option><option selected>30</option><option>50</option><option>100</option>
               </select>
             </label>
-            <div id="music-pages" data-page="1"></div>
-          </div>
-        </div>
-      </div>
-
-      <div id="games-tab" class="tab-page" style="display: none;">
-        <div class="logs-tab-content">
-          <h2>Recently Played Games</h2>
-          <div id="game-loading">loading stuff lol...</div>
-          <div id="game-logs"></div>
-          <div class="pagination-controls">
-            <label>Show per page:
-              <select id="games-per-page" onchange="renderGameLogs()">
-                <option>10</option><option selected>30</option><option>50</option><option>100</option>
-              </select>
-            </label>
-            <div id="game-pages" data-page="1"></div>
+            <div id="activity-pages" data-page="1"></div>
           </div>
         </div>
       </div>
@@ -116,8 +98,7 @@
 
   <script src="js/utils.js"></script>
   <script src="js/firebase.js"></script>
-  <script src="js/music.js"></script>
-  <script src="js/games.js"></script>
+  <script src="js/activity.js"></script>
   <script src="js/presence.js"></script>
   <script src="js/navigation.js"></script>
   <script src="js/main.js"></script>

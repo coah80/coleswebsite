@@ -27,18 +27,15 @@ function connectSocket(){
 document.addEventListener('DOMContentLoaded', async () => {
   console.log("DOM loaded, initializing application");
   
-  // Show loading indicators
-  document.getElementById('music-loading').style.display = 'block';
-  document.getElementById('game-loading').style.display = 'block';
+  // Show loading indicator
+  document.getElementById('activity-loading').style.display = 'block';
   
   try {
     await fetchLogs();
-    // Hide loading indicators after fetching
-    document.getElementById('music-loading').style.display = 'none';
-    document.getElementById('game-loading').style.display = 'none';
+    // Hide loading indicator after fetching
+    document.getElementById('activity-loading').style.display = 'none';
     
-    renderMusicLogs();
-    renderGameLogs();
+    renderActivityLogs();
   } catch (error) {
     console.error("Error loading logs:", error);
   }
