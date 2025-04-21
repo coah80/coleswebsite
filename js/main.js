@@ -28,8 +28,38 @@ function connectSocket(){
 
 document.addEventListener('DOMContentLoaded', async () => {
   console.log("DOM loaded, initializing application");
-  await fetchLogs();
-  renderMusicLogs();
-  renderGameLogs();
+  
+  // Show loading indicators
+  document.getElementById('music-loading').style.display = 'block';
+  document.getElementById('game-loading').style.display = 'block';
+  
+  try {
+    await fetchLogs();
+    // Hide loading indicators after fetching
+    document.getElementById('music-loading').style.display = 'none';
+    document.getElementById('game-loading').style.display = 'none';
+    
+    renderMusicLogs();
+    renderGameLogs();
+  } catch (error) {
+    console.error("Error loading logs:", error);
+  }
+  
+  // Connect to Discord presence socket
   connectSocket();
+  
+  // Fix tab display on mobile
+  if (isMobile) {
+    const card = document.getElementById('main-card');
+    document.querySelectorAll('.card-tab').forEach(tab => {
+      tab.addEventListener('click', () => {
+        setTimeout(() => {
+          const activeTab = document.querySelector('.tab-page[style*="display: block"]');
+          if (activeTab) {
+            card.style.maxHeight = `${activeTab.scrollHeight + 100}px`;
+          }
+        }, 50);
+      });
+    });
+  }
 });

@@ -32,7 +32,16 @@ function switchTab(tabName, fromPop = false) {
 
   if (target) {
     target.style.display = 'block';
-    card.style.maxHeight = `${target.scrollHeight + 100}px`;
+    
+    setTimeout(() => {
+      if (isMobile) {
+        const viewportHeight = window.innerHeight;
+        const maxHeight = Math.min(viewportHeight * 0.8, target.scrollHeight + 100);
+        card.style.maxHeight = `${maxHeight}px`;
+      } else {
+        card.style.maxHeight = `${target.scrollHeight + 100}px`;
+      }
+    }, 10);
   }
 }
 
@@ -48,4 +57,19 @@ document.addEventListener('DOMContentLoaded', () => {
 
   const initial = location.pathname.replace('/', '') || 'home';
   switchTab(initial);
+  
+  window.addEventListener('resize', () => {
+    const activeTab = document.querySelector('.tab-page[style*="display: block"]');
+    if (activeTab) {
+      const card = document.getElementById('main-card');
+      
+      if (isMobile) {
+        const viewportHeight = window.innerHeight;
+        const maxHeight = Math.min(viewportHeight * 0.8, activeTab.scrollHeight + 100);
+        card.style.maxHeight = `${maxHeight}px`;
+      } else {
+        card.style.maxHeight = `${activeTab.scrollHeight + 100}px`;
+      }
+    }
+  });
 });

@@ -21,76 +21,114 @@ function updateProgressBar(start, end) {
 }
 
 async function handleActivity(data) {
+  if (!data) {
+    console.error("No data received in handleActivity");
+    return;
+  }
+  
   const now = Date.now();
   const discordBox = document.getElementById('discord-activity');
+  
+  if (!discordBox) {
+    console.error("Discord activity box not found");
+    return;
+  }
+  
   let html = '';
 
+  // Update status dot
   const statusDot = document.querySelector('.status-dot');
-  const status = data.discord_status;
-  statusDot.className = `status-dot status-${status}`;
+  if (statusDot) {
+    const status = data.discord_status || 'offline';
+    statusDot.className = `status-dot status-${status}`;
+  }
 
+  // Handle Spotify activity
   if (data.spotify) {
-    const s = data.spotify;
-    const total = s.timestamps.end - s.timestamps.start;
-    const elapsed = now - s.timestamps.start;
-    const progress = Math.min(Math.max(elapsed / total, 0), 1) * 100;
+    try {
+      const s = data.spotify;
+      
+      // Verify that all required timestamps exist
+      if (!s.timestamps || !s.timestamps.start || !s.timestamps.end) {
+        console.warn("Spotify data missing timestamps:", s);
+        s.timestamps = s.timestamps || {};
+        s.timestamps.start = s.timestamps.start || now - 60000;  // Default to 1 minute ago
+        s.timestamps.end = s.timestamps.end || now + 180000;     // Default to 3 minutes from now
+      }
+      
+      const total = s.timestamps.end - s.timestamps.start;
+      const elapsed = now - s.timestamps.start;
+      const progress = Math.min(Math.max(elapsed / total, 0), 1) * 100;
+      
+      // Handle missing album art
+      const albumArt = s.album_art_url || 'icons/spotify.png';
+      const trackId = s.track_id || '';
 
-    html += `
-      <div class="presence-entry spotify-presence">
-        <img src="${s.album_art_url}" class="album-art">
-        <div class="music-info">
-          <a class="song-title" href="https://open.spotify.com/track/${s.track_id}" target="_blank">
-            <img src="icons/spotify.png" class="spotify-icon" />
-            ${s.song}
-          </a>
-          <div class="artist">${s.artist} • ${s.album}</div>
-          <div class="spotify-progress">
-            <div class="time">${formatTime(elapsed)}</div>
-            <div class="bar"><div class="fill" style="width:${progress}%"></div></div>
-            <div class="time">${formatTime(total)}</div>
+      html += `
+        <div class="presence-entry spotify-presence">
+          <img src="${albumArt}" class="album-art" onerror="this.src='icons/spotify.png'">
+          <div class="music-info">
+            <a class="song-title" href="https://open.spotify.com/track/${trackId}" target="_blank">
+              <img src="icons/spotify.png" class="spotify-icon" />
+              ${s.song || 'Unknown Track'}
+            </a>
+            <div class="artist">${s.artist || 'Unknown Artist'} • ${s.album || 'Unknown Album'}</div>
+            <div class="spotify-progress">
+              <div class="time">${formatTime(elapsed)}</div>
+              <div class="bar"><div class="fill" style="width:${progress}%"></div></div>
+              <div class="time">${formatTime(total)}</div>
+            </div>
           </div>
         </div>
-      </div>
-    `;
+      `;
 
-    updateProgressBar(s.timestamps.start, s.timestamps.end);
+      updateProgressBar(s.timestamps.start, s.timestamps.end);
 
-    if (!musicLogs.length || musicLogs[0].track_id !== s.track_id || now - musicLogs[0].loggedAt > 30000) {
-      musicLogs.unshift({
-        track_id: s.track_id,
-        song: s.song,
-        artist: s.artist,
-        album: s.album,
-        album_art_url: s.album_art_url,
-        loggedAt: now
-      });
+      // Log the track if it's new or has been more than 30 seconds
+      if (!musicLogs.length || musicLogs[0].track_id !== s.track_id || now - musicLogs[0].loggedAt > 30000) {
+        musicLogs.unshift({
+          track_id: s.track_id || '',
+          song: s.song || 'Unknown Track',
+          artist: s.artist || 'Unknown Artist',
+          album: s.album || 'Unknown Album',
+          album_art_url: albumArt,
+          loggedAt: now
+        });
 
-      if (musicLogs.length > 300) musicLogs.pop();
-      await saveLogs();
+        if (musicLogs.length > 300) musicLogs.pop();
+        await saveLogs();
+      }
+    } catch (err) {
+      console.error("Error processing Spotify data:", err);
     }
   } else {
     clearInterval(progressInterval);
   }
 
+  // Handle activities (games)
   const games = data.activities ? data.activities.filter(a => a.type === 0 && a.name !== 'Custom Status') : [];
   const currentGame = games[0];
 
   if (currentGame) {
-    const gameKey = `${currentGame.name}:${currentGame.details || ''}:${currentGame.state || ''}`;
-    const top = gameLogs[0];
-    const topKey = top ? `${top.name}:${top.details || ''}:${top.state || ''}` : '';
+    try {
+      const gameKey = `${currentGame.name}:${currentGame.details || ''}:${currentGame.state || ''}`;
+      const top = gameLogs[0];
+      const topKey = top ? `${top.name}:${top.details || ''}:${top.state || ''}` : '';
 
-    if (gameKey !== topKey) {
-      gameLogs.unshift({
-        name: currentGame.name,
-        details: currentGame.details || '',
-        state: currentGame.state || '',
-        icon: currentGame.application_id || null,
-        loggedAt: now
-      });
+      if (gameKey !== topKey) {
+        gameLogs.unshift({
+          name: currentGame.name || 'Unknown Game',
+          details: currentGame.details || '',
+          state: currentGame.state || '',
+          icon: currentGame.application_id || null,
+          loggedAt: now
+        });
 
-      if (gameLogs.length > 300) gameLogs = gameLogs.slice(0, 300);
-      await saveLogs();
+        if (gameLogs.length > 300) gameLogs = gameLogs.slice(0, 300);
+        await saveLogs();
+      }
+    } catch (err) {
+      console.error("Error processing game data:", err);
     }
   }
 
@@ -102,9 +140,9 @@ async function handleActivity(data) {
 
       html += `
         <div class="presence-entry">
-          <img src="${icon}" class="album-art">
+          <img src="${icon}" class="album-art" onerror="this.src='icons/discord.svg'">
           <div class="music-info">
-            <div class="song-title">${g.name}</div>
+            <div class="song-title">${g.name || 'Playing a game'}</div>
             <div class="artist">${g.details || ''}</div>
             <div class="artist">${g.state || ''}</div>
           </div>
@@ -115,4 +153,9 @@ async function handleActivity(data) {
 
   discordBox.innerHTML = html || 'Not currently playing anything.';
   discordBox.classList.toggle('active', !!html);
+  
+  // If we're showing activity data, ensure the status dot is positioned correctly
+  if (html && statusDot) {
+    statusDot.style.display = 'block';
+  }
 }
