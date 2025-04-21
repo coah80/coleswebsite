@@ -172,6 +172,37 @@ async function handleActivity(data) {
   try {
     discordBox.innerHTML = html || 'Not currently playing anything.';
     discordBox.classList.toggle('active', !!html);
+    
+    // Make sure all presence entries are properly styled with centered text
+    setTimeout(() => {
+      const presenceEntries = discordBox.querySelectorAll('.presence-entry');
+      presenceEntries.forEach(entry => {
+        entry.style.textAlign = 'center';
+        
+        const musicInfo = entry.querySelector('.music-info');
+        if (musicInfo) {
+          musicInfo.style.display = 'flex';
+          musicInfo.style.flexDirection = 'column';
+          musicInfo.style.alignItems = 'center';
+          musicInfo.style.justifyContent = 'center';
+          musicInfo.style.textAlign = 'center';
+          
+          const songTitle = musicInfo.querySelector('.song-title');
+          const artistElements = musicInfo.querySelectorAll('.artist');
+          
+          if (songTitle) songTitle.style.textAlign = 'center';
+          artistElements.forEach(el => el.style.textAlign = 'center');
+        }
+        
+        // Make album art spin if it's a Spotify entry
+        if (entry.classList.contains('spotify-presence')) {
+          const albumArt = entry.querySelector('.album-art');
+          if (albumArt) {
+            albumArt.style.animation = 'spin 10s linear infinite';
+          }
+        }
+      });
+    }, 50);
   } catch (err) {
     console.error("Error updating Discord box:", err);
   }

@@ -110,3 +110,50 @@
   gap: 24px;
   align-items: stretch;
 }
+
+/* Add spinning animation for album art in Spotify */
+@keyframes spin {
+  from { transform: rotate(0deg); }
+  to { transform: rotate(360deg); }
+}
+
+.spotify-presence .album-art {
+  animation: spin 10s linear infinite;
+}
+
+/* Center text in Spotify activity */
+.presence-entry {
+  text-align: center;
+}
+
+.presence-entry .music-info {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+}
+
+.presence-entry .song-title,
+.presence-entry .artist {
+  text-align: center;
+  width: 100%;
+}
+
+.spotify-icon {
+  vertical-align: middle;
+  width: 16px;
+  height: 16px;
+  margin-right: 4px;
+}
+
+.spotify-progress {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 100%;
+}
+
+.spotify-progress .bar {
+  flex: 1;
+}
