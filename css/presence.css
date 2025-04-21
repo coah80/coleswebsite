@@ -161,6 +161,16 @@
   width: 100%;
 }
 
+.presence-entry .song-title {
+  color: #e6dbff;
+  text-decoration: none;
+}
+
+.presence-entry .song-title:hover {
+  text-decoration: underline;
+  color: #c9a8ff;
+}
+
 .spotify-icon {
   vertical-align: middle;
   width: 16px;
