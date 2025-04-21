@@ -1,26 +1,41 @@
+/* Mobile optimizations */
 .id-card {
   width: 92vw;
   height: auto !important;
-  padding: 20px;
-  border-radius: 18px;
+  padding: 16px;
+  border-radius: 20px;
   max-width: 100%;
   overflow-y: auto;
   box-sizing: border-box;
+  max-height: 85vh !important;
 }
 
 .card-tabs {
-  top: 14px;
-  left: 16px;
-  flex-wrap: wrap;
-  gap: 10px;
+  position: static !important;
+  top: 0;
+  left: 0;
+  display: flex;
+  justify-content: center;
+  width: 100%;
+  margin-bottom: 16px;
+  gap: 8px;
+}
+
+.card-tab {
+  flex: 1;
+  max-width: 100px;
+  text-align: center;
+  padding: 8px 0;
+  font-size: 0.9rem;
 }
 
 .content-wrapper {
   flex-direction: column !important;
   padding: 0;
-  gap: 24px;
+  gap: 12px;
   width: 100%;
   align-items: center;
+  margin-top: 10px;
 }
 
 .left-section,
@@ -31,9 +46,22 @@
   align-items: center;
 }
 
+.center-content {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  margin-bottom: 10px;
+}
+
+.status-wrapper {
+  margin-bottom: 8px;
+  position: relative;
+}
+
 .status-wrapper img {
-  width: 96px;
-  height: 96px;
+  width: 80px;
+  height: 80px;
+  border-width: 3px;
 }
 
 .status-dot {
@@ -44,45 +72,88 @@
 }
 
 .username {
-  font-size: 1.3rem;
+  font-size: 1.2rem;
   margin-top: 4px;
+  margin-bottom: 2px;
 }
 
 .intro {
-  font-size: 1.1rem;
+  font-size: 1rem;
+  margin: 4px 0 8px;
 }
 
 .link {
   width: 100%;
   max-width: 280px;
+  margin: 6px 0;
+  padding: 8px 14px;
+  font-size: 0.95rem;
+}
+
+.discord-box {
+  padding: 10px;
+  border-radius: 8px;
+  margin-top: 5px;
+  width: 100%;
+  box-sizing: border-box;
+  max-width: 280px;
 }
 
 #music-tab,
 #games-tab {
-  padding-right: 0 !important;
-  padding-left: 0 !important;
+  padding: 0 !important;
   overflow-y: auto;
   height: auto !important;
   width: 100%;
 }
 
+.logs-tab-content {
+  padding: 10px 5px;
+  width: 100%;
+}
+
+.logs-tab-content h2 {
+  text-align: center;
+  font-size: 1.2rem;
+  margin-top: 0;
+  margin-bottom: 12px;
+}
+
+.music-wrapper {
+  padding: 10px;
+  margin-bottom: 8px;
+}
+
+.album-art {
+  width: 50px;
+  height: 50px;
+}
+
+.music-info .song-title {
+  font-size: 0.9rem;
+}
+
+.music-info .artist {
+  font-size: 0.75rem;
+}
+
 .spotify-progress {
   display: flex;
   align-items: center;
-  gap: 8px;
+  gap: 6px;
   margin-top: 4px;
   width: 100%;
 }
 
 .spotify-progress .time {
-  font-size: 0.7rem;
+  font-size: 0.65rem;
   color: #b7a4d4;
   flex-shrink: 0;
 }
 
 .spotify-progress .bar {
   flex: 1;
-  height: 4px;
+  height: 3px;
   background: #2b1f4c;
   border-radius: 2px;
   overflow: hidden;
@@ -100,12 +171,32 @@
 }
 
 .spotify-icon {
-  width: 14px;
-  height: 14px;
-  margin-right: 4px;
+  width: 12px;
+  height: 12px;
+  margin-right: 3px;
 }
 
-.logs-tab-content {
-  padding: 10px;
-  width: 100%;
+.pagination-controls {
+  margin-top: 12px;
+  flex-wrap: wrap;
+  justify-content: center;
+}
+
+.pagination-controls button {
+  padding: 4px 8px;
+  min-width: 30px;
+  margin: 2px;
+}
+
+/* Fix for the scrollable content areas */
+.tab-page {
+  overflow-y: auto;
+  -webkit-overflow-scrolling: touch;
+}
+
+/* Ensure status dot is positioned correctly */
+#home-tab .status-dot {
+  position: absolute;
+  bottom: 0;
+  right: 0;
 }
