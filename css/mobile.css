@@ -308,3 +308,30 @@
   from { transform: rotate(0deg); }
   to { transform: rotate(360deg); }
 }
+
+/* Fix for song title centering specifically */
+.presence-entry .music-info .song-title {
+  text-align: center !important;
+  width: 100% !important;
+  display: flex !important;
+  justify-content: center !important;
+  align-items: center !important;
+  margin: 0 auto !important;
+}
+
+/* Keep the Spotify icon aligned with text */
+.presence-entry .song-title .spotify-icon,
+.presence-entry .song-title img {
+  margin-right: 4px !important;
+  flex-shrink: 0 !important;
+}
+
+/* Force anchor tag styling to be centered */
+.presence-entry a.song-title {
+  text-align: center !important;
+  display: inline-flex !important;
+  justify-content: center !important;
+  width: 100% !important;
+  color: inherit !important;
+  text-decoration: none !important;
+}

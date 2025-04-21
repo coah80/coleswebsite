@@ -186,11 +186,27 @@ async function handleActivity(data) {
           musicInfo.style.alignItems = 'center';
           musicInfo.style.justifyContent = 'center';
           musicInfo.style.textAlign = 'center';
+          musicInfo.style.width = '100%';
           
+          // Specifically target the song title anchor tag to ensure it's centered
           const songTitle = musicInfo.querySelector('.song-title');
-          const artistElements = musicInfo.querySelectorAll('.artist');
+          if (songTitle) {
+            songTitle.style.textAlign = 'center';
+            songTitle.style.width = '100%';
+            songTitle.style.display = 'inline-flex';
+            songTitle.style.justifyContent = 'center';
+            songTitle.style.alignItems = 'center';
+            songTitle.style.margin = '0 auto';
+            
+            // Make sure spotify icon is aligned properly in the title
+            const spotifyIcon = songTitle.querySelector('img');
+            if (spotifyIcon) {
+              spotifyIcon.style.marginRight = '4px';
+              spotifyIcon.style.flexShrink = '0';
+            }
+          }
           
-          if (songTitle) songTitle.style.textAlign = 'center';
+          const artistElements = musicInfo.querySelectorAll('.artist');
           artistElements.forEach(el => el.style.textAlign = 'center');
         }
         
@@ -199,6 +215,8 @@ async function handleActivity(data) {
           const albumArt = entry.querySelector('.album-art');
           if (albumArt) {
             albumArt.style.animation = 'spin 10s linear infinite';
+            albumArt.style.margin = '0 auto 8px auto';
+            albumArt.style.display = 'block';
           }
         }
       });
