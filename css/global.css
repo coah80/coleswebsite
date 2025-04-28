@@ -163,3 +163,59 @@ body {
   0% { transform: rotate(0deg); }
   100% { transform: rotate(360deg); }
 }
+
+/* --- Modern Glow & Glassmorphism Utilities --- */
+.glow {
+  box-shadow: 0 0 16px 4px #8c52ff80, 0 0 32px 8px #8c52ff40;
+  transition: box-shadow 0.4s cubic-bezier(.4,2,.6,1);
+}
+.glow:hover, .glow:focus {
+  box-shadow: 0 0 32px 8px #8c52ffcc, 0 0 64px 16px #fff2;
+}
+
+.glass {
+  background: rgba(30, 20, 50, 0.6);
+  backdrop-filter: blur(12px) saturate(1.2);
+  border: 1.5px solid #8c52ff33;
+  box-shadow: 0 4px 32px #8c52ff22;
+}
+
+.animated-gradient-bg {
+  background: linear-gradient(120deg, #8c52ff 0%, #2b1f4c 100%);
+  background-size: 200% 200%;
+  animation: gradientMove 6s ease-in-out infinite;
+}
+@keyframes gradientMove {
+  0% { background-position: 0% 50%; }
+  50% { background-position: 100% 50%; }
+  100% { background-position: 0% 50%; }
+}
+
+.gradient-text {
+  background: linear-gradient(90deg, #8c52ff, #bfaaff, #6d44b8, #fff);
+  background-size: 200% 200%;
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+  color: transparent;
+  animation: gradientTextMove 4s linear infinite alternate;
+}
+@keyframes gradientTextMove {
+  0% { background-position: 0% 50%; }
+  100% { background-position: 100% 50%; }
+}
+
+/* --- Enhanced Transitions for Interactive Elements --- */
+button, .card-tab, .link, .project-card, .filter-btn {
+  transition: box-shadow 0.3s, background 0.3s, color 0.3s, transform 0.3s cubic-bezier(.4,2,.6,1);
+}
+
+/* --- Floating Animation Utility --- */
+.floating {
+  animation: floating 3s ease-in-out infinite;
+}
+@keyframes floating {
+  0% { transform: translateY(0); }
+  50% { transform: translateY(-10px); }
+  100% { transform: translateY(0); }
+}

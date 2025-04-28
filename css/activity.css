@@ -41,17 +41,14 @@
   padding: 6px 12px;
   border-radius: 8px;
   cursor: pointer;
-  transition: background 0.2s, box-shadow 0.2s;
+  transition: box-shadow 0.3s, transform 0.3s cubic-bezier(.4,2,.6,1);
   font-size: 0.9rem;
+  box-shadow: 0 0 8px #8c52ff40;
 }
 
-.filter-btn:hover {
-  background: #322a45;
-}
-
-.filter-btn.active {
-  background: #6d44b8;
-  box-shadow: 0 0 8px #8c52ff;
+.filter-btn:hover, .filter-btn.active {
+  box-shadow: 0 0 24px #8c52ffcc, 0 0 48px #fff2;
+  transform: scale(1.08) translateY(-2px);
 }
 
 .activity-wrapper {
@@ -61,7 +58,13 @@
   background: #1b1429;
   padding: 12px;
   border-radius: 12px;
-  box-shadow: inset 0 0 10px #8c52ff20;
+  box-shadow: 0 0 16px #8c52ff40, 0 0 32px #fff2, inset 0 0 10px #8c52ff20;
+  transition: box-shadow 0.3s, transform 0.3s cubic-bezier(.4,2,.6,1);
+}
+
+.activity-wrapper:hover {
+  box-shadow: 0 0 32px #8c52ffcc, 0 0 64px #fff2, inset 0 0 20px #8c52ff40;
+  transform: scale(1.03) translateY(-4px);
 }
 
 .activity-icon {
@@ -72,6 +75,7 @@
   flex-shrink: 0;
   border: 2px solid #b592ff;
   box-shadow: 0 0 10px #8c52ff90;
+  animation: floating 2.8s ease-in-out infinite;
 }
 
 .activity-info {
