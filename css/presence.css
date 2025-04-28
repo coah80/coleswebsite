@@ -3,6 +3,8 @@
   display: flex;
   justify-content: center;
   margin-bottom: 12px;
+  width: 120px;
+  height: 120px;
 }
 
 .status-wrapper img {
@@ -11,23 +13,28 @@
   border-radius: 50%;
   object-fit: cover;
   border: 2px solid #6d44b8;
-  box-shadow: 0 0 12px #8c52ff80;
+  box-shadow: 0 0 24px #8c52ffcc, 0 0 48px #fff2;
   display: block;
+  animation: floating 3s ease-in-out infinite;
+  position: absolute;
+  left: 10px;
+  top: 10px;
 }
 
 .status-dot {
   position: absolute;
-  bottom: 4px;
-  right: 4px;
-  width: 16px;
-  height: 16px;
+  bottom: 14px;
+  right: 14px;
+  width: 20px;
+  height: 20px;
   border-radius: 50%;
-  border: 2px solid #0d0b16;
+  border: 2.5px solid #0d0b16;
   background-size: cover;
   background-position: center;
   background-repeat: no-repeat;
   box-shadow: 0 0 8px #8c52ff99, 0 0 16px #fff2;
-  animation: pulseGlow 1.8s infinite alternate;
+  animation: floating 3s ease-in-out infinite, pulseGlow 1.8s infinite alternate;
+  z-index: 2;
 }
 
 .status-online   { background-image: url('../icons/ONLINE.png'); }
@@ -231,4 +238,10 @@
 @keyframes pulseGlow {
   0% { box-shadow: 0 0 8px #8c52ff99, 0 0 16px #fff2; }
   100% { box-shadow: 0 0 20px #8c52ffcc, 0 0 32px #fff4; }
+}
+
+@keyframes floating {
+  0% { transform: translateY(0px); }
+  50% { transform: translateY(-5px); }
+  100% { transform: translateY(0px); }
 }
