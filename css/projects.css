@@ -46,8 +46,8 @@
   border-radius: 15px;
   overflow: hidden;
   background-color: #1b1429;
-  box-shadow: 0 0 16px #8c52ff40, 0 0 32px #fff2;
-  transition: box-shadow 0.3s, transform 0.3s cubic-bezier(.4,2,.6,1);
+  box-shadow: 0 0 10px rgba(140, 82, 255, 0.3);
+  transition: transform 0.3s, box-shadow 0.3s;
   text-decoration: none;
   color: inherit;
   display: flex;
@@ -55,8 +55,8 @@
 }
 
 .project-card:hover {
-  transform: translateY(-10px) scale(1.04);
-  box-shadow: 0 0 32px #8c52ffcc, 0 0 64px #fff2;
+  transform: translateY(-5px);
+  box-shadow: 0 5px 15px rgba(140, 82, 255, 0.5);
 }
 
 .project-image {
@@ -69,7 +69,6 @@
   font-weight: bold;
   border-bottom: 2px solid #6d44b8;
   overflow: hidden;
-  animation: floating 3.5s ease-in-out infinite;
 }
 
 .project-thumbnail {

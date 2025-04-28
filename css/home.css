@@ -35,9 +35,8 @@
   border-radius: 50%;
   object-fit: cover;
   border: 2px solid #6d44b8;
-  box-shadow: 0 0 24px #8c52ffcc, 0 0 48px #fff2;
+  box-shadow: 0 0 12px #8c52ff80;
   display: block;
-  animation: floating 3s ease-in-out infinite;
 }
 
 .left-section .status-wrapper .status-online,
@@ -66,46 +65,4 @@
 
 #home-tab .left-section {
   transform: translatex(34px) translatey(0px);
-}
-
-/* Add animated gradient to username */
-.username {
-  font-size: 2.4rem;
-  font-weight: 800;
-  margin-bottom: 10px;
-  text-align: center;
-  letter-spacing: 1.5px;
-  text-shadow: 0 0 12px #8c52ff99, 0 0 32px #fff2;
-  background: linear-gradient(90deg, #8c52ff, #bfaaff, #6d44b8, #fff);
-  background-size: 200% 200%;
-  -webkit-background-clip: text;
-  -webkit-text-fill-color: transparent;
-  background-clip: text;
-  color: transparent;
-  animation: gradientTextMove 4s linear infinite alternate;
-}
-
-/* Social links: glow and scale on hover */
-.social-link {
-  box-shadow: 0 0 8px #8c52ff40;
-  transition: box-shadow 0.3s, transform 0.3s cubic-bezier(.4,2,.6,1);
-}
-.social-link:hover {
-  box-shadow: 0 0 24px #8c52ffcc, 0 0 48px #fff2;
-  transform: scale(1.08) translateY(-2px);
-}
-
-/* Make .intro more visually interesting */
-.intro {
-  font-size: 1.4rem;
-  font-weight: 700;
-  letter-spacing: 0.04em;
-  background: var(--accent-gradient);
-  -webkit-background-clip: text;
-  -webkit-text-fill-color: transparent;
-  background-clip: text;
-  color: transparent;
-  margin-bottom: 18px;
-  text-align: center;
-  text-shadow: 0 0 8px #00ffe799, 0 0 16px #8c52ff55;
 }

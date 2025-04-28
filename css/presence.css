@@ -3,8 +3,6 @@
   display: flex;
   justify-content: center;
   margin-bottom: 12px;
-  width: 120px;
-  height: 120px;
 }
 
 .status-wrapper img {
@@ -13,28 +11,21 @@
   border-radius: 50%;
   object-fit: cover;
   border: 2px solid #6d44b8;
-  box-shadow: 0 0 24px #8c52ffcc, 0 0 48px #fff2;
+  box-shadow: 0 0 12px #8c52ff80;
   display: block;
-  animation: floating 3s ease-in-out infinite;
-  position: absolute;
-  left: 10px;
-  top: 10px;
 }
 
 .status-dot {
   position: absolute;
-  bottom: 14px;
-  right: 14px;
-  width: 20px;
-  height: 20px;
+  bottom: 4px;
+  right: 4px;
+  width: 16px;
+  height: 16px;
   border-radius: 50%;
-  border: 2.5px solid #0d0b16;
+  border: 2px solid #0d0b16;
   background-size: cover;
   background-position: center;
   background-repeat: no-repeat;
-  box-shadow: 0 0 8px #8c52ff99, 0 0 16px #fff2;
-  animation: floating 3s ease-in-out infinite, pulseGlow 1.8s infinite alternate;
-  z-index: 2;
 }
 
 .status-online   { background-image: url('../icons/ONLINE.png'); }
@@ -98,10 +89,7 @@
 }
 
 .discord-box {
-  background: rgba(27, 20, 41, 0.7);
-  backdrop-filter: blur(10px) saturate(1.2);
-  box-shadow: 0 0 24px #8c52ff55, 0 0 48px #fff2;
-  border: 1.5px solid #8c52ff33;
+  background: #1b1429;
   color: #e6dbff;
   padding: 12px;
   border-radius: 10px;
@@ -111,12 +99,7 @@
   flex-direction: column;
   gap: 16px;
   margin-top: 12px;
-  transition: box-shadow 0.3s, background 0.3s;
-}
-
-.discord-box.active {
-  box-shadow: 0 0 32px #8c52ffcc, 0 0 64px #fff2;
-  background: rgba(27, 20, 41, 0.85);
+  box-shadow: inset 0 0 10px #8c52ff20;
 }
 
 .logs-tab-content {
@@ -233,15 +216,4 @@
   .spotify-progress {
     justify-content: center;
   }
-}
-
-@keyframes pulseGlow {
-  0% { box-shadow: 0 0 8px #8c52ff99, 0 0 16px #fff2; }
-  100% { box-shadow: 0 0 20px #8c52ffcc, 0 0 32px #fff4; }
-}
-
-@keyframes floating {
-  0% { transform: translateY(0px); }
-  50% { transform: translateY(-5px); }
-  100% { transform: translateY(0px); }
 }
