@@ -215,7 +215,7 @@
 
 .spotify-progress .fill {
   height: 100%;
-  background: #8c52ff;
+  background: var(--accent-color);
   border-radius: 2px;
   position: absolute;
   top: 0;
