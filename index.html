@@ -1,44 +1,47 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>cole's website</title>
-  <link rel="icon" type="image/png" href="icons/webicon.png" />
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1.0">
+  <title>Cole's Website</title>
+  <link rel="icon" type="image/png" href="icons/webicon.png">
 
-  <link rel="stylesheet" href="css/global.css" />
-  <link rel="stylesheet" href="css/home.css" />
-  <link rel="stylesheet" href="css/activity.css" />
-  <link rel="stylesheet" href="css/presence.css" />
-  <link rel="stylesheet" href="css/projects.css" />
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;700&display=swap" rel="stylesheet">
+
+  <link rel="stylesheet" href="css/global.css">
+  <link rel="stylesheet" href="css/home.css">
+  <link rel="stylesheet" href="css/activity.css">
+  <link rel="stylesheet" href="css/presence.css">
+  <link rel="stylesheet" href="css/projects.css">
+  <link rel="stylesheet" href="css/mobile.css" media="(max-width: 768px)">
+
+  <meta http-equiv="Content-Security-Policy" content="default-src 'self'; style-src 'self' https://fonts.googleapis.com; font-src 'self' https://fonts.gstatic.com; img-src 'self' https: data:; script-src 'self'; connect-src 'self' https:; base-uri 'none'; object-src 'none'; form-action 'none'; upgrade-insecure-requests">
+  <meta name="referrer" content="same-origin">
 
   <script>
     const isMobile = /iPhone|iPad|iPod|Android|webOS|BlackBerry|Windows Phone/i.test(navigator.userAgent);
-    if (isMobile) {
-      document.write('<link rel="stylesheet" href="css/mobile.css">');
-    }
   </script>
 
-  <meta property="og:title" content="coles website! its awesome!" />
-  <meta property="og:description" content="fuck you!" />
-  <meta property="og:image" content="icons/webicon2.png" />
-  <meta property="og:type" content="website" />
-  <meta property="og:url" content="https://cole.ong" />
+  <meta property="og:title" content="Cole's Website">
+  <meta property="og:description" content="Welcome to Cole's personal website">
+  <meta property="og:image" content="icons/webicon2.png">
+  <meta property="og:type" content="website">
+  <meta property="og:url" content="https://cole.ong">
 </head>
 <body>
-
   <div class="background-scroll">
     <div class="scrolling-row scroll-left">
-      <div class="inner-scroll">colevr ・ colevr ・ colevr ・ colevr ・ colevr ・ colevr ・ colevr ・ colevr ・ colevr ・ colevr ・ colevr ・colevr ・ colevr ・ colevr ・ colevr ・ colevr ・ colevr ・ colevr ・ colevr ・ colevr ・ colevr ・ colevr ・ </div>
+      <div class="inner-scroll">colevr ・ colevr ・ colevr ・ colevr ・ colevr ・ colevr ・ colevr ・ colevr ・ colevr ・ colevr ・ colevr ・ colevr ・ colevr ・ colevr ・ colevr ・ colevr ・ colevr ・ colevr ・ colevr ・ colevr ・ colevr ・ </div>
     </div>
     <div class="scrolling-row scroll-right">
-      <div class="inner-scroll">colevr ・ colevr ・ colevr ・ colevr ・ colevr ・ colevr ・ colevr ・ colevr ・ colevr ・ colevr ・ colevr ・colevr ・ colevr ・ colevr ・ colevr ・ colevr ・ colevr ・ colevr ・ colevr ・ colevr ・ colevr ・ colevr ・ </div>
+      <div class="inner-scroll">colevr ・ colevr ・ colevr ・ colevr ・ colevr ・ colevr ・ colevr ・ colevr ・ colevr ・ colevr ・ colevr ・ colevr ・ colevr ・ colevr ・ colevr ・ colevr ・ colevr ・ colevr ・ colevr ・ colevr ・ colevr ・ </div>
     </div>
   </div>
 
   <div class="center-wrapper">
     <div class="id-card" id="main-card">
-
       <div class="card-tabs">
         <button class="card-tab active" data-tab="home">Home</button>
         <button class="card-tab" data-tab="activity">Recent Activity</button>
@@ -50,36 +53,35 @@
           <div class="left-section">
             <div class="center-content">
               <div class="status-wrapper">
-                <img src="icons/colespfp.gif" alt="Profile Picture" />
+                <img src="icons/colespfp.gif" alt="Profile Picture">
                 <div class="status-dot status-offline"></div>
               </div>
               <div class="username">colevr</div>
             </div>
             <div class="discord-box" id="discord-activity">Loading Discord activity...</div>
           </div>
-
           <div class="right-section">
             <div class="intro">Hi, I'm Cole!</div>
             <a href="https://www.youtube.com/@colevrrr" class="link social-link" target="_blank">
-              <img src="icons/yt.svg" class="icon" /> YouTube
+              <img src="icons/yt.svg" class="icon" alt="YouTube"> YouTube
             </a>
             <a href="https://github.com/colevrya" class="link social-link" target="_blank">
-              <img src="icons/github.svg" class="icon" /> GitHub
+              <img src="icons/github.svg" class="icon" alt="GitHub"> GitHub
             </a>
             <a href="https://discord.gg/nqJv5czwQG" class="link social-link" target="_blank">
-              <img src="icons/discord.svg" class="icon" /> Discord
+              <img src="icons/discord.svg" class="icon" alt="Discord"> Discord
             </a>
             <a href="https://x.com/coledotvr" class="link social-link" target="_blank">
-              <img src="icons/twitter.svg" class="icon" /> Twitter
+              <img src="icons/twitter.svg" class="icon" alt="Twitter"> Twitter
             </a>
             <a href="https://steamcommunity.com/id/colevryt/" class="link social-link" target="_blank">
-              <img src="icons/steam.svg" class="icon" /> Steam
+              <img src="icons/steam.svg" class="icon" alt="Steam"> Steam
             </a>
           </div>
         </div>
       </div>
 
-      <div id="activity-tab" class="tab-page" style="display: none;">
+      <div id="activity-tab" class="tab-page" style="display:none;">
         <div class="logs-tab-content">
           <h2>Recent Activity</h2>
           <div class="activity-filters">
@@ -92,7 +94,10 @@
           <div class="pagination-controls">
             <label>Show per page:
               <select id="activity-per-page" onchange="renderActivityLogs()">
-                <option>10</option><option selected>30</option><option>50</option><option>100</option>
+                <option>10</option>
+                <option selected>30</option>
+                <option>50</option>
+                <option>100</option>
               </select>
             </label>
             <div id="activity-pages" data-page="1"></div>
@@ -100,7 +105,7 @@
         </div>
       </div>
 
-      <div id="projects-tab" class="tab-page" style="display: none;">
+      <div id="projects-tab" class="tab-page" style="display:none;">
         <div class="projects-content">
           <h2>My Projects</h2>
           <div class="projects-grid">
@@ -117,24 +122,22 @@
           <div class="coming-soon">more stuff here soon!!</div>
         </div>
       </div>
-      
     </div>
   </div>
 
-  <script src="js/utils.js"></script>
-  <script src="js/firebase.js"></script>
-  <script src="js/activity.js"></script>
-  <script src="js/presence.js"></script>
-  <script src="js/navigation.js"></script>
-  <script src="js/main.js"></script>
-
+  <script type="module" src="js/utils.js"></script>
+  <script type="module" src="js/firebase.js"></script>
+  <script type="module" src="js/activity.js"></script>
+  <script type="module" src="js/presence.js"></script>
+  <script type="module" src="js/navigation.js"></script>
+  <script type="module" src="js/main.js"></script>
   <script>
     if (isMobile) {
       const s = document.createElement('script');
       s.src = 'js/mobile.js';
-      document.body.appendChild(s);
+      s.type = 'module';
+      document.head.appendChild(s);
     }
   </script>
-
 </body>
 </html>

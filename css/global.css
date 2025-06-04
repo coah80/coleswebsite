@@ -1,13 +1,27 @@
+:root {
+  --bg-color: #0d0b16;
+  --text-color: #e6dbff;
+  --accent-color: #ff6ec7;
+  --card-bg: #1a1329;
+  --card-border: #3b2a60;
+}
+
+*, *::before, *::after {
+  box-sizing: border-box;
+}
+
 body {
-  background: #0d0b16;
-  color: #e6dbff;
-  font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+  background: var(--bg-color);
+  color: var(--text-color);
+  font-family: 'Inter', system-ui, sans-serif;
+  line-height: 1.5;
   margin: 0;
   padding: 0;
   height: 100vh;
   width: 100vw;
   overflow: hidden;
   position: relative;
+  scroll-behavior: smooth;
 }
 
 .background-scroll {
@@ -29,7 +43,7 @@ body {
   font-size: clamp(2rem, 5vw, 4rem); /* Responsive font size */
   font-weight: bold;
   color: #2d1d4a;
-  text-shadow: 0 0 10px #8c52ff20;
+  text-shadow: 0 0 10px var(--accent-color)20;
   user-select: none;
   width: 100%;
   position: absolute;
@@ -86,8 +100,8 @@ body {
 }
 
 .id-card {
-  background: linear-gradient(145deg, #1a1329, #120d1f);
-  border: 2px solid #3b2a60;
+  background: linear-gradient(145deg, var(--card-bg), #120d1f);
+  border: 2px solid var(--card-border);
   border-radius: 20px;
   width: 100%;
   max-width: 1000px;
@@ -98,7 +112,7 @@ body {
   flex-direction: column;
   justify-content: flex-start;
   align-items: stretch;
-  box-shadow: 0 0 25px rgba(140, 82, 255, 0.4);
+  box-shadow: 0 0 25px var(--accent-color);
   z-index: 1;
   position: relative;
   overflow: hidden;
@@ -120,9 +134,9 @@ body {
 }
 
 .card-tab {
-  background: #1a1329;
+  background: var(--card-bg);
   color: #bfaaff;
-  border: 2px solid #3b2a60;
+  border: 2px solid var(--card-border);
   padding: 6px 16px;
   border-radius: 8px;
   font-weight: bold;
@@ -132,7 +146,7 @@ body {
 }
 
 .card-tab.active {
-  background: #8c52ff;
+  background: var(--accent-color);
   color: #fff;
 }
 
@@ -163,3 +177,5 @@ body {
   0% { transform: rotate(0deg); }
   100% { transform: rotate(360deg); }
 }
+:focus-visible{outline:2px solid var(--accent-color);outline-offset:2px;}
+

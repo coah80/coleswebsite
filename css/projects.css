@@ -8,7 +8,7 @@
   margin-top: 0;
   text-align: center;
   color: #d2c6f8;
-  text-shadow: 0 0 6px #8c52ff80;
+  text-shadow: 0 0 6px var(--accent-color)80;
   margin-bottom: 20px;
 }
 
@@ -17,7 +17,7 @@
 }
 
 #projects-tab::-webkit-scrollbar-thumb {
-  background: #8c52ff66;
+  background: color-mix(in srgb, var(--accent-color) 40%, transparent);
   border-radius: 4px;
 }
 
@@ -67,7 +67,7 @@
   justify-content: center;
   color: #e6dbff;
   font-weight: bold;
-  border-bottom: 2px solid #6d44b8;
+  border-bottom: 2px solid var(--accent-color);
   overflow: hidden;
 }
 
@@ -107,7 +107,7 @@
 .coming-soon {
   margin-top: 10px;
   font-size: 1.1rem;
-  color: #8c52ff;
+  color: var(--accent-color);
   text-align: center;
   font-style: italic;
 }

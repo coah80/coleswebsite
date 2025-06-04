@@ -13,7 +13,7 @@
 }
 
 #activity-tab::-webkit-scrollbar-thumb {
-  background: #8c52ff66;
+  background: color-mix(in srgb, var(--accent-color) 40%, transparent);
   border-radius: 4px;
 }
 
@@ -50,8 +50,8 @@
 }
 
 .filter-btn.active {
-  background: #6d44b8;
-  box-shadow: 0 0 8px #8c52ff;
+  background: var(--accent-color);
+  box-shadow: 0 0 8px var(--accent-color);
 }
 
 .activity-wrapper {
@@ -61,7 +61,7 @@
   background: #1b1429;
   padding: 12px;
   border-radius: 12px;
-  box-shadow: inset 0 0 10px #8c52ff20;
+  box-shadow: inset 0 0 10px var(--accent-color)20;
 }
 
 .activity-icon {
@@ -71,7 +71,7 @@
   object-fit: cover;
   flex-shrink: 0;
   border: 2px solid #b592ff;
-  box-shadow: 0 0 10px #8c52ff90;
+  box-shadow: 0 0 10px var(--accent-color)90;
 }
 
 .activity-info {
@@ -155,7 +155,7 @@
 }
 
 .pagination-controls button:hover {
-  background: #8c52ff;
+  background: var(--accent-color);
 }
 
 #activity-loading {

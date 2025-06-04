@@ -10,8 +10,8 @@
   height: 100px;
   border-radius: 50%;
   object-fit: cover;
-  border: 2px solid #6d44b8;
-  box-shadow: 0 0 12px #8c52ff80;
+  border: 2px solid var(--accent-color);
+  box-shadow: 0 0 12px var(--accent-color)80;
   display: block;
 }
 
@@ -37,7 +37,7 @@
   font-size: 1.4rem;
   font-weight: bold;
   color: #d2c6f8;
-  text-shadow: 0 0 6px #8c52ff80;
+  text-shadow: 0 0 6px var(--accent-color)80;
   margin-bottom: 10px;
   text-align: center;
 }
@@ -47,7 +47,7 @@
   margin-bottom: 10px;
   text-align: center;
   color: #e6dbff;
-  text-shadow: 0 0 5px #8c52ff55;
+  text-shadow: 0 0 5px var(--accent-color)55;
 }
 
 .link {
@@ -61,13 +61,13 @@
   max-width: 260px;
   text-align: center;
   transition: background 0.3s, color 0.3s, box-shadow 0.3s;
-  box-shadow: 0 0 8px #8c52ff40;
+  box-shadow: 0 0 8px var(--accent-color)40;
 }
 
 .link:hover {
-  background: #8c52ff;
+  background: var(--accent-color);
   color: #fff;
-  box-shadow: 0 0 12px #8c52ff, 0 0 24px #8c52ff99;
+  box-shadow: 0 0 12px var(--accent-color), 0 0 24px var(--accent-color)99;
 }
 
 .social-link {
@@ -99,7 +99,7 @@
   flex-direction: column;
   gap: 16px;
   margin-top: 12px;
-  box-shadow: inset 0 0 10px #8c52ff20;
+  box-shadow: inset 0 0 10px var(--accent-color)20;
 }
 
 .logs-tab-content {
@@ -124,7 +124,7 @@
   border-radius: 50%;
   object-fit: cover;
   border: 2px solid #b592ff;
-  box-shadow: 0 0 10px #8c52ff90;
+  box-shadow: 0 0 10px var(--accent-color)90;
   margin: 0 auto;
 }
 
@@ -135,7 +135,7 @@
   object-fit: cover;
   flex-shrink: 0;
   border: 2px solid #b592ff;
-  box-shadow: 0 0 10px #8c52ff90;
+  box-shadow: 0 0 10px var(--accent-color)90;
 }
 
 /* Center text in Spotify activity */
@@ -204,7 +204,7 @@
 
 .spotify-progress .fill {
   height: 100%;
-  background: #8c52ff;
+  background: var(--accent-color);
   border-radius: 2px;
   position: absolute;
   top: 0;
