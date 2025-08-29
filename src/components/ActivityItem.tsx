@@ -31,7 +31,7 @@ const ActivityItem: React.FC<ActivityItemProps> = ({ log }) => {
       <div className="flex items-center space-x-4">
         <div className="relative">
           <img
-            src={isMusic && log.image ? log.image : (isMusic ? '/icons/spotify.png' : '/icons/steam.svg')}
+            src={log.image || (isMusic ? '/icons/spotify.png' : '/icons/steam.svg')}
             alt={log.title}
             className="w-12 h-12 rounded-lg object-cover border-2 border-slate-600"
             onError={(e) => {

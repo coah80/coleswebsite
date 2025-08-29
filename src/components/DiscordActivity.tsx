@@ -51,11 +51,11 @@ const DiscordActivity: React.FC = () => {
       <div className="flex items-center space-x-4">
         <div className="relative">
           <img
-            src={currentActivity.image || '/icons/discord.svg'}
+            src={currentActivity.image}
             alt={currentActivity.title}
             className="w-14 h-14 rounded-lg object-cover border-2 border-primary-500/50"
             onError={(e) => {
-              e.currentTarget.src = '/icons/discord.svg'
+              e.currentTarget.src = isSpotify ? '/icons/spotify.png' : '/icons/discord.svg'
             }}
           />
           <div className={`absolute -bottom-1 -right-1 w-6 h-6 rounded-full flex items-center justify-center ${
