@@ -1,7 +1,0 @@
-/* Vite CSS entry point - imports the actual stylesheets */
-@import url('../css/global.css');
-@import url('../css/home.css');
-@import url('../css/presence.css');
-@import url('../css/activity.css');
-@import url('../css/projects.css');
-@import url('../css/mobile.css') screen and (max-width: 768px);

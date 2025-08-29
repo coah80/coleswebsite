@@ -111,7 +111,7 @@
   align-items: stretch;
 }
 
-/* Spotify presence styling */
+/* Add spinning animation for album art in Spotify */
 @keyframes spin {
   from { transform: rotate(0deg); }
   to { transform: rotate(360deg); }
@@ -138,6 +138,7 @@
   box-shadow: 0 0 10px #8c52ff90;
 }
 
+/* Center text in Spotify activity */
 .presence-entry {
   text-align: center;
   display: flex;
@@ -177,6 +178,7 @@
   margin-right: 4px;
 }
 
+/* Fix progress bar styling for all devices */
 .spotify-progress {
   display: flex;
   align-items: center;
@@ -207,4 +209,11 @@
   position: absolute;
   top: 0;
   left: 0;
+}
+
+/* Only center progress bar on mobile */
+@media (max-width: 768px) {
+  .spotify-progress {
+    justify-content: center;
+  }
 }

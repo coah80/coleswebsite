@@ -4,12 +4,10 @@ function switchTab(tabName, fromPop = false) {
   const activity = document.getElementById('activity-tab');
   const projects = document.getElementById('projects-tab');
 
-  // Hide all tabs
   home.style.display = 'none';
   activity.style.display = 'none';
   projects.style.display = 'none';
 
-  // Update tab buttons
   document.querySelectorAll('.card-tab').forEach(btn => {
     btn.classList.toggle('active', btn.dataset.tab === tabName);
   });
@@ -34,41 +32,43 @@ function switchTab(tabName, fromPop = false) {
   if (target) {
     target.style.display = 'block';
     
-    // Adjust card height for mobile
     setTimeout(() => {
       if (typeof isMobile !== 'undefined' && isMobile) {
         const viewportHeight = window.innerHeight;
-        const maxHeight = Math.min(viewportHeight * 0.85, target.scrollHeight + 100);
+        const maxHeight = Math.min(viewportHeight * 0.8, target.scrollHeight + 100);
         card.style.maxHeight = `${maxHeight}px`;
+      } else {
+        card.style.maxHeight = `${target.scrollHeight + 100}px`;
       }
     }, 10);
   }
 }
 
-// Handle browser back/forward
 window.onpopstate = () => {
   const tab = location.pathname.replace('/', '') || 'home';
   switchTab(tab, true);
 };
 
 document.addEventListener('DOMContentLoaded', () => {
-  // Set up tab click handlers
   document.querySelectorAll('.card-tab').forEach(btn => {
     btn.addEventListener('click', () => switchTab(btn.dataset.tab));
   });
 
-  // Initialize with current URL
   const initial = location.pathname.replace('/', '') || 'home';
   switchTab(initial);
   
-  // Handle window resize
   window.addEventListener('resize', () => {
     const activeTab = document.querySelector('.tab-page[style*="display: block"]');
-    if (activeTab && typeof isMobile !== 'undefined' && isMobile) {
+    if (activeTab) {
       const card = document.getElementById('main-card');
-      const viewportHeight = window.innerHeight;
-      const maxHeight = Math.min(viewportHeight * 0.85, activeTab.scrollHeight + 100);
-      card.style.maxHeight = `${maxHeight}px`;
+      
+      if (typeof isMobile !== 'undefined' && isMobile) {
+        const viewportHeight = window.innerHeight;
+        const maxHeight = Math.min(viewportHeight * 0.8, activeTab.scrollHeight + 100);
+        card.style.maxHeight = `${maxHeight}px`;
+      } else {
+        card.style.maxHeight = `${activeTab.scrollHeight + 100}px`;
+      }
     }
   });
 });
