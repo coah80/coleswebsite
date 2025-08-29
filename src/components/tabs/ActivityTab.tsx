@@ -17,11 +17,13 @@ const ActivityTab: React.FC = () => {
   const [currentPage, setCurrentPage] = useState(1)
   const [itemsPerPage, setItemsPerPage] = useState(10)
   
-  const { activityLogs, isLoading } = useDiscord()
+  const { activityLogs, isLoading, error } = useDiscord()
   
   const filteredLogs = activityLogs.filter(log => {
     if (activeFilter === 'all') return true
-    return log.type === activeFilter.slice(0, -1) // 'music' -> 'music', 'games' -> 'game'
+    if (activeFilter === 'music') return log.type === 'music'
+    if (activeFilter === 'games') return log.type === 'game'
+    return true
   })
   
   const totalPages = Math.ceil(filteredLogs.length / itemsPerPage)
@@ -93,6 +95,14 @@ const ActivityTab: React.FC = () => {
               <p>No activity found for the selected filter.</p>
             </div>
           )}
+        </div>
+      )}
+
+      {error && (
+        <div className="glass-card p-4 border-red-500/50 bg-red-500/10">
+          <div className="flex items-center space-x-2 text-red-400">
+            <span className="text-sm">⚠️ {error}</span>
+          </div>
         </div>
       )}
 

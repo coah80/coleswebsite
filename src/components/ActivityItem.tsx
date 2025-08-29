@@ -11,8 +11,29 @@ const ActivityItem: React.FC<ActivityItemProps> = ({ log }) => {
   const isMusic = log.type === 'music'
   const Icon = isMusic ? Music : Gamepad2
   
+  // Get proper image URL based on type
+  const getImageUrl = () => {
+    if (log.image) {
+      return log.image
+    }
+    
+    if (isMusic) {
+      // For Spotify, try to get album art or use a music placeholder
+      return log.image || 'https://images.pexels.com/photos/1763075/pexels-photo-1763075.jpeg?auto=compress&cs=tinysrgb&w=64'
+    } else {
+      // For games, use a gaming placeholder
+      return 'https://images.pexels.com/photos/442576/pexels-photo-442576.jpeg?auto=compress&cs=tinysrgb&w=64'
+    }
+  }
+  
   const formatDate = (timestamp: number) => {
-    return new Date(timestamp).toLocaleString('en-US', {
+    // Handle both milliseconds and seconds timestamps
+    const date = new Date(timestamp > 1000000000000 ? timestamp : timestamp * 1000)
+    if (isNaN(date.getTime())) {
+      return 'Invalid Date'
+    }
+    
+    return date.toLocaleString('en-US', {
       month: 'long',
       day: 'numeric',
       year: 'numeric',
@@ -31,12 +52,9 @@ const ActivityItem: React.FC<ActivityItemProps> = ({ log }) => {
       <div className="flex items-center space-x-4">
         <div className="relative">
           <img
-            src={log.image || (isMusic ? '/icons/spotify.png' : '/icons/steam.svg')}
+            src={getImageUrl()}
             alt={log.title}
             className="w-12 h-12 rounded-lg object-cover border-2 border-slate-600"
-            onError={(e) => {
-              e.currentTarget.src = isMusic ? '/icons/spotify.png' : '/icons/steam.svg'
-            }}
           />
           <div className={`absolute -top-1 -right-1 w-6 h-6 rounded-full flex items-center justify-center ${
             isMusic ? 'bg-green-500' : 'bg-indigo-500'

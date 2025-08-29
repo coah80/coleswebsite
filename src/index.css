@@ -19,28 +19,80 @@
 
 @layer components {
   .glass-card {
-    background: rgba(15, 23, 42, 0.85);
-    backdrop-filter: blur(20px) saturate(180%);
-    -webkit-backdrop-filter: blur(20px) saturate(180%);
-    border: 1px solid rgba(132, 61, 255, 0.3);
+    background: 
+      linear-gradient(135deg, rgba(132, 61, 255, 0.15) 0%, rgba(168, 85, 247, 0.1) 50%, rgba(132, 61, 255, 0.05) 100%),
+      linear-gradient(135deg, rgba(15, 23, 42, 0.85) 0%, rgba(30, 41, 59, 0.9) 50%, rgba(15, 23, 42, 0.95) 100%);
+    backdrop-filter: blur(20px) saturate(180%) brightness(1.05);
+    -webkit-backdrop-filter: blur(20px) saturate(180%) brightness(1.05);
+    border: 1px solid;
+    border-image: linear-gradient(
+      135deg,
+      rgba(132, 61, 255, 0.5) 0%,
+      rgba(168, 85, 247, 0.4) 25%,
+      rgba(147, 51, 234, 0.3) 50%,
+      rgba(168, 85, 247, 0.4) 75%,
+      rgba(132, 61, 255, 0.5) 100%
+    ) 1;
     border-radius: 1rem;
     box-shadow: 
-      0 25px 50px -12px rgba(0, 0, 0, 0.6),
-      0 8px 32px rgba(132, 61, 255, 0.15),
-      0 0 0 1px rgba(132, 61, 255, 0.1),
+      0 8px 32px rgba(0, 0, 0, 0.5),
+      0 4px 16px rgba(132, 61, 255, 0.15),
+      0 2px 8px rgba(168, 85, 247, 0.1),
+      0 1px 4px rgba(147, 51, 234, 0.05),
       inset 0 1px 0 rgba(255, 255, 255, 0.15),
-      inset 0 -1px 0 rgba(132, 61, 255, 0.1);
+      inset 0 -1px 0 rgba(132, 61, 255, 0.1),
+      inset 0 0 0 1px rgba(132, 61, 255, 0.05);
     transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    position: relative;
+    overflow: hidden;
+  }
+  
+  .glass-card::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    height: 2px;
+    background: linear-gradient(
+      90deg,
+      transparent 0%,
+      rgba(132, 61, 255, 0.3) 25%,
+      rgba(255, 255, 255, 0.25) 50%,
+      rgba(168, 85, 247, 0.3) 75%,
+      transparent 100%
+    );
+    pointer-events: none;
+    opacity: 0.8;
+  }
+  
+  .glass-card::after {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background: radial-gradient(circle at 50% 0%, rgba(132, 61, 255, 0.1) 0%, transparent 50%);
+    pointer-events: none;
+    opacity: 0.6;
   }
   
   .glass-card:hover {
     box-shadow: 
-      0 32px 64px -12px rgba(0, 0, 0, 0.7),
-      0 12px 40px rgba(132, 61, 255, 0.2),
-      0 0 0 1px rgba(132, 61, 255, 0.2),
+      0 12px 40px rgba(0, 0, 0, 0.6),
+      0 6px 20px rgba(132, 61, 255, 0.2),
+      0 3px 12px rgba(168, 85, 247, 0.15),
+      0 1px 6px rgba(147, 51, 234, 0.1),
       inset 0 1px 0 rgba(255, 255, 255, 0.2),
-      inset 0 -1px 0 rgba(132, 61, 255, 0.15);
-    border-color: rgba(132, 61, 255, 0.4);
+      inset 0 -1px 0 rgba(132, 61, 255, 0.15),
+      inset 0 0 0 1px rgba(132, 61, 255, 0.1);
+    transform: translateY(-1px);
+    border-image: linear-gradient(
+      135deg,
+      rgba(132, 61, 255, 0.6) 0%,
+      rgba(168, 85, 247, 0.5) 25%,
+      rgba(147, 51, 234, 0.4) 50%,
+      rgba(168, 85, 247, 0.5) 75%,
+      rgba(132, 61, 255, 0.6) 100%
+    ) 1;
   }
   
   .text-gradient {
