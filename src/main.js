@@ -1,3 +1,6 @@
+// Import CSS
+import './index.css'
+
 // Discord Integration
 class DiscordIntegration {
   constructor() {
