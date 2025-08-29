@@ -10,7 +10,10 @@ async function fetchLogs() {
     console.log("Fetching logs from Firebase...");
     
     // Hide any previous error messages
-    document.getElementById('activity-loading').innerHTML = 'loading stuff lol...';
+    const loadingElement = document.getElementById('activity-loading');
+    if (loadingElement) {
+      loadingElement.innerHTML = 'Loading activity data...';
+    }
     
     const [musicRes, gameRes] = await Promise.all([
       fetch(`${firebaseBase}/musicLogs.json`).then(r => {
@@ -26,7 +29,7 @@ async function fetchLogs() {
     // Process music logs
     if (musicRes) {
       musicLogs = Array.isArray(musicRes) ? musicRes : Object.values(musicRes || {});
-      musicLogs = musicLogs.filter(log => log && log.loggedAt); // Filter out any invalid logs
+      musicLogs = musicLogs.filter(log => log && log.loggedAt);
       musicLogs.sort((a, b) => b.loggedAt - a.loggedAt);
     } else {
       console.log("No music logs found");
@@ -36,7 +39,7 @@ async function fetchLogs() {
     // Process game logs
     if (gameRes) {
       gameLogs = Array.isArray(gameRes) ? gameRes : Object.values(gameRes || {});
-      gameLogs = gameLogs.filter(log => log && log.loggedAt); // Filter out any invalid logs
+      gameLogs = gameLogs.filter(log => log && log.loggedAt);
       gameLogs.sort((a, b) => b.loggedAt - a.loggedAt);
     } else {
       console.log("No game logs found");
@@ -47,10 +50,11 @@ async function fetchLogs() {
   } catch (err) {
     console.error('Failed to fetch logs:', err);
     
-    // Show error messages in the loading divs
-    document.getElementById('activity-loading').innerHTML = 'Failed to load activity data. Please try again later.';
+    const loadingElement = document.getElementById('activity-loading');
+    if (loadingElement) {
+      loadingElement.innerHTML = 'Failed to load activity data. Please try again later.';
+    }
     
-    // Initialize empty arrays to prevent errors in rendering functions
     musicLogs = musicLogs || [];
     gameLogs = gameLogs || [];
   }
@@ -58,7 +62,6 @@ async function fetchLogs() {
 
 async function saveLogs() {
   try {
-    // Make sure logs are sorted by timestamp (newest first)
     musicLogs.sort((a, b) => b.loggedAt - a.loggedAt);
     gameLogs.sort((a, b) => b.loggedAt - a.loggedAt);
 

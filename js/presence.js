@@ -49,19 +49,17 @@ async function handleActivity(data) {
       try {
         const s = data.spotify;
         
-        // Verify that all required timestamps exist
         if (!s.timestamps || !s.timestamps.start || !s.timestamps.end) {
           console.warn("Spotify data missing timestamps:", s);
           s.timestamps = s.timestamps || {};
-          s.timestamps.start = s.timestamps.start || now - 60000;  // Default to 1 minute ago
-          s.timestamps.end = s.timestamps.end || now + 180000;     // Default to 3 minutes from now
+          s.timestamps.start = s.timestamps.start || now - 60000;
+          s.timestamps.end = s.timestamps.end || now + 180000;
         }
         
         const total = s.timestamps.end - s.timestamps.start;
         const elapsed = now - s.timestamps.start;
         const progress = Math.min(Math.max(elapsed / total, 0), 1) * 100;
         
-        // Handle missing album art
         const albumArt = s.album_art_url || 'icons/spotify.png';
         const trackId = s.track_id || '';
 
@@ -85,7 +83,7 @@ async function handleActivity(data) {
 
         updateProgressBar(s.timestamps.start, s.timestamps.end);
 
-        // Log the track if it's new or has been more than 30 seconds
+        // Log the track if it's new
         if (!musicLogs.length || musicLogs[0].track_id !== s.track_id || now - musicLogs[0].loggedAt > 30000) {
           try {
             musicLogs.unshift({
@@ -147,7 +145,7 @@ async function handleActivity(data) {
           try {
             const icon = g.application_id
               ? `https://dcdn.dstn.to/app-icons/${g.application_id}?ext=webp&size=64`
-              : 'https://cdn.discordapp.com/embed/avatars/0.png';
+              : 'icons/discord.svg';
 
             html += `
               <div class="presence-entry">
@@ -170,10 +168,8 @@ async function handleActivity(data) {
   }
 
   try {
-    discordBox.innerHTML = html || 'Not currently playing anything.';
+    discordBox.innerHTML = html || 'Currently working on YouTube content!';
     discordBox.classList.toggle('active', !!html);
-    
-    // No need for inline styles since we've properly styled the elements in CSS
   } catch (err) {
     console.error("Error updating Discord box:", err);
   }

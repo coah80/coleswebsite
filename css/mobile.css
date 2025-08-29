@@ -178,7 +178,6 @@
   font-size: 0.75rem;
 }
 
-/* Activity type badge adjustments for mobile */
 .activity-type {
   position: absolute;
   top: 5px;
@@ -205,7 +204,7 @@
 
 .spotify-progress .bar {
   flex: 1;
-  max-width: 160px; /* Limit width to help with centering */
+  max-width: 160px;
   height: 3px;
   background: #2b1f4c;
   border-radius: 2px;
@@ -222,7 +221,6 @@
   left: 0;
 }
 
-/* Force centered text with important for mobile */
 .presence-entry {
   margin-bottom: 8px;
   width: 100%;
@@ -249,7 +247,6 @@
   margin: 0 auto;
 }
 
-/* Smaller Spotify icon for mobile */
 .spotify-icon {
   width: 12px;
   height: 12px;
@@ -257,7 +254,6 @@
   vertical-align: middle;
 }
 
-/* Album art positioning and sizing for mobile */
 .presence-entry .album-art {
   width: 50px !important;
   height: 50px !important;
@@ -268,7 +264,6 @@
   object-fit: cover !important;
 }
 
-/* Structure album art and text vertically on mobile */
 .presence-entry {
   flex-direction: column !important;
 }
@@ -285,7 +280,6 @@
   margin: 2px;
 }
 
-/* Fix for the scrollable content areas */
 .tab-page {
   overflow-y: auto;
   -webkit-overflow-scrolling: touch;
@@ -301,7 +295,7 @@
   transform: none !important;
 }
 
-/* Override any styles that might interfere with our positioning */
+/* Override any styles that might interfere with positioning */
 .left-section .status-wrapper .status-online,
 .left-section .status-wrapper .status-idle,
 .left-section .status-wrapper .status-dnd,
@@ -323,24 +317,12 @@
   to { transform: rotate(360deg); }
 }
 
-/* Fix for song title centering specifically */
-.presence-entry .music-info .song-title {
-  text-align: center !important;
-  width: 100% !important;
-  display: flex !important;
-  justify-content: center !important;
-  align-items: center !important;
-  margin: 0 auto !important;
-}
-
-/* Keep the Spotify icon aligned with text */
 .presence-entry .song-title .spotify-icon,
 .presence-entry .song-title img {
   margin-right: 4px !important;
   flex-shrink: 0 !important;
 }
 
-/* Force anchor tag styling to be centered */
 .presence-entry a.song-title {
   text-align: center !important;
   display: inline-flex !important;
@@ -350,7 +332,6 @@
   text-decoration: none !important;
 }
 
-/* Activity filters for mobile */
 .activity-filters {
   flex-wrap: wrap;
   gap: 6px;

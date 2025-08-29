@@ -1,16 +1,180 @@
 <!DOCTYPE html>
 <html lang="en">
-  <head>
-    <meta charset="UTF-8" />
-    <link rel="icon" type="image/svg+xml" href="/vite.svg" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Cole's Website</title>
-    <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
-  </head>
-  <body>
-    <div id="app"></div>
-    <script type="module" src="/src/main.js"></script>
-  </body>
+    <link rel="icon" href="icons/webicon.png">
+    
+    <!-- CSS Files -->
+    <link rel="stylesheet" href="css/global.css">
+    <link rel="stylesheet" href="css/home.css">
+    <link rel="stylesheet" href="css/presence.css">
+    <link rel="stylesheet" href="css/activity.css">
+    <link rel="stylesheet" href="css/projects.css">
+    <link rel="stylesheet" href="css/mobile.css" media="(max-width: 768px)">
+</head>
+<body>
+    <!-- Background Animation -->
+    <div class="background-scroll">
+        <div class="scrolling-row scroll-left">
+            <div class="inner-scroll">
+                COLE COLE COLE COLE COLE COLE COLE COLE COLE COLE COLE COLE COLE COLE COLE COLE COLE COLE COLE COLE COLE COLE COLE COLE COLE COLE COLE COLE COLE COLE COLE COLE COLE COLE COLE COLE COLE COLE COLE COLE 
+            </div>
+        </div>
+        <div class="scrolling-row scroll-right">
+            <div class="inner-scroll">
+                YOUTUBE EDITOR THUMBNAILS YOUTUBE EDITOR THUMBNAILS YOUTUBE EDITOR THUMBNAILS YOUTUBE EDITOR THUMBNAILS YOUTUBE EDITOR THUMBNAILS YOUTUBE EDITOR THUMBNAILS YOUTUBE EDITOR THUMBNAILS YOUTUBE EDITOR THUMBNAILS 
+            </div>
+        </div>
+    </div>
+
+    <!-- Main Content -->
+    <div class="center-wrapper">
+        <div class="id-card" id="main-card">
+            <!-- Tab Navigation -->
+            <div class="card-tabs">
+                <button class="card-tab active" data-tab="home">Home</button>
+                <button class="card-tab" data-tab="activity">Activity</button>
+                <button class="card-tab" data-tab="projects">Projects</button>
+            </div>
+
+            <!-- Home Tab -->
+            <div class="tab-page" id="home-tab" style="display: block;">
+                <div class="content-wrapper">
+                    <div class="left-section">
+                        <div class="status-wrapper">
+                            <img src="icons/colespfp.gif" alt="Cole's Profile Picture">
+                            <div class="status-dot status-offline"></div>
+                        </div>
+                    </div>
+                    
+                    <div class="right-section">
+                        <div class="center-content">
+                            <h2 class="username">Cole</h2>
+                            <p class="intro">YouTuber • Video Editor • Thumbnail Designer</p>
+                            
+                            <!-- Discord Activity -->
+                            <div class="discord-box" id="discord-activity">
+                                Not currently playing anything.
+                            </div>
+                            
+                            <!-- Social Links -->
+                            <a href="https://youtube.com/@cole" class="link social-link" target="_blank">
+                                <img src="icons/yt.svg" alt="YouTube" class="icon">
+                                YouTube Channel
+                            </a>
+                            <a href="https://github.com/cole" class="link social-link" target="_blank">
+                                <img src="icons/github.svg" alt="GitHub" class="icon">
+                                GitHub
+                            </a>
+                            <a href="https://twitter.com/cole" class="link social-link" target="_blank">
+                                <img src="icons/twitter.svg" alt="Twitter" class="icon">
+                                Twitter
+                            </a>
+                            <a href="https://discord.gg/cole" class="link social-link" target="_blank">
+                                <img src="icons/discord.svg" alt="Discord" class="icon">
+                                Discord Server
+                            </a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Activity Tab -->
+            <div class="tab-page" id="activity-tab" style="display: none;">
+                <div class="logs-tab-content">
+                    <h2>Recent Activity</h2>
+                    
+                    <!-- Activity Filters -->
+                    <div class="activity-filters">
+                        <button class="filter-btn active" data-filter="all">All</button>
+                        <button class="filter-btn" data-filter="music">Music</button>
+                        <button class="filter-btn" data-filter="game">Games</button>
+                    </div>
+                    
+                    <!-- Loading Indicator -->
+                    <div id="activity-loading" style="display: block;">
+                        Loading activity data...
+                    </div>
+                    
+                    <!-- Activity Logs -->
+                    <div id="activity-logs"></div>
+                    
+                    <!-- Pagination -->
+                    <div class="pagination-controls">
+                        <select id="activity-per-page">
+                            <option value="10">10 per page</option>
+                            <option value="20">20 per page</option>
+                            <option value="30" selected>30 per page</option>
+                            <option value="50">50 per page</option>
+                        </select>
+                        <div id="activity-pages" data-page="1"></div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Projects Tab -->
+            <div class="tab-page" id="projects-tab" style="display: none;">
+                <div class="projects-content">
+                    <h2>My Work</h2>
+                    
+                    <div class="projects-grid">
+                        <a href="#" class="project-card">
+                            <div class="project-image">
+                                <img src="https://images.pexels.com/photos/1591056/pexels-photo-1591056.jpeg?auto=compress&cs=tinysrgb&w=400" alt="YouTube Thumbnails" class="project-thumbnail">
+                            </div>
+                            <div class="project-info">
+                                <h4 class="project-title">YouTube Thumbnails</h4>
+                                <p class="project-desc">Eye-catching thumbnail designs that boost click-through rates</p>
+                            </div>
+                        </a>
+                        
+                        <a href="#" class="project-card">
+                            <div class="project-image">
+                                <img src="https://images.pexels.com/photos/3945313/pexels-photo-3945313.jpeg?auto=compress&cs=tinysrgb&w=400" alt="Video Editing" class="project-thumbnail">
+                            </div>
+                            <div class="project-info">
+                                <h4 class="project-title">Video Editing</h4>
+                                <p class="project-desc">Professional video editing with smooth transitions and effects</p>
+                            </div>
+                        </a>
+                        
+                        <a href="#" class="project-card">
+                            <div class="project-image">
+                                <img src="https://images.pexels.com/photos/1779487/pexels-photo-1779487.jpeg?auto=compress&cs=tinysrgb&w=400" alt="Content Creation" class="project-thumbnail">
+                            </div>
+                            <div class="project-info">
+                                <h4 class="project-title">Content Creation</h4>
+                                <p class="project-desc">Full-service content creation from concept to final product</p>
+                            </div>
+                        </a>
+                        
+                        <div class="project-card">
+                            <div class="project-image">More Projects</div>
+                            <div class="project-info">
+                                <h4 class="project-title">Portfolio Expansion</h4>
+                                <p class="project-desc">More amazing projects coming soon!</p>
+                                <div class="coming-soon">Coming Soon</div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- JavaScript Files -->
+    <script>
+        // Mobile detection
+        const isMobile = window.innerWidth <= 768;
+    </script>
+    <script src="js/utils.js"></script>
+    <script src="js/firebase.js"></script>
+    <script src="js/presence.js"></script>
+    <script src="js/activity.js"></script>
+    <script src="js/navigation.js"></script>
+    <script src="js/main.js"></script>
+    <script src="js/mobile.js"></script>
+</body>
 </html>

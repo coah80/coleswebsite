@@ -112,7 +112,7 @@
   font-style: italic;
 }
 
-/* Media query for tablet and mobile devices */
+/* Media queries for responsive design */
 @media (max-width: 768px) {
   .project-card {
     width: calc(50% - 20px);
@@ -120,10 +120,9 @@
   }
 }
 
-/* Media query for small mobile devices */
 @media (max-width: 480px) {
   .project-card {
     width: 100%;
     max-width: 250px;
   }
-} 
+}

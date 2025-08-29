@@ -28,12 +28,17 @@ document.addEventListener('DOMContentLoaded', async () => {
   console.log("DOM loaded, initializing application");
   
   // Show loading indicator
-  document.getElementById('activity-loading').style.display = 'block';
+  const loadingElement = document.getElementById('activity-loading');
+  if (loadingElement) {
+    loadingElement.style.display = 'block';
+  }
   
   try {
     await fetchLogs();
     // Hide loading indicator after fetching
-    document.getElementById('activity-loading').style.display = 'none';
+    if (loadingElement) {
+      loadingElement.style.display = 'none';
+    }
     
     renderActivityLogs();
   } catch (error) {
@@ -42,19 +47,4 @@ document.addEventListener('DOMContentLoaded', async () => {
   
   // Connect to Discord presence socket
   connectSocket();
-  
-  // Fix tab display on mobile
-  if (isMobile) {
-    const card = document.getElementById('main-card');
-    document.querySelectorAll('.card-tab').forEach(tab => {
-      tab.addEventListener('click', () => {
-        setTimeout(() => {
-          const activeTab = document.querySelector('.tab-page[style*="display: block"]');
-          if (activeTab) {
-            card.style.maxHeight = `${activeTab.scrollHeight + 100}px`;
-          }
-        }, 50);
-      });
-    });
-  }
 });

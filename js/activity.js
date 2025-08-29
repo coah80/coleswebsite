@@ -3,7 +3,6 @@ let currentFilter = 'all';
 
 function renderActivityLogs() {
   try {
-    // Check if the DOM elements exist
     const perPageElement = document.getElementById('activity-per-page');
     const container = document.getElementById('activity-logs');
     const pagination = document.getElementById('activity-pages');
@@ -42,7 +41,6 @@ function renderActivityLogs() {
       if (!log) return '';
       
       if (log.type === 'music') {
-        // Handle music activity
         const track_id = log.track_id || '';
         const song = log.song || 'Unknown Track';
         const artist = log.artist || 'Unknown Artist';
@@ -64,7 +62,6 @@ function renderActivityLogs() {
           </div>
         `;
       } else {
-        // Handle game activity
         const name = log.name || 'Unknown Game';
         const details = log.details || '';
         const state = log.state || '';
@@ -94,14 +91,13 @@ function renderActivityLogs() {
       return `<button onclick="goToActivityPage(${num})">${num}</button>`;
     }).join('');
     
-    // Hide loading indicator if it's visible
+    // Hide loading indicator
     const loadingElem = document.getElementById('activity-loading');
     if (loadingElem) {
       loadingElem.style.display = 'none';
     }
   } catch (err) {
     console.error("Error rendering activity logs:", err);
-    // Show error in the container
     const container = document.getElementById('activity-logs');
     if (container) {
       container.innerHTML = '<div class="error">Error loading activity data. Please refresh the page.</div>';
@@ -145,4 +141,4 @@ document.addEventListener('DOMContentLoaded', () => {
       setActivityFilter(btn.dataset.filter);
     });
   });
-}); 
+});
