@@ -13,22 +13,26 @@ export default defineConfig(({ mode }) => ({
   build: {
     outDir: "dist",
     assetsDir: "assets",
-    sourcemap: mode === 'development',
+    sourcemap: false, // Disable sourcemaps for production
     minify: 'esbuild',
     target: 'es2015',
     rollupOptions: {
       output: {
         manualChunks: undefined,
-        entryFileNames: (chunkInfo) => {
-          return `assets/${chunkInfo.name}-[hash].js`;
+        // Ensure proper file extensions for JavaScript
+        entryFileNames: () => {
+          return `assets/index-[hash].js`;
         },
-        chunkFileNames: (chunkInfo) => {
-          return `assets/${chunkInfo.name}-[hash].js`;
+        chunkFileNames: () => {
+          return `assets/[name]-[hash].js`;
         },
         assetFileNames: (assetInfo) => {
           const info = assetInfo.name?.split('.') || [];
           const ext = info[info.length - 1];
-          return `assets/[name]-[hash].${ext}`;
+          if (ext === 'css') {
+            return `assets/[name]-[hash].css`;
+          }
+          return `assets/[name]-[hash].[ext]`;
         }
       },
     },
@@ -43,4 +47,9 @@ export default defineConfig(({ mode }) => ({
       "@": path.resolve(__dirname, "./src"),
     },
   },
+  // Ensure proper module resolution
+  esbuild: {
+    target: 'es2015',
+    format: 'esm'
+  }
 }));

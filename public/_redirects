@@ -1,6 +1,11 @@
-# Handle client-side routing - ensure all routes go to index.html
+# Cloudflare Pages Redirects Configuration
+# Handle client-side routing for React Router
+
+# Redirect all non-asset requests to index.html for SPA routing
 /*    /index.html   200
 
-# Specific redirects for common paths that might cause issues
-/src/*    /index.html   200
+# Ensure assets are served correctly
 /assets/*    /assets/:splat   200
+
+# Specific handling for source files (shouldn't be needed in production)
+/src/*    /index.html   200

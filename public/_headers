@@ -1,63 +1,86 @@
-# Set correct MIME types for JavaScript files
+# Cloudflare Pages Headers Configuration
+# This file configures proper MIME types and headers for static assets
+
+# JavaScript files - ensure proper MIME type
 /assets/*.js
   Content-Type: application/javascript; charset=utf-8
   Cache-Control: public, max-age=31536000, immutable
 
-# Set correct MIME types for CSS files  
+# ES Module files
+/assets/*.mjs
+  Content-Type: application/javascript; charset=utf-8
+  Cache-Control: public, max-age=31536000, immutable
+
+# CSS files
 /assets/*.css
   Content-Type: text/css; charset=utf-8
   Cache-Control: public, max-age=31536000, immutable
 
-# Set correct MIME types for TypeScript files (in case they're served directly)
+# Source files (should not be served in production but just in case)
+/src/*.js
+  Content-Type: application/javascript; charset=utf-8
+
+/src/*.mjs
+  Content-Type: application/javascript; charset=utf-8
+
 /src/*.tsx
   Content-Type: application/javascript; charset=utf-8
 
 /src/*.ts
   Content-Type: application/javascript; charset=utf-8
 
-# Set correct MIME types for common file types
-*.html
+# Main entry point
+/src/main.tsx
+  Content-Type: application/javascript; charset=utf-8
+
+# HTML files
+/*.html
   Content-Type: text/html; charset=utf-8
   Cache-Control: public, max-age=3600
 
-*.js
-  Content-Type: application/javascript; charset=utf-8
-
-*.mjs
-  Content-Type: application/javascript; charset=utf-8
-
-*.css
-  Content-Type: text/css; charset=utf-8
-
-*.json
+# JSON files
+/*.json
   Content-Type: application/json; charset=utf-8
 
-*.svg
-  Content-Type: image/svg+xml; charset=utf-8
-
-*.png
+# Image files
+/assets/*.png
   Content-Type: image/png
+  Cache-Control: public, max-age=31536000, immutable
 
-*.jpg
+/assets/*.jpg
   Content-Type: image/jpeg
+  Cache-Control: public, max-age=31536000, immutable
 
-*.jpeg
+/assets/*.jpeg
   Content-Type: image/jpeg
+  Cache-Control: public, max-age=31536000, immutable
 
-*.webp
+/assets/*.svg
+  Content-Type: image/svg+xml; charset=utf-8
+  Cache-Control: public, max-age=31536000, immutable
+
+/assets/*.webp
   Content-Type: image/webp
+  Cache-Control: public, max-age=31536000, immutable
 
-*.ico
-  Content-Type: image/x-icon
+# Fonts
+/assets/*.woff
+  Content-Type: font/woff
+  Cache-Control: public, max-age=31536000, immutable
 
-# Security headers
+/assets/*.woff2
+  Content-Type: font/woff2
+  Cache-Control: public, max-age=31536000, immutable
+
+# Security and performance headers for all files
 /*
   X-Frame-Options: DENY
   X-Content-Type-Options: nosniff
   Referrer-Policy: strict-origin-when-cross-origin
   X-XSS-Protection: 1; mode=block
   Permissions-Policy: camera=(), microphone=(), geolocation=()
-
-# Disable Cloudflare's automatic minification that might interfere
+  
+# Disable Cloudflare's automatic features that might interfere
 /*
   cf-cache-status: DYNAMIC
+  cf-ray: DYNAMIC
