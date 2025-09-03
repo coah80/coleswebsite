@@ -21,18 +21,18 @@ export default defineConfig(({ mode }) => ({
         manualChunks: undefined,
         // Ensure proper file extensions for JavaScript
         entryFileNames: () => {
-          return `assets/index-[hash].js`;
+          return `assets/index.js`;
         },
         chunkFileNames: () => {
-          return `assets/[name]-[hash].js`;
+          return `assets/[name].js`;
         },
         assetFileNames: (assetInfo) => {
           const info = assetInfo.name?.split('.') || [];
           const ext = info[info.length - 1];
           if (ext === 'css') {
-            return `assets/[name]-[hash].css`;
+            return `assets/[name].css`;
           }
-          return `assets/[name]-[hash].[ext]`;
+          return `assets/[name].[ext]`;
         }
       },
     },
