@@ -79,12 +79,14 @@ const detectPlatform = (name: string, url: string): { icon: any; color: string }
 const SocialLinksSection = () => {
   const [socialLinks, setSocialLinks] = useState<SocialLink[]>([]);
   const [isLoading, setIsLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
     fetchSocialLinks();
   }, []);
 
   const fetchSocialLinks = async () => {
+    setError(null);
     try {
       const { data, error } = await supabase
         .from('social_links')
@@ -96,6 +98,7 @@ const SocialLinksSection = () => {
       setSocialLinks(data || []);
     } catch (error) {
       console.error('Error fetching social links:', error);
+      setError('Unable to load social links. Please check your connection.');
     }
     setIsLoading(false);
   };
@@ -104,6 +107,22 @@ const SocialLinksSection = () => {
     return (
       <div className="h-full flex items-center justify-center">
         <div className="text-muted-foreground">Loading...</div>
+      </div>
+    );
+  }
+
+  if (error) {
+    return (
+      <div className="h-full flex items-center justify-center">
+        <div className="text-center">
+          <p className="text-muted-foreground mb-2">{error}</p>
+          <button 
+            onClick={fetchSocialLinks}
+            className="text-sm text-primary hover:underline"
+          >
+            Try again
+          </button>
+        </div>
       </div>
     );
   }
