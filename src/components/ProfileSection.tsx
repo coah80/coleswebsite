@@ -111,6 +111,7 @@ const ProfileSection = () => {
           } catch (error) {
             console.error('Error parsing Lanyard message:', error);
           }
+        };
             if (ws && ws.readyState === WebSocket.OPEN) {
               ws.send(JSON.stringify(heartbeatData));
             }
