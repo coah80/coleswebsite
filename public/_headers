@@ -1,6 +1,14 @@
 # Cloudflare Pages Headers Configuration
-# Ensure JavaScript files are served with correct MIME type
+# Ensure all assets are served with correct MIME types
 
-# JavaScript and module files
+# JavaScript files
 /assets/*.js
   Content-Type: application/javascript; charset=utf-8
+
+# TypeScript files (should not be served in production)
+/src/*.tsx
+  Content-Type: text/plain; charset=utf-8
+
+# CSS files
+/assets/*.css
+  Content-Type: text/css; charset=utf-8
