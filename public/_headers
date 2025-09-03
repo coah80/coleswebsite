@@ -4,11 +4,21 @@
 # JavaScript files
 /assets/*.js
   Content-Type: application/javascript; charset=utf-8
-
-# TypeScript files (should not be served in production)
-/src/*.tsx
-  Content-Type: text/plain; charset=utf-8
+  Cache-Control: public, max-age=31536000, immutable
 
 # CSS files
 /assets/*.css
   Content-Type: text/css; charset=utf-8
+  Cache-Control: public, max-age=31536000, immutable
+
+# HTML files
+/*.html
+  Content-Type: text/html; charset=utf-8
+
+# Root HTML
+/
+  Content-Type: text/html; charset=utf-8
+
+# Prevent serving source files
+/src/*
+  X-Robots-Tag: noindex

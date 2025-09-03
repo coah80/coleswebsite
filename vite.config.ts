@@ -12,15 +12,15 @@ export default defineConfig(({ mode }) => ({
   build: {
     outDir: "dist",
     assetsDir: "assets",
-    sourcemap: false, // Disable sourcemaps for production
+    sourcemap: false,
     minify: 'esbuild',
     target: 'es2015',
     rollupOptions: {
       output: {
         manualChunks: undefined,
-        entryFileNames: `assets/[name]-[hash].js`,
-        chunkFileNames: `assets/[name]-[hash].js`,
-        assetFileNames: `assets/[name]-[hash].[ext]`,
+        entryFileNames: `assets/[name].[hash].js`,
+        chunkFileNames: `assets/[name].[hash].js`,
+        assetFileNames: `assets/[name].[hash].[ext]`,
       },
     },
   },
@@ -32,7 +32,6 @@ export default defineConfig(({ mode }) => ({
       "@": path.resolve(__dirname, "./src"),
     },
   },
-  // Ensure proper module resolution
   esbuild: {
     target: 'es2015',
     format: 'esm'
