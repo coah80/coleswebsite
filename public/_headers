@@ -6,11 +6,6 @@
   Content-Type: application/javascript; charset=utf-8
   Cache-Control: public, max-age=31536000, immutable
 
-# Specific file that's causing issues
-/assets/index.js
-  Content-Type: application/javascript; charset=utf-8
-  Cache-Control: public, max-age=31536000, immutable
-
 # ES Module files
 /assets/*.mjs
   Content-Type: application/javascript; charset=utf-8

@@ -19,21 +19,9 @@ export default defineConfig(({ mode }) => ({
     rollupOptions: {
       output: {
         manualChunks: undefined,
-        // Ensure proper file extensions for JavaScript
-        entryFileNames: () => {
-          return `assets/index.js`;
-        },
-        chunkFileNames: () => {
-          return `assets/[name].js`;
-        },
-        assetFileNames: (assetInfo) => {
-          const info = assetInfo.name?.split('.') || [];
-          const ext = info[info.length - 1];
-          if (ext === 'css') {
-            return `assets/[name].css`;
-          }
-          return `assets/[name].[ext]`;
-        }
+        entryFileNames: `assets/index.js`,
+        chunkFileNames: `assets/[name].js`,
+        assetFileNames: `assets/[name].[ext]`
       },
     },
   },
