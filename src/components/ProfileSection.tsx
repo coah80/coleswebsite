@@ -74,12 +74,14 @@ const ProfileSection = () => {
           setIsConnected(true);
           
           // Subscribe to user
-          ws?.send(JSON.stringify({
+        if (ws && ws.readyState === WebSocket.OPEN) {
+          ws.send(JSON.stringify({
             op: 2,
             d: {
               subscribe_to_id: DISCORD_USER_ID
             }
           }));
+        }
         };
 
         ws.onmessage = (event) => {
@@ -109,7 +111,9 @@ const ProfileSection = () => {
           } catch (error) {
             console.error('Error parsing Lanyard message:', error);
           }
-        };
+            if (ws && ws.readyState === WebSocket.OPEN) {
+              ws.send(JSON.stringify(heartbeatData));
+            }
 
         ws.onclose = () => {
           console.log('Lanyard WebSocket disconnected');
