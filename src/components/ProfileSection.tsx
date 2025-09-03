@@ -64,15 +64,26 @@ const ProfileSection = () => {
     let ws: WebSocket | null = null;
     let heartbeatInterval: NodeJS.Timeout;
     let reconnectTimeout: NodeJS.Timeout;
+    let reconnectAttempts = 0;
+    const maxReconnectAttempts = 3;
 
     const connect = () => {
       try {
         console.log('Attempting to connect to Lanyard with Discord ID:', DISCORD_USER_ID);
+        
+        // Validate Discord User ID format
+        if (!DISCORD_USER_ID || !/^\d{17,19}$/.test(DISCORD_USER_ID)) {
+          console.warn('Invalid Discord User ID format:', DISCORD_USER_ID);
+          setIsConnected(false);
+          return;
+        }
+        
         ws = new WebSocket('wss://api.lanyard.rest/socket');
         
         ws.onopen = () => {
           console.log('Lanyard WebSocket connected');
           setIsConnected(true);
+          reconnectAttempts = 0;
           
           // Subscribe to user
         if (ws && ws.readyState === WebSocket.OPEN) {
@@ -121,32 +132,39 @@ const ProfileSection = () => {
             setLastSeen(new Date().toLocaleTimeString());
           }
           
-          // Reconnect after 5 seconds
-          reconnectTimeout = setTimeout(connect, 5000);
+          // Only reconnect if we haven't exceeded max attempts
+          if (reconnectAttempts < maxReconnectAttempts) {
+            reconnectAttempts++;
+            const delay = Math.min(5000 * reconnectAttempts, 30000);
+            console.log(`Attempting reconnect ${reconnectAttempts}/${maxReconnectAttempts} in ${delay}ms`);
+            reconnectTimeout = setTimeout(connect, delay);
+          } else {
+            console.log('Max reconnection attempts reached. Lanyard connection disabled.');
+          }
         };
 
         ws.onerror = (error) => {
           console.error('Lanyard WebSocket error:', error);
-          console.warn('This might be due to an invalid Discord User ID or Lanyard service issues');
+          console.warn('Lanyard connection failed. This might be due to:');
+          console.warn('1. Invalid Discord User ID:', DISCORD_USER_ID);
+          console.warn('2. Lanyard service issues');
+          console.warn('3. Network connectivity problems');
           setIsConnected(false);
           
-          // Don't attempt to reconnect immediately on error
-          if (reconnectTimeout) {
-            clearTimeout(reconnectTimeout);
+          // Only reconnect on error if we haven't exceeded max attempts
+          if (reconnectAttempts < maxReconnectAttempts) {
+            reconnectAttempts++;
+            const delay = Math.min(10000 * reconnectAttempts, 60000);
+            console.log(`Error reconnect attempt ${reconnectAttempts}/${maxReconnectAttempts} in ${delay}ms`);
+            reconnectTimeout = setTimeout(connect, delay);
+          } else {
+            console.log('Max error reconnection attempts reached. Lanyard connection disabled.');
           }
-          
-          // Wait longer before reconnecting on error
-          reconnectTimeout = setTimeout(connect, 30000);
         };
 
       } catch (error) {
         console.error('Failed to connect to Lanyard:', error);
         setIsConnected(false);
-        
-        // Don't reconnect on connection creation failure
-        if (reconnectTimeout) {
-          clearTimeout(reconnectTimeout);
-        }
       }
     };
 
