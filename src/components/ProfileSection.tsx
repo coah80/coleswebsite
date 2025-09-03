@@ -102,30 +102,51 @@ const ProfileSection = () => {
 
         ws.onmessage = (event) => {
           try {
+            // Check if the WebSocket is still valid and data exists
+            if (!event.data || ws?.readyState !== WebSocket.OPEN) {
+              console.warn('Received message from invalid WebSocket connection');
+              return;
+            }
+
             const message = JSON.parse(event.data);
+            
+            // Validate message structure
+            if (!message || typeof message.op !== 'number') {
+              console.warn('Invalid Lanyard message format:', message);
+              return;
+            }
             
             if (message.op === 0) {
               // Initial data or update
               console.log('Lanyard data received:', message.d);
-              setLanyardData(message.d);
-              if (message.d?.discord_status !== 'offline') {
-                setLastSeen('');
+              if (message.d && typeof message.d === 'object') {
+                setLanyardData(message.d);
+                if (message.d?.discord_status !== 'offline') {
+                  setLastSeen('');
+                }
               }
             } else if (message.op === 1) {
               // Heartbeat request
-              const heartbeatData = { op: 3 };
-              ws?.send(JSON.stringify(heartbeatData));
+              if (ws?.readyState === WebSocket.OPEN) {
+                ws.send(JSON.stringify({ op: 3 }));
+              }
               
               // Set up heartbeat interval
               if (heartbeatInterval) clearInterval(heartbeatInterval);
-              heartbeatInterval = setInterval(() => {
-                if (ws?.readyState === WebSocket.OPEN) {
-                  ws.send(JSON.stringify({ op: 3 }));
-                }
-              }, message.d.heartbeat_interval);
+              if (message.d?.heartbeat_interval && typeof message.d.heartbeat_interval === 'number') {
+                heartbeatInterval = setInterval(() => {
+                  if (ws?.readyState === WebSocket.OPEN) {
+                    ws.send(JSON.stringify({ op: 3 }));
+                  }
+                }, message.d.heartbeat_interval);
+              }
             }
           } catch (error) {
             console.error('Error parsing Lanyard message:', error);
+            // Don't attempt to use the WebSocket if parsing fails
+            if (ws?.readyState === WebSocket.OPEN) {
+              ws.close();
+            }
           }
         };
 
@@ -148,22 +169,17 @@ const ProfileSection = () => {
         };
 
         ws.onerror = (error) => {
-          console.error('Lanyard WebSocket error:', error);
-          console.warn('Lanyard connection failed. This might be due to:');
-          console.warn('1. Invalid Discord User ID:', DISCORD_USER_ID);
-          console.warn('2. Lanyard service issues');
-          console.warn('3. Network connectivity problems');
+          console.warn('Lanyard WebSocket connection failed - this is expected if Discord integration is not set up');
           setIsConnected(false);
           
-          // Only reconnect on error if we haven't exceeded max attempts
-          if (reconnectAttempts < maxReconnectAttempts) {
-            reconnectAttempts++;
-            const delay = Math.min(10000 * reconnectAttempts, 60000);
-            console.log(`Error reconnect attempt ${reconnectAttempts}/${maxReconnectAttempts} in ${delay}ms`);
-            reconnectTimeout = setTimeout(connect, delay);
-          } else {
-            console.log('Max error reconnection attempts reached. Lanyard connection disabled.');
+          // Clean up any existing connection
+          if (ws) {
+            ws.close();
+            ws = null;
           }
+          
+          // Don't attempt reconnection on error to avoid spam
+          console.log('Lanyard connection disabled due to error');
         };
 
       } catch (error) {
