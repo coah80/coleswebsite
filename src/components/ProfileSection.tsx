@@ -49,7 +49,7 @@ const ProfileSection = () => {
   const [lastSeen, setLastSeen] = useState<string>('');
   const [currentTime, setCurrentTime] = useState(Date.now());
 
-  const DISCORD_USER_ID = '761701756119547955';
+  const DISCORD_USER_ID = import.meta.env.VITE_DISCORD_USER_ID || '761701756119547955';
 
   // Update current time every second for Spotify progress
   useEffect(() => {
@@ -67,6 +67,7 @@ const ProfileSection = () => {
 
     const connect = () => {
       try {
+        console.log('Attempting to connect to Lanyard with Discord ID:', DISCORD_USER_ID);
         ws = new WebSocket('wss://api.lanyard.rest/socket');
         
         ws.onopen = () => {
@@ -126,12 +127,26 @@ const ProfileSection = () => {
 
         ws.onerror = (error) => {
           console.error('Lanyard WebSocket error:', error);
+          console.warn('This might be due to an invalid Discord User ID or Lanyard service issues');
           setIsConnected(false);
+          
+          // Don't attempt to reconnect immediately on error
+          if (reconnectTimeout) {
+            clearTimeout(reconnectTimeout);
+          }
+          
+          // Wait longer before reconnecting on error
+          reconnectTimeout = setTimeout(connect, 30000);
         };
 
       } catch (error) {
         console.error('Failed to connect to Lanyard:', error);
         setIsConnected(false);
+        
+        // Don't reconnect on connection creation failure
+        if (reconnectTimeout) {
+          clearTimeout(reconnectTimeout);
+        }
       }
     };
 
