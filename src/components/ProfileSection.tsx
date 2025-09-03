@@ -49,7 +49,11 @@ const ProfileSection = () => {
   const [lastSeen, setLastSeen] = useState<string>('');
   const [currentTime, setCurrentTime] = useState(Date.now());
 
-  const DISCORD_USER_ID = import.meta.env.VITE_DISCORD_USER_ID || '761701756119547955';
+  const DISCORD_USER_ID = (import.meta.env.VITE_DISCORD_USER_ID && 
+    typeof import.meta.env.VITE_DISCORD_USER_ID === 'string' && 
+    import.meta.env.VITE_DISCORD_USER_ID.trim() !== '') 
+    ? import.meta.env.VITE_DISCORD_USER_ID 
+    : '761701756119547955';
 
   // Update current time every second for Spotify progress
   useEffect(() => {
