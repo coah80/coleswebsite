@@ -8,8 +8,7 @@
     "build": "vite build",
     "lint": "eslint .",
     "preview": "vite preview",
-    "serve": "vite preview --port 4173",
-    "install": "npm install"
+    "serve": "vite preview --port 4173"
   },
   "dependencies": {
     "@hookform/resolvers": "^3.10.0",
