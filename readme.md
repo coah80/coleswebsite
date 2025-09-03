@@ -1,1 +1,1 @@
-yo wsp me I'm cole
+have you heard of the video game "among us" it is a multiplayer strategy game where you and 14 of ur friends are given roles in which one or two of you are the imposter and you guys have to figure out who is the imposter. Its like the saying "among us" like "The imposter is among us" do you get the joke? Its like among us the game.
