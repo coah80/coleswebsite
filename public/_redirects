@@ -1,2 +1,6 @@
-# Handle client-side routing
+# Handle client-side routing - ensure all routes go to index.html
 /*    /index.html   200
+
+# Specific redirects for common paths that might cause issues
+/src/*    /index.html   200
+/assets/*    /assets/:splat   200
