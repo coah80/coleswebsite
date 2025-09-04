@@ -101,7 +101,7 @@ const LandscapeLayout = () => {
         isLandscape ? 'h-[calc(100vh-80px)] xl:h-[calc(100vh-100px)]' : ''
       }`}>
         <Card className={`min-h-full bg-gradient-card border-border/50 p-4 sm:p-6 xl:p-12 2xl:p-16 ${
-          isLandscape ? 'h-full' : ''
+          isLandscape ? 'h-full overflow-y-auto' : 'overflow-y-auto'
         }`}>
           {renderContent()}
         </Card>
