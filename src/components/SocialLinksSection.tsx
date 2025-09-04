@@ -258,12 +258,12 @@ const SocialLinksSection = ({ isLandscape }: SocialLinksSectionProps) => {
                 >
                   <Card className={`${isLandscape ? '' : 'p-1.5 sm:p-2 lg:p-2.5'} bg-card/50 border-border/30 hover:border-primary/50 transition-all duration-300 hover:shadow-link hover:-translate-y-1 group-hover:bg-gradient-card`} style={isLandscape ? { 
                     height: `calc((100% - ${(socialLinks.length - 1) * 4}px) / ${socialLinks.length})`,
-                    minHeight: '60px',
-                    padding: '12px'
+                    minHeight: '45px',
+                    padding: '8px'
                   } : {}}>
                     <div className={`flex items-center h-full ${isLandscape ? (isCompact ? 'justify-center' : 'gap-3') : 'gap-1.5 sm:gap-2 lg:gap-3'}`}>
-                      <div className={`${isLandscape ? 'p-3 rounded-full bg-gradient-to-r shadow-lg group-hover:scale-110 transition-transform duration-300 flex-shrink-0' : 'p-1 lg:p-1.5 rounded-full bg-gradient-to-r shadow-lg group-hover:scale-110 transition-transform duration-300 flex-shrink-0'} ${color}`}>
-                        <IconComponent className={`${isLandscape ? 'w-8 h-8 text-white' : 'w-2.5 h-2.5 sm:w-3 sm:h-3 lg:w-4 lg:h-4 text-white'}`} />
+                      <div className={`${isLandscape ? 'p-2 rounded-full bg-gradient-to-r shadow-lg group-hover:scale-110 transition-transform duration-300 flex-shrink-0' : 'p-1 lg:p-1.5 rounded-full bg-gradient-to-r shadow-lg group-hover:scale-110 transition-transform duration-300 flex-shrink-0'} ${color}`}>
+                        <IconComponent className={`${isLandscape ? 'w-6 h-6 text-white' : 'w-2.5 h-2.5 sm:w-3 sm:h-3 lg:w-4 lg:h-4 text-white'}`} />
                       </div>
                       {!isCompact && (
                       <div className="flex-1 min-w-0">
