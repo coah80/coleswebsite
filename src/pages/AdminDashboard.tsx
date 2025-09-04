@@ -175,25 +175,10 @@ const AdminDashboard = () => {
         const metrics = ctx.measureText(testLine);
         
         if (metrics.width > canvas.width - 60) {
-          
-          // Map signature fonts to canvas fonts
-          const fontMap: { [key: string]: string } = {
-            'dancing': 'Dancing Script',
-            'pacifico': 'Pacifico',
-            'great-vibes': 'Great Vibes',
-            'caveat': 'Caveat',
-            'sacramento': 'Sacramento',
-            'allura': 'Allura',
-            'alex-brush': 'Alex Brush',
-            'kaushan': 'Kaushan Script',
-            'satisfy': 'Satisfy',
-            'cookie': 'Cookie'
-          };
-          
-          const fontFamily = fontMap[submission.signature_font || 'dancing'] || 'Dancing Script';
-          ctx.font = `italic 18px ${fontFamily}, cursive`;
-          ctx.textAlign = 'left';
-          ctx.fillText(`— ${submission.signature_text}`, 30, y);
+          lines.push(currentLine);
+          currentLine = word;
+        } else {
+          currentLine = testLine;
         }
       }
       if (currentLine) lines.push(currentLine);
@@ -209,7 +194,23 @@ const AdminDashboard = () => {
       if (submission.signature_enabled && submission.signature_text) {
         y += 20;
         ctx.fillStyle = '#a855f7';
-        ctx.font = 'italic 18px Dancing Script, cursive'; // Use signature font
+        
+        // Map signature fonts to canvas fonts
+        const fontMap: { [key: string]: string } = {
+          'dancing': 'Dancing Script',
+          'pacifico': 'Pacifico',
+          'great-vibes': 'Great Vibes',
+          'caveat': 'Caveat',
+          'sacramento': 'Sacramento',
+          'allura': 'Allura',
+          'alex-brush': 'Alex Brush',
+          'kaushan': 'Kaushan Script',
+          'satisfy': 'Satisfy',
+          'cookie': 'Cookie'
+        };
+        
+        const fontFamily = fontMap[submission.signature_font || 'dancing'] || 'Dancing Script';
+        ctx.font = `italic 18px ${fontFamily}, cursive`;
         ctx.textAlign = 'right';
         ctx.fillText(`— ${submission.signature_text}`, canvas.width - 30, y);
         ctx.textAlign = 'left'; // Reset alignment
@@ -313,96 +314,97 @@ const AdminDashboard = () => {
             </div>
 
             <div className="grid gap-4">
-            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
-              {filteredSubmissions.map((submission) => (
-                <Card key={submission.id} className="aspect-square bg-gradient-card border-border/50 overflow-hidden group hover:shadow-lg transition-all duration-300">
-                  <div className="h-full flex flex-col">
-                    {/* Header */}
-                    <div className="p-3 border-b border-border/30 flex-shrink-0">
-                      <div className="flex items-center justify-between mb-2">
-                        <div className="flex items-center gap-2">
-                          {submission.type === 'drawing' ? (
-                            <Image className="h-4 w-4" />
-                          ) : (
-                            <MessageSquare className="h-4 w-4" />
-                          )}
-                          <Badge variant={submission.type === 'drawing' ? 'default' : 'secondary'} className="text-xs">
-                            {submission.type}
-                          </Badge>
-                        </div>
-                        <div className="flex gap-1">
-                          <Button
-                            size="sm"
-                            variant="ghost"
-                            onClick={() => downloadSubmissionAsImage(submission)}
-                            className="h-7 w-7 p-0 opacity-0 group-hover:opacity-100 transition-opacity"
-                          >
-                            <Download className="h-3 w-3" />
-                          </Button>
-                          <Button
-                            size="sm"
-                            variant="ghost"
-                            onClick={() => deleteSubmission(submission.id)}
-                            className="h-7 w-7 p-0 opacity-0 group-hover:opacity-100 transition-opacity text-destructive hover:text-destructive"
-                          >
-                            <Trash2 className="h-3 w-3" />
-                          </Button>
-                        </div>
-                      </div>
-                      <div className="text-xs text-muted-foreground truncate">
-                        {new Date(submission.submitted_at).toLocaleDateString()} {new Date(submission.submitted_at).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
-                      </div>
-                    </div>
-                    
-                    {/* Content */}
-                    <div className="flex-1 p-3 overflow-hidden">
-                      {submission.type === 'drawing' ? (
-                        <div className="h-full flex items-center justify-center">
-                          <img
-                            src={submission.content}
-                            alt="User drawing"
-                            className="max-w-full max-h-full object-contain rounded border border-border/30"
-                          />
-                        </div>
-                      ) : (
-                        <div className="h-full flex flex-col">
-                          <div className="flex-1 overflow-hidden">
-                            <p className="text-sm text-foreground bg-background/30 p-2 rounded border border-border/30 line-clamp-6 leading-relaxed">
-                              {submission.content}
-                            </p>
+              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
+                {filteredSubmissions.map((submission) => (
+                  <Card key={submission.id} className="aspect-square bg-gradient-card border-border/50 overflow-hidden group hover:shadow-lg transition-all duration-300">
+                    <div className="h-full flex flex-col">
+                      {/* Header */}
+                      <div className="p-3 border-b border-border/30 flex-shrink-0">
+                        <div className="flex items-center justify-between mb-2">
+                          <div className="flex items-center gap-2">
+                            {submission.type === 'drawing' ? (
+                              <Image className="h-4 w-4" />
+                            ) : (
+                              <MessageSquare className="h-4 w-4" />
+                            )}
+                            <Badge variant={submission.type === 'drawing' ? 'default' : 'secondary'} className="text-xs">
+                              {submission.type}
+                            </Badge>
                           </div>
-                          
-                          {/* Signature */}
-                          {submission.signature_enabled && submission.signature_text && (
-                            <div className="mt-2 pt-2 border-t border-border/20">
-                              <div className={`text-xs italic text-primary/80 truncate ${
-                                submission.signature_font === 'dancing' ? 'font-dancing' :
-                                submission.signature_font === 'pacifico' ? 'font-pacifico' :
-                                submission.signature_font === 'great-vibes' ? 'font-great-vibes' :
-                                submission.signature_font === 'caveat' ? 'font-caveat' :
-                                submission.signature_font === 'sacramento' ? 'font-sacramento' :
-                                submission.signature_font === 'allura' ? 'font-allura' :
-                                submission.signature_font === 'alex-brush' ? 'font-alex-brush' :
-                                submission.signature_font === 'kaushan' ? 'font-kaushan' :
-                                submission.signature_font === 'satisfy' ? 'font-satisfy' :
-                                submission.signature_font === 'cookie' ? 'font-cookie' : ''
-                              }`}>
-                                — {submission.signature_text}
-                              </div>
-                            </div>
-                          )}
+                          <div className="flex gap-1">
+                            <Button
+                              size="sm"
+                              variant="ghost"
+                              onClick={() => downloadSubmissionAsImage(submission)}
+                              className="h-7 w-7 p-0 opacity-0 group-hover:opacity-100 transition-opacity"
+                            >
+                              <Download className="h-3 w-3" />
+                            </Button>
+                            <Button
+                              size="sm"
+                              variant="ghost"
+                              onClick={() => deleteSubmission(submission.id)}
+                              className="h-7 w-7 p-0 opacity-0 group-hover:opacity-100 transition-opacity text-destructive hover:text-destructive"
+                            >
+                              <Trash2 className="h-3 w-3" />
+                            </Button>
+                          </div>
                         </div>
-                      )}
+                        <div className="text-xs text-muted-foreground truncate">
+                          {new Date(submission.submitted_at).toLocaleDateString()} {new Date(submission.submitted_at).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
+                        </div>
+                      </div>
+                      
+                      {/* Content */}
+                      <div className="flex-1 p-3 overflow-hidden">
+                        {submission.type === 'drawing' ? (
+                          <div className="h-full flex items-center justify-center">
+                            <img
+                              src={submission.content}
+                              alt="User drawing"
+                              className="max-w-full max-h-full object-contain rounded border border-border/30"
+                            />
+                          </div>
+                        ) : (
+                          <div className="h-full flex flex-col">
+                            <div className="flex-1 overflow-hidden">
+                              <p className="text-sm text-foreground bg-background/30 p-2 rounded border border-border/30 line-clamp-6 leading-relaxed">
+                                {submission.content}
+                              </p>
+                            </div>
+                            
+                            {/* Signature */}
+                            {submission.signature_enabled && submission.signature_text && (
+                              <div className="mt-2 pt-2 border-t border-border/20">
+                                <div className={`text-xs italic text-primary/80 truncate ${
+                                  submission.signature_font === 'dancing' ? 'font-dancing' :
+                                  submission.signature_font === 'pacifico' ? 'font-pacifico' :
+                                  submission.signature_font === 'great-vibes' ? 'font-great-vibes' :
+                                  submission.signature_font === 'caveat' ? 'font-caveat' :
+                                  submission.signature_font === 'sacramento' ? 'font-sacramento' :
+                                  submission.signature_font === 'allura' ? 'font-allura' :
+                                  submission.signature_font === 'alex-brush' ? 'font-alex-brush' :
+                                  submission.signature_font === 'kaushan' ? 'font-kaushan' :
+                                  submission.signature_font === 'satisfy' ? 'font-satisfy' :
+                                  submission.signature_font === 'cookie' ? 'font-cookie' : ''
+                                }`}>
+                                  — {submission.signature_text}
+                                </div>
+                              </div>
+                            )}
+                          </div>
+                        )}
+                      </div>
                     </div>
-                  </div>
-                </Card>
-              ))}
-              
-              {filteredSubmissions.length === 0 && (
-                <Card className="p-8 text-center bg-gradient-card border-border/50">
-                  <p className="text-muted-foreground">No submissions found</p>
-                </Card>
-              )}
+                  </Card>
+                ))}
+                
+                {filteredSubmissions.length === 0 && (
+                  <Card className="p-8 text-center bg-gradient-card border-border/50">
+                    <p className="text-muted-foreground">No submissions found</p>
+                  </Card>
+                )}
+              </div>
             </div>
           </TabsContent>
 
