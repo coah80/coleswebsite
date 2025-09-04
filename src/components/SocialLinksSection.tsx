@@ -173,6 +173,20 @@ const SocialLinksSection = ({ isLandscape }: SocialLinksSectionProps) => {
   const [socialLinks, setSocialLinks] = useState<SocialLink[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const [screenHeight, setScreenHeight] = useState(window.innerHeight);
+  const [isCompact, setIsCompact] = useState(false);
+
+  useEffect(() => {
+    const handleResize = () => {
+      setScreenHeight(window.innerHeight);
+      // Switch to icon-only mode when screen is very short or when there are many links
+      setIsCompact(window.innerHeight < 600 || socialLinks.length > 8);
+    };
+
+    handleResize();
+    window.addEventListener('resize', handleResize);
+    return () => window.removeEventListener('resize', handleResize);
+  }, [socialLinks.length]);
 
   useEffect(() => {
     fetchSocialLinks();
@@ -228,7 +242,7 @@ const SocialLinksSection = ({ isLandscape }: SocialLinksSectionProps) => {
         <div className={`${isLandscape ? 'flex-1 flex flex-col min-h-0' : 'flex-1'}`}>
           <div className={`${isLandscape ? 'flex flex-col h-full pb-4' : 'space-y-1.5 lg:space-y-2 pb-2 lg:pb-4'}`} style={isLandscape ? { 
             height: `calc(100% - 2rem)`, 
-            gap: `${Math.max(1, Math.min(6, (window.innerHeight - 400) / Math.max(1, socialLinks.length * 10)))}px` 
+            gap: `${Math.max(1, Math.min(6, (screenHeight - 400) / Math.max(1, socialLinks.length * 10)))}px` 
           } : {}}>
             {socialLinks.map((link, index) => {
               const { icon: IconComponent, color } = detectPlatform(link.name, link.url);
@@ -243,37 +257,39 @@ const SocialLinksSection = ({ isLandscape }: SocialLinksSectionProps) => {
                   style={{ animationDelay: `${index * 100}ms` }}
                 >
                   <Card className={`${isLandscape ? 'flex-1' : 'p-1.5 sm:p-2 lg:p-2.5'} bg-card/50 border-border/30 hover:border-primary/50 transition-all duration-300 hover:shadow-link hover:-translate-y-1 group-hover:bg-gradient-card`} style={isLandscape ? { 
-                    padding: `${Math.max(2, Math.min(12, (window.innerHeight - 400) / Math.max(1, socialLinks.length * 1.5)))}px`,
-                    height: `${Math.max(30, (window.innerHeight - 400) / Math.max(1, socialLinks.length) - Math.max(1, Math.min(6, (window.innerHeight - 400) / Math.max(1, socialLinks.length * 10))))}px`
+                    padding: isCompact ? `${Math.max(4, Math.min(8, (screenHeight - 400) / Math.max(1, socialLinks.length * 2)))}px` : `${Math.max(2, Math.min(12, (screenHeight - 400) / Math.max(1, socialLinks.length * 1.5)))}px`,
+                    height: `${Math.max(30, (screenHeight - 400) / Math.max(1, socialLinks.length) - Math.max(1, Math.min(6, (screenHeight - 400) / Math.max(1, socialLinks.length * 10))))}px`
                   } : {}}>
-                    <div className={`flex items-center h-full ${isLandscape ? 'gap-2 xl:gap-3 2xl:gap-4' : 'gap-1.5 sm:gap-2 lg:gap-3'}`}>
+                    <div className={`flex items-center h-full ${isLandscape ? (isCompact ? 'justify-center' : 'gap-2 xl:gap-3 2xl:gap-4') : 'gap-1.5 sm:gap-2 lg:gap-3'}`}>
                       <div className={`${isLandscape ? 'rounded-full bg-gradient-to-r shadow-lg group-hover:scale-110 transition-transform duration-300 flex-shrink-0' : 'p-1 lg:p-1.5 rounded-full bg-gradient-to-r shadow-lg group-hover:scale-110 transition-transform duration-300 flex-shrink-0'} ${color}`} style={isLandscape ? { 
-                        padding: `${Math.max(1, Math.min(8, (window.innerHeight - 400) / Math.max(1, socialLinks.length * 2)))}px`
+                        padding: `${Math.max(1, Math.min(8, (screenHeight - 400) / Math.max(1, socialLinks.length * 2)))}px`
                       } : {}}>
                         <IconComponent className={`${isLandscape ? 'text-white' : 'w-2.5 h-2.5 sm:w-3 sm:h-3 lg:w-4 lg:h-4 text-white'}`} style={isLandscape ? { 
-                          width: `${Math.max(8, Math.min(24, (window.innerHeight - 400) / Math.max(1, socialLinks.length * 1.2)))}px`, 
-                          height: `${Math.max(8, Math.min(24, (window.innerHeight - 400) / Math.max(1, socialLinks.length * 1.2)))}px` 
+                          width: `${Math.max(8, Math.min(24, (screenHeight - 400) / Math.max(1, socialLinks.length * 1.2)))}px`, 
+                          height: `${Math.max(8, Math.min(24, (screenHeight - 400) / Math.max(1, socialLinks.length * 1.2)))}px` 
                         } : {}} />
                       </div>
+                      {!isCompact && (
                       <div className="flex-1 min-w-0">
                         <div className="flex items-center gap-2">
-                          <span className={`font-medium group-hover:text-primary transition-colors font-rounded truncate`} style={isLandscape ? { fontSize: `${Math.max(8, Math.min(16, (window.innerHeight - 400) / Math.max(1, socialLinks.length * 2)))}px` } : {}} >
+                          <span className={`font-medium group-hover:text-primary transition-colors font-rounded truncate`} style={isLandscape ? { fontSize: `${Math.max(8, Math.min(16, (screenHeight - 400) / Math.max(1, socialLinks.length * 2)))}px` } : {}} >
                             {link.name}
                           </span>
                           <ExternalLink className={`${isLandscape ? 'text-muted-foreground/50 group-hover:text-primary/70 transition-colors flex-shrink-0' : 'h-1.5 w-1.5 sm:h-2 sm:w-2 lg:h-2.5 lg:w-2.5 text-muted-foreground/50 group-hover:text-primary/70 transition-colors flex-shrink-0'}`} style={isLandscape ? { 
-                            width: `${Math.max(6, Math.min(12, (window.innerHeight - 400) / Math.max(1, socialLinks.length * 3)))}px`, 
-                            height: `${Math.max(6, Math.min(12, (window.innerHeight - 400) / Math.max(1, socialLinks.length * 3)))}px` 
+                            width: `${Math.max(6, Math.min(12, (screenHeight - 400) / Math.max(1, socialLinks.length * 3)))}px`, 
+                            height: `${Math.max(6, Math.min(12, (screenHeight - 400) / Math.max(1, socialLinks.length * 3)))}px` 
                           } : {}} />
                         </div>
-                        <div className={`text-muted-foreground font-code truncate`} style={isLandscape ? { fontSize: `${Math.max(6, Math.min(12, (window.innerHeight - 400) / Math.max(1, socialLinks.length * 2.5)))}px` } : {}}>
+                        <div className={`text-muted-foreground font-code truncate`} style={isLandscape ? { fontSize: `${Math.max(6, Math.min(12, (screenHeight - 400) / Math.max(1, socialLinks.length * 2.5)))}px` } : {}}>
                           {link.handle}
                         </div>
                         {link.description && (
-                          <div className={`text-muted-foreground/80 ${isLandscape ? 'block' : 'hidden md:block text-xs'} font-rounded italic truncate`} style={isLandscape ? { fontSize: `${Math.max(5, Math.min(10, (window.innerHeight - 400) / Math.max(1, socialLinks.length * 3)))}px` } : {}}>
+                          <div className={`text-muted-foreground/80 ${isLandscape ? 'block' : 'hidden md:block text-xs'} font-rounded italic truncate`} style={isLandscape ? { fontSize: `${Math.max(5, Math.min(10, (screenHeight - 400) / Math.max(1, socialLinks.length * 3)))}px` } : {}}>
                             {link.description}
                           </div>
                         )}
                       </div>
+                      )}
                     </div>
                   </Card>
                 </a>
