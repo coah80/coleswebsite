@@ -132,12 +132,12 @@ const SocialLinksSection = ({ isLandscape }: SocialLinksSectionProps) => {
   }
 
   return (
-    <div className={`${isLandscape ? 'h-full flex flex-col' : 'flex flex-col'}`} data-section="social">
+    <div className={`${isLandscape ? 'h-full flex flex-col pb-4' : 'flex flex-col'}`} data-section="social">
       {/* Main Socials */}
-      <div className={`${isLandscape ? 'h-full flex flex-col' : ''}`}>
+      <div className={`${isLandscape ? 'flex-1 flex flex-col min-h-0' : ''}`}>
         <h2 className={`text-base lg:text-lg xl:text-xl font-semibold text-foreground font-fun ${isLandscape ? 'mb-2 xl:mb-3 flex-shrink-0' : 'mb-2 lg:mb-3'}`}>find me here</h2>
-        <div className={`${isLandscape ? 'flex-1 flex flex-col' : 'flex-1'}`}>
-          <div className={`${isLandscape ? 'flex flex-col h-full' : 'space-y-1.5 lg:space-y-2 pb-2 lg:pb-4'}`}>
+        <div className={`${isLandscape ? 'flex-1 flex flex-col min-h-0' : 'flex-1'}`}>
+          <div className={`${isLandscape ? 'flex flex-col flex-1 min-h-0 pb-2' : 'space-y-1.5 lg:space-y-2 pb-2 lg:pb-4'}`}>
             {socialLinks.map((link, index) => {
               const { icon: IconComponent, color } = detectPlatform(link.name, link.url);
               

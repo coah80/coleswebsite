@@ -468,7 +468,7 @@ const ProfileSection = () => {
         </div>
 
         {/* Bio */}
-        <div className={`pt-2 ${isLandscape ? 'mt-auto' : 'mt-4'}`}>
+        <div className={`pt-2 ${isLandscape ? 'mt-auto pb-4' : 'mt-4'}`}>
           <h3 className="font-medium mb-2 text-foreground text-sm lg:text-base font-rounded">about me</h3>
           <p className="text-xs lg:text-sm text-muted-foreground leading-relaxed font-rounded">
             hey im cole! im a video editor, tech enthusiast, and bad coder. check out the{' '}
@@ -498,7 +498,7 @@ const ProfileSection = () => {
         </div>
 
         {/* Status Footer */}
-        <div className="mt-3 lg:mt-4 pt-2 lg:pt-3 border-t border-border/30">
+        <div className={`mt-3 lg:mt-4 pt-2 lg:pt-3 border-t border-border/30 ${isLandscape ? 'pb-2' : ''}`}>
           <div className="flex items-center justify-between text-xs lg:text-sm text-muted-foreground">
             <div className="flex items-center gap-2">
               <div className={`w-3 h-3 rounded-full ${
