@@ -103,7 +103,9 @@ const LandscapeLayout = () => {
         <Card className={`min-h-full bg-gradient-card border-border/50 p-4 sm:p-6 xl:p-12 2xl:p-16 ${
           isLandscape ? 'h-full overflow-y-auto' : 'overflow-y-auto'
         }`}>
-          {renderContent()}
+          <div className="py-8 sm:py-12 lg:py-16">
+            {renderContent()}
+          </div>
         </Card>
       </main>
     </div>
