@@ -4,7 +4,7 @@ import {
   Instagram, Youtube, Twitter, Github, Mail, MessageCircle, Coffee,
   Gamepad2, Music, Camera, Linkedin, Facebook, Twitch, ExternalLink,
   Phone, MapPin, Globe, Heart, Star, Bookmark, Video, Mic, Radio,
-  Users, Zap, Play, Headphones, Monitor, Smartphone, Tv, Film,
+  Users, Zap, Play, Headphones, Monitor, Smartphone, Tv, Film, Calendar as CalendarIcon,
   Share, Link, Hash, AtSign, DollarSign, Gift, ShoppingCart
 } from 'lucide-react';
 import { supabase } from '@/integrations/supabase/client';
@@ -101,7 +101,7 @@ const PLATFORM_CONFIG: Record<string, { icon: any; color: string }> = {
   indiegogo: { icon: Gift, color: 'from-pink-500 to-purple-500' },
   
   // Professional/Business
-  calendly: { icon: Calendar, color: 'from-blue-500 to-blue-600' },
+  calendly: { icon: CalendarIcon, color: 'from-blue-500 to-blue-600' },
   linktree: { icon: Link, color: 'from-green-400 to-green-500' },
   beacons: { icon: Link, color: 'from-purple-500 to-pink-500' },
   carrd: { icon: Link, color: 'from-blue-500 to-purple-500' },
