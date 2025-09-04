@@ -6,7 +6,7 @@ import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
 import { Switch } from '@/components/ui/switch';
 import { Badge } from '@/components/ui/badge';
-import { Trash2, Plus, ExternalLink, GripVertical, Copy } from 'lucide-react';
+import { Trash2, Plus, ExternalLink, GripVertical, Copy, ArrowUp, ArrowDown } from 'lucide-react';
 import { 
   Instagram, Youtube, Twitter, Github, Mail, MessageCircle, Coffee,
   Gamepad2, Music, Camera, Linkedin, Facebook, Twitch,
@@ -107,6 +107,49 @@ const SocialLinksManager = () => {
   useEffect(() => {
     fetchSocialLinks();
   }, []);
+
+  const moveLink = async (linkId: string, direction: 'up' | 'down') => {
+    const currentIndex = socialLinks.findIndex(link => link.id === linkId);
+    if (currentIndex === -1) return;
+    
+    const newIndex = direction === 'up' ? currentIndex - 1 : currentIndex + 1;
+    if (newIndex < 0 || newIndex >= socialLinks.length) return;
+    
+    // Create new array with swapped positions
+    const newLinks = [...socialLinks];
+    [newLinks[currentIndex], newLinks[newIndex]] = [newLinks[newIndex], newLinks[currentIndex]];
+    
+    // Update display_order for both items
+    try {
+      const updates = [
+        supabase
+          .from('social_links')
+          .update({ display_order: newIndex })
+          .eq('id', linkId),
+        supabase
+          .from('social_links')
+          .update({ display_order: currentIndex })
+          .eq('id', newLinks[currentIndex].id)
+      ];
+      
+      await Promise.all(updates);
+      
+      // Update local state immediately for better UX
+      setSocialLinks(newLinks);
+      
+      toast({ 
+        title: "Success", 
+        description: "Link order updated" 
+      });
+    } catch (error) {
+      console.error('Error updating link order:', error);
+      toast({
+        title: "Error",
+        description: "Failed to update link order",
+        variant: "destructive",
+      });
+    }
+  };
 
   const fetchSocialLinks = async () => {
     try {
@@ -337,8 +380,27 @@ const SocialLinksManager = () => {
           return (
             <Card key={link.id} className="p-4 bg-gradient-card border-border/50">
               <div className="flex items-center gap-4">
-                <div className="flex items-center gap-2">
-                  <GripVertical className="h-4 w-4 text-muted-foreground cursor-move" />
+                <div className="flex items-center gap-2 flex-shrink-0">
+                  <div className="flex flex-col gap-1">
+                    <Button
+                      variant="ghost"
+                      size="sm"
+                      className="h-6 w-6 p-0"
+                      onClick={() => moveLink(link.id, 'up')}
+                      disabled={socialLinks.findIndex(l => l.id === link.id) === 0}
+                    >
+                      <ArrowUp className="h-3 w-3" />
+                    </Button>
+                    <Button
+                      variant="ghost"
+                      size="sm"
+                      className="h-6 w-6 p-0"
+                      onClick={() => moveLink(link.id, 'down')}
+                      disabled={socialLinks.findIndex(l => l.id === link.id) === socialLinks.length - 1}
+                    >
+                      <ArrowDown className="h-3 w-3" />
+                    </Button>
+                  </div>
                   <div className={`p-2 rounded-full bg-gradient-to-r ${color} shadow-lg`}>
                     <IconComponent className="w-4 h-4 text-white" />
                   </div>
@@ -361,7 +423,7 @@ const SocialLinksManager = () => {
                   )}
                 </div>
                 
-                <div className="flex items-center gap-2">
+                <div className="flex items-center gap-2 flex-shrink-0">
                   <Switch
                     checked={link.is_published}
                     onCheckedChange={(checked) => togglePublished(link.id, checked)}
