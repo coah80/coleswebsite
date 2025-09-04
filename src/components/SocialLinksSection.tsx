@@ -5,7 +5,7 @@ import {
   Gamepad2, Music, Camera, Linkedin, Facebook, Twitch, ExternalLink,
   Phone, MapPin, Globe, Heart, Star, Bookmark, Video, Mic, Radio,
   Users, Zap, Play, Headphones, Monitor, Smartphone, Tv, Film, Calendar as CalendarIcon,
-  Share, Link, Hash, AtSign, DollarSign, Gift, ShoppingCart
+  Share, Link, Hash, AtSign, DollarSign, Gift, ShoppingCart, Edit
 } from 'lucide-react';
 import { supabase } from '@/integrations/supabase/client';
 
