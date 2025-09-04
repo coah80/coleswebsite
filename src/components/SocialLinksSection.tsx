@@ -9,6 +9,26 @@ import {
 } from 'lucide-react';
 import { supabase } from '@/integrations/supabase/client';
 
+// Define styles outside component for better performance
+const getButtonStyle = (socialLinksLength: number, isLandscape: boolean) => {
+  if (!isLandscape) return {};
+  
+  return {
+    flex: 1,
+    minHeight: '50px',
+    padding: '8px'
+  };
+};
+
+const getContainerStyle = (isLandscape: boolean) => {
+  if (!isLandscape) return {};
+  
+  return {
+    height: '100%',
+    gap: '4px'
+  };
+};
+
 interface SocialLink {
   id: string;
   name: string;
@@ -175,7 +195,6 @@ const SocialLinksSection = ({ isLandscape }: SocialLinksSectionProps) => {
   const [error, setError] = useState<string | null>(null);
   const [screenHeight, setScreenHeight] = useState(window.innerHeight);
   const [isCompact, setIsCompact] = useState(false);
-  const [forceUpdate, setForceUpdate] = useState(0);
 
   useEffect(() => {
     const handleResize = () => {
@@ -191,18 +210,10 @@ const SocialLinksSection = ({ isLandscape }: SocialLinksSectionProps) => {
 
   useEffect(() => {
     fetchSocialLinks();
-    // Force a layout recalculation on mount
-    setForceUpdate(prev => prev + 1);
   }, []);
 
-  // Force layout recalculation when socialLinks change
   useEffect(() => {
-    // Force a complete re-render when social links change
-    const timer = setTimeout(() => {
-      setForceUpdate(prev => prev + 1);
-      setIsCompact(window.innerHeight < 600 || socialLinks.length > 8);
-    }, 100);
-    return () => clearTimeout(timer);
+    setIsCompact(window.innerHeight < 600 || socialLinks.length > 8);
   }, [socialLinks.length]);
 
   const fetchSocialLinks = async () => {
@@ -257,12 +268,10 @@ const SocialLinksSection = ({ isLandscape }: SocialLinksSectionProps) => {
       <div className={`${isLandscape ? 'flex-1 flex flex-col min-h-0' : ''}`}>
         <h2 className={`text-base lg:text-lg xl:text-xl font-semibold text-foreground font-fun ${isLandscape ? 'mb-6 xl:mb-8 flex-shrink-0' : 'mb-2 lg:mb-3'}`}>find me here</h2>
         <div className={`${isLandscape ? 'flex-1 flex flex-col min-h-0' : 'flex-1'}`}>
-          <div className={`${isLandscape ? 'flex flex-col h-full' : 'space-y-1.5 lg:space-y-2 pb-2 lg:pb-4'}`} style={isLandscape ? { 
-            height: '100%',
-            gap: '4px',
-            // Force recalculation with key
-            transform: `translateZ(${forceUpdate}px)`
-          } : {}}>
+          <div 
+            className={`${isLandscape ? 'flex flex-col h-full' : 'space-y-1.5 lg:space-y-2 pb-2 lg:pb-4'}`} 
+            style={getContainerStyle(isLandscape)}
+          >
             {socialLinks.map((link, index) => {
               const { icon: IconComponent, color } = detectPlatform(link.name, link.url);
               
@@ -277,14 +286,7 @@ const SocialLinksSection = ({ isLandscape }: SocialLinksSectionProps) => {
                 >
                   <Card 
                     className={`${isLandscape ? '' : 'p-1.5 sm:p-2 lg:p-2.5'} bg-card/50 border-border/30 hover:border-primary/50 transition-all duration-300 hover:shadow-link hover:-translate-y-1 group-hover:bg-gradient-card`} 
-                    style={isLandscape ? { 
-                      height: `calc((100% - ${(socialLinks.length - 1) * 4}px) / ${socialLinks.length})`,
-                      minHeight: '50px',
-                      padding: '8px',
-                      flex: `1 1 calc(100% / ${socialLinks.length})`,
-                      // Force layout recalculation
-                      willChange: 'height'
-                    } : {}}
+                    style={getButtonStyle(socialLinks.length, isLandscape)}
                   >
                     <div className={`flex items-center h-full ${isLandscape ? (isCompact ? 'justify-center' : 'gap-3') : 'gap-1.5 sm:gap-2 lg:gap-3'}`}>
                       <div className={`${isLandscape ? 'p-2 rounded-full bg-gradient-to-r shadow-lg group-hover:scale-110 transition-transform duration-300 flex-shrink-0' : 'p-1 lg:p-1.5 rounded-full bg-gradient-to-r shadow-lg group-hover:scale-110 transition-transform duration-300 flex-shrink-0'} ${color}`}>
