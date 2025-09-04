@@ -48,6 +48,21 @@ const ProfileSection = () => {
   const [isConnected, setIsConnected] = useState(false);
   const [lastSeen, setLastSeen] = useState<string>('');
   const [currentTime, setCurrentTime] = useState(Date.now());
+  const [isLandscape, setIsLandscape] = useState(false);
+
+  useEffect(() => {
+    const checkOrientation = () => {
+      const width = window.innerWidth;
+      const height = window.innerHeight;
+      const aspectRatio = width / height;
+      const shouldUseLandscape = width > 1200 || aspectRatio > 1.3;
+      setIsLandscape(shouldUseLandscape);
+    };
+
+    checkOrientation();
+    window.addEventListener('resize', checkOrientation);
+    return () => window.removeEventListener('resize', checkOrientation);
+  }, []);
 
   const DISCORD_USER_ID = (import.meta.env.VITE_DISCORD_USER_ID && 
     typeof import.meta.env.VITE_DISCORD_USER_ID === 'string' && 
@@ -254,9 +269,11 @@ const ProfileSection = () => {
     lanyardData.spotify.timestamps.end > currentTime;
 
   return (
-    <div className="h-full lg:h-full">
+    <div className={isLandscape ? "h-full" : ""}>
       {/* Main Profile Card */}
-      <Card className="p-4 lg:p-6 xl:p-8 2xl:p-12 bg-card/50 border-border/30 min-h-full lg:h-full flex flex-col">
+      <Card className={`p-4 lg:p-6 xl:p-8 2xl:p-12 bg-card/50 border-border/30 min-h-full flex flex-col ${
+        isLandscape ? 'h-full' : ''
+      }`}>
         <div className="flex items-start gap-4 lg:gap-6 xl:gap-8 mb-4 xl:mb-6">
           {/* Avatar */}
           <div className="relative flex-shrink-0">
@@ -451,7 +468,7 @@ const ProfileSection = () => {
         </div>
 
         {/* Bio */}
-        <div className="mt-auto pt-2">
+        <div className={`pt-2 ${isLandscape ? 'mt-auto' : 'mt-4'}`}>
           <h3 className="font-medium mb-2 text-foreground text-sm lg:text-base font-rounded">about me</h3>
           <p className="text-xs lg:text-sm text-muted-foreground leading-relaxed font-rounded">
             hey im cole! im a video editor, tech enthusiast, and bad coder. check out the{' '}

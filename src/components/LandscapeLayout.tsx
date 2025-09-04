@@ -10,6 +10,24 @@ import AdminButton from '@/components/AdminButton';
 
 const LandscapeLayout = () => {
   const [activeTab, setActiveTab] = useState<'home' | 'portfolio' | 'submissions'>('home');
+  const [isLandscape, setIsLandscape] = useState(false);
+
+  useEffect(() => {
+    const checkOrientation = () => {
+      // Use a combination of width and aspect ratio to determine layout
+      const width = window.innerWidth;
+      const height = window.innerHeight;
+      const aspectRatio = width / height;
+      
+      // Consider landscape if width > 1200px OR aspect ratio > 1.3
+      const shouldUseLandscape = width > 1200 || aspectRatio > 1.3;
+      setIsLandscape(shouldUseLandscape);
+    };
+
+    checkOrientation();
+    window.addEventListener('resize', checkOrientation);
+    return () => window.removeEventListener('resize', checkOrientation);
+  }, []);
 
   useEffect(() => {
     const handleTabChange = (event: CustomEvent) => {
@@ -43,12 +61,12 @@ const LandscapeLayout = () => {
   };
 
   return (
-    <div className="min-h-screen bg-background lg:h-screen lg:overflow-hidden">
+    <div className={`min-h-screen bg-background ${isLandscape ? 'h-screen overflow-hidden' : ''}`}>
       <AdminButton />
       {/* Folder Tabs */}
       <div className="border-b border-border/30 bg-card/30">
-        <div className="max-w-[1800px] mx-auto px-4 sm:px-6 lg:px-8 xl:px-12">
-          <div className="flex gap-1 pt-2 lg:pt-4 xl:pt-6">
+        <div className="max-w-[1800px] mx-auto px-4 sm:px-6 xl:px-12">
+          <div className={`flex gap-1 ${isLandscape ? 'pt-4 xl:pt-6' : 'pt-2'}`}>
             {tabs.map((tab) => {
               const isActive = activeTab === tab.id;
               const Icon = isActive ? FolderOpen : Folder;
@@ -60,7 +78,8 @@ const LandscapeLayout = () => {
                   onClick={() => setActiveTab(tab.id)}
                   className={`
                     relative rounded-t-lg rounded-b-none border-t border-l border-r border-b-0
-                    px-3 sm:px-4 lg:px-6 py-2 lg:py-3 text-sm lg:text-base xl:text-lg
+                    px-3 sm:px-4 py-2 text-sm
+                    ${isLandscape ? 'xl:px-6 xl:py-3 xl:text-base 2xl:text-lg' : ''}
                     ${isActive 
                       ? 'bg-background border-border text-foreground shadow-sm' 
                       : 'bg-card/50 border-border/50 text-muted-foreground hover:bg-card hover:text-foreground'
@@ -68,7 +87,7 @@ const LandscapeLayout = () => {
                     ${isActive ? 'z-10' : 'z-0'}
                   `}
                 >
-                  <Icon className="mr-2 h-4 w-4 lg:h-5 lg:w-5" />
+                  <Icon className={`mr-2 h-4 w-4 ${isLandscape ? 'xl:h-5 xl:w-5' : ''}`} />
                   <span className="font-heading font-medium">{tab.label}</span>
                 </Button>
               );
@@ -78,8 +97,12 @@ const LandscapeLayout = () => {
       </div>
 
       {/* Content Area */}
-      <main className="max-w-[1800px] mx-auto p-3 sm:p-4 lg:p-6 xl:p-8 2xl:p-12 min-h-[calc(100vh-60px)] lg:h-[calc(100vh-80px)] xl:h-[calc(100vh-100px)]">
-        <Card className="min-h-full lg:h-full bg-gradient-card border-border/50 p-4 sm:p-6 lg:p-8 xl:p-12 2xl:p-16">
+      <main className={`max-w-[1800px] mx-auto p-3 sm:p-4 xl:p-8 2xl:p-12 min-h-[calc(100vh-60px)] ${
+        isLandscape ? 'h-[calc(100vh-80px)] xl:h-[calc(100vh-100px)]' : ''
+      }`}>
+        <Card className={`min-h-full bg-gradient-card border-border/50 p-4 sm:p-6 xl:p-12 2xl:p-16 ${
+          isLandscape ? 'h-full' : ''
+        }`}>
           {renderContent()}
         </Card>
       </main>

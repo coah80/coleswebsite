@@ -128,11 +128,11 @@ const SocialLinksSection = () => {
   }
 
   return (
-    <div className="h-full flex flex-col" data-section="social">
+    <div className={`flex flex-col ${isLandscape ? 'h-full' : ''}`} data-section="social">
       {/* Main Socials */}
       <div>
         <h2 className="text-base lg:text-lg xl:text-xl font-semibold mb-2 lg:mb-3 text-foreground font-fun">find me here</h2>
-        <div className="flex-1 lg:overflow-y-auto lg:max-h-[50vh] xl:max-h-[60vh]">
+        <div className={`flex-1 ${isLandscape ? 'overflow-y-auto max-h-[50vh] xl:max-h-[60vh]' : ''}`}>
           <div className="space-y-1.5 lg:space-y-2 pb-2 lg:pb-4">
             {socialLinks.map((link, index) => {
               const { icon: IconComponent, color } = detectPlatform(link.name, link.url);
