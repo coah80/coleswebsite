@@ -238,7 +238,7 @@ const SocialLinksSection = ({ isLandscape }: SocialLinksSectionProps) => {
     <div className={`${isLandscape ? 'h-full flex flex-col overflow-hidden' : 'flex flex-col'}`} data-section="social">
       {/* Main Socials */}
       <div className={`${isLandscape ? 'flex-1 flex flex-col min-h-0' : ''}`}>
-        <h2 className={`text-base lg:text-lg xl:text-xl font-semibold text-foreground font-fun ${isLandscape ? 'mb-2 xl:mb-3 flex-shrink-0' : 'mb-2 lg:mb-3'}`}>find me here</h2>
+        <h2 className={`text-base lg:text-lg xl:text-xl font-semibold text-foreground font-fun ${isLandscape ? 'mb-4 xl:mb-6 flex-shrink-0' : 'mb-2 lg:mb-3'}`}>find me here</h2>
         <div className={`${isLandscape ? 'flex-1 flex flex-col min-h-0' : 'flex-1'}`}>
           <div className={`${isLandscape ? 'flex flex-col h-full' : 'space-y-1.5 lg:space-y-2 pb-2 lg:pb-4'}`} style={isLandscape ? { 
             height: '100%',
@@ -258,7 +258,7 @@ const SocialLinksSection = ({ isLandscape }: SocialLinksSectionProps) => {
                 >
                   <Card className={`${isLandscape ? '' : 'p-1.5 sm:p-2 lg:p-2.5'} bg-card/50 border-border/30 hover:border-primary/50 transition-all duration-300 hover:shadow-link hover:-translate-y-1 group-hover:bg-gradient-card`} style={isLandscape ? { 
                     height: `calc((100% - ${(socialLinks.length - 1) * 4}px) / ${socialLinks.length})`,
-                    minHeight: '45px',
+                    minHeight: '55px',
                     padding: '8px'
                   } : {}}>
                     <div className={`flex items-center h-full ${isLandscape ? (isCompact ? 'justify-center' : 'gap-3') : 'gap-1.5 sm:gap-2 lg:gap-3'}`}>
