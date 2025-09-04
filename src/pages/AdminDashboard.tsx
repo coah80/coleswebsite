@@ -161,6 +161,21 @@ const AdminDashboard = () => {
         ctx.font = '16px Inter, sans-serif';
         ctx.fillText('Drawing not available for download', 30, 160);
       }
+    } else {
+      // For messages, wrap text
+      ctx.fillStyle = '#ffffff';
+      ctx.font = '16px Inter, sans-serif';
+      
+      const words = submission.content.split(' ');
+      const lines = [];
+      let currentLine = '';
+      
+      for (const word of words) {
+        const testLine = currentLine + (currentLine ? ' ' : '') + word;
+        const metrics = ctx.measureText(testLine);
+        
+        if (metrics.width > canvas.width - 60) {
+          if (currentLine) lines.push(currentLine);
           currentLine = word;
         } else {
           currentLine = testLine;
