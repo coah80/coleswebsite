@@ -101,9 +101,9 @@ const LandscapeLayout = () => {
         isLandscape ? 'h-[calc(100vh-80px)] xl:h-[calc(100vh-100px)]' : ''
       }`}>
         <Card className={`min-h-full bg-gradient-card border-border/50 p-4 sm:p-6 xl:p-12 2xl:p-16 ${
-          isLandscape ? 'h-full overflow-y-auto' : 'overflow-y-auto'
-        }`}>
-          <div className="py-8 sm:py-12 lg:py-16">
+          isLandscape ? 'h-full' : ''
+        } ${activeTab === 'submissions' ? 'overflow-y-auto' : ''}`}>
+          <div className={activeTab === 'submissions' ? 'py-8 sm:py-12 lg:py-16' : ''}>
             {renderContent()}
           </div>
         </Card>
