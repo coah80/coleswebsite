@@ -9,26 +9,6 @@ import {
 } from 'lucide-react';
 import { supabase } from '@/integrations/supabase/client';
 
-// Define styles outside component for better performance
-const getButtonStyle = (socialLinksLength: number, isLandscape: boolean) => {
-  if (!isLandscape) return {};
-  
-  return {
-    flex: 1,
-    minHeight: '50px',
-    padding: '8px'
-  };
-};
-
-const getContainerStyle = (isLandscape: boolean) => {
-  if (!isLandscape) return {};
-  
-  return {
-    height: '100%',
-    gap: '4px'
-  };
-};
-
 interface SocialLink {
   id: string;
   name: string;
@@ -193,28 +173,10 @@ const SocialLinksSection = ({ isLandscape }: SocialLinksSectionProps) => {
   const [socialLinks, setSocialLinks] = useState<SocialLink[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
-  const [screenHeight, setScreenHeight] = useState(window.innerHeight);
-  const [isCompact, setIsCompact] = useState(false);
-
-  useEffect(() => {
-    const handleResize = () => {
-      setScreenHeight(window.innerHeight);
-      // Switch to icon-only mode when screen is very short or when there are many links
-      setIsCompact(window.innerHeight < 600 || socialLinks.length > 8);
-    };
-
-    handleResize();
-    window.addEventListener('resize', handleResize);
-    return () => window.removeEventListener('resize', handleResize);
-  }, [socialLinks.length]);
 
   useEffect(() => {
     fetchSocialLinks();
   }, []);
-
-  useEffect(() => {
-    setIsCompact(window.innerHeight < 600 || socialLinks.length > 8);
-  }, [socialLinks.length]);
 
   const fetchSocialLinks = async () => {
     setError(null);
@@ -236,6 +198,22 @@ const SocialLinksSection = ({ isLandscape }: SocialLinksSectionProps) => {
       setError('Unable to load social links. Please check your connection.');
     }
     setIsLoading(false);
+  };
+
+  // Calculate button height based on number of links and available space
+  const getButtonHeight = () => {
+    if (!isLandscape || socialLinks.length === 0) return 'auto';
+    
+    // Base calculation: divide available space by number of buttons
+    // Account for gaps between buttons (4px each)
+    const gapSpace = (socialLinks.length - 1) * 4;
+    return `calc((100% - ${gapSpace}px) / ${socialLinks.length})`;
+  };
+
+  // Determine if we should show compact mode (icon only)
+  const shouldShowCompact = () => {
+    if (!isLandscape) return false;
+    return socialLinks.length > 8 || window.innerHeight < 700;
   };
 
   if (isLoading) {
@@ -267,11 +245,121 @@ const SocialLinksSection = ({ isLandscape }: SocialLinksSectionProps) => {
       {/* Main Socials */}
       <div className={`${isLandscape ? 'flex-1 flex flex-col min-h-0' : ''}`}>
         <h2 className={`text-base lg:text-lg xl:text-xl font-semibold text-foreground font-fun ${isLandscape ? 'mb-6 xl:mb-8 flex-shrink-0' : 'mb-2 lg:mb-3'}`}>find me here</h2>
-        <div className={`${isLandscape ? 'flex-1 flex flex-col min-h-0' : 'flex-1'}`}>
-          <div 
-            className={`${isLandscape ? 'flex flex-col h-full' : 'space-y-1.5 lg:space-y-2 pb-2 lg:pb-4'}`} 
-            style={getContainerStyle(isLandscape)}
-          >
+        
+        {/* Button Container */}
+        <div className={`${isLandscape ? 'flex-1 min-h-0' : 'flex-1'}`}>
+          {isLandscape ? (
+            // Landscape: Vertical stack with equal heights
+            <div className="h-full flex flex-col gap-1">
+              {socialLinks.map((link, index) => {
+                const { icon: IconComponent, color } = detectPlatform(link.name, link.url);
+                const isCompact = shouldShowCompact();
+                
+                return (
+                  <a
+                    key={link.id}
+                    href={link.url}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="block group"
+                    style={{ 
+                      height: getButtonHeight(),
+                      minHeight: '45px',
+                      animationDelay: `${index * 100}ms` 
+                    }}
+                  >
+                    <Card className="h-full p-3 bg-card/50 border-border/30 hover:border-primary/50 transition-all duration-300 hover:shadow-link hover:-translate-y-1 group-hover:bg-gradient-card">
+                      <div className={`flex items-center h-full ${isCompact ? 'justify-center' : 'gap-3'}`}>
+                        {/* Icon */}
+                        <div className={`p-2 rounded-full bg-gradient-to-r shadow-lg group-hover:scale-110 transition-transform duration-300 flex-shrink-0 ${color}`}>
+                          <IconComponent className="w-5 h-5 text-white" />
+                        </div>
+                        
+                        {/* Text Content - Hidden in compact mode */}
+                        {!isCompact && (
+                          <div className="flex-1 min-w-0">
+                            <div className="flex items-center gap-2">
+                              <span className="font-medium group-hover:text-primary transition-colors font-rounded truncate text-sm">
+                                {link.name}
+                              </span>
+                              <ExternalLink className="h-3 w-3 text-muted-foreground/50 group-hover:text-primary/70 transition-colors flex-shrink-0" />
+                            </div>
+                            <div className="text-muted-foreground font-code truncate text-xs">
+                              {link.handle}
+                            </div>
+                            {link.description && (
+                              <div className="text-muted-foreground/80 text-xs font-rounded italic truncate">
+                                {link.description}
+                              </div>
+                            )}
+                          </div>
+                        )}
+                      </div>
+                    </Card>
+                  </a>
+                );
+              })}
+            </div>
+          ) : (
+            // Portrait: Regular spacing
+            <div className="space-y-2">
+              {socialLinks.map((link, index) => {
+                const { icon: IconComponent, color } = detectPlatform(link.name, link.url);
+                
+                return (
+                  <a
+                    key={link.id}
+                    href={link.url}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="block group"
+                    style={{ animationDelay: `${index * 100}ms` }}
+                  >
+                    <Card className="p-3 bg-card/50 border-border/30 hover:border-primary/50 transition-all duration-300 hover:shadow-link hover:-translate-y-1 group-hover:bg-gradient-card">
+                      <div className="flex items-center gap-3">
+                        {/* Icon */}
+                        <div className={`p-2 rounded-full bg-gradient-to-r shadow-lg group-hover:scale-110 transition-transform duration-300 flex-shrink-0 ${color}`}>
+                          <IconComponent className="w-4 h-4 text-white" />
+                        </div>
+                        
+                        {/* Text Content */}
+                        <div className="flex-1 min-w-0">
+                          <div className="flex items-center gap-2">
+                            <span className="font-medium group-hover:text-primary transition-colors font-rounded truncate text-sm">
+                              {link.name}
+                            </span>
+                            <ExternalLink className="h-3 w-3 text-muted-foreground/50 group-hover:text-primary/70 transition-colors flex-shrink-0" />
+                          </div>
+                          <div className="text-muted-foreground font-code truncate text-xs">
+                            {link.handle}
+                          </div>
+                          {link.description && (
+                            <div className="text-muted-foreground/80 text-xs font-rounded italic truncate">
+                              {link.description}
+                            </div>
+                          )}
+                        </div>
+                      </div>
+                    </Card>
+                  </a>
+                );
+              })}
+            </div>
+          )}
+        </div>
+        
+        {/* No links message */}
+        {socialLinks.length === 0 && !isLoading && (
+          <div className="text-center py-8">
+            <p className="text-muted-foreground">No social links available</p>
+          </div>
+        )}
+      </div>
+    </div>
+  );
+};
+
+export default SocialLinksSection;
             {socialLinks.map((link, index) => {
               const { icon: IconComponent, color } = detectPlatform(link.name, link.url);
               
