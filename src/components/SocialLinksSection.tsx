@@ -187,20 +187,6 @@ const SocialLinksSection = ({ isLandscape }: SocialLinksSectionProps) => {
     window.addEventListener('resize', handleResize);
     return () => window.removeEventListener('resize', handleResize);
   }, [socialLinks.length]);
-  const [screenHeight, setScreenHeight] = useState(window.innerHeight);
-  const [isCompact, setIsCompact] = useState(false);
-
-  useEffect(() => {
-    const handleResize = () => {
-      setScreenHeight(window.innerHeight);
-      // Switch to icon-only mode when screen is very short or when there are many links
-      setIsCompact(window.innerHeight < 600 || socialLinks.length > 8);
-    };
-
-    handleResize();
-    window.addEventListener('resize', handleResize);
-    return () => window.removeEventListener('resize', handleResize);
-  }, [socialLinks.length]);
 
   useEffect(() => {
     fetchSocialLinks();
