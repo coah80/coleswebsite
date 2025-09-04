@@ -137,7 +137,7 @@ const SocialLinksSection = ({ isLandscape }: SocialLinksSectionProps) => {
       <div className={`${isLandscape ? 'h-full flex flex-col' : ''}`}>
         <h2 className={`text-base lg:text-lg xl:text-xl font-semibold text-foreground font-fun ${isLandscape ? 'mb-2 xl:mb-3 flex-shrink-0' : 'mb-2 lg:mb-3'}`}>find me here</h2>
         <div className={`${isLandscape ? 'flex-1 flex flex-col' : 'flex-1'}`}>
-          <div className={`${isLandscape ? 'flex flex-col flex-1 gap-1 xl:gap-1.5' : 'space-y-1.5 lg:space-y-2 pb-2 lg:pb-4'}`}>
+          <div className={`${isLandscape ? 'flex flex-col h-full' : 'space-y-1.5 lg:space-y-2 pb-2 lg:pb-4'}`}>
             {socialLinks.map((link, index) => {
               const { icon: IconComponent, color } = detectPlatform(link.name, link.url);
               
@@ -150,23 +150,23 @@ const SocialLinksSection = ({ isLandscape }: SocialLinksSectionProps) => {
                   className="block group"
                   style={{ animationDelay: `${index * 100}ms` }}
                 >
-                  <Card className={`${isLandscape ? 'p-1 xl:p-1.5 flex-1 min-h-0' : 'p-1.5 sm:p-2 lg:p-2.5'} bg-card/50 border-border/30 hover:border-primary/50 transition-all duration-300 hover:shadow-link hover:-translate-y-1 group-hover:bg-gradient-card`}>
-                    <div className={`flex items-center ${isLandscape ? 'gap-1.5 xl:gap-2' : 'gap-1.5 sm:gap-2 lg:gap-3'}`}>
-                      <div className={`${isLandscape ? 'p-0.5 xl:p-1' : 'p-1 lg:p-1.5'} rounded-full bg-gradient-to-r ${color} shadow-lg group-hover:scale-110 transition-transform duration-300 flex-shrink-0`}>
-                        <IconComponent className={`${isLandscape ? 'w-2.5 h-2.5 xl:w-3 xl:h-3' : 'w-2.5 h-2.5 sm:w-3 sm:h-3 lg:w-4 lg:h-4'} text-white`} />
+                  <Card className={`${isLandscape ? 'flex-1 p-2 xl:p-3 2xl:p-4' : 'p-1.5 sm:p-2 lg:p-2.5'} bg-card/50 border-border/30 hover:border-primary/50 transition-all duration-300 hover:shadow-link hover:-translate-y-1 group-hover:bg-gradient-card`}>
+                    <div className={`flex items-center h-full ${isLandscape ? 'gap-2 xl:gap-3 2xl:gap-4' : 'gap-1.5 sm:gap-2 lg:gap-3'}`}>
+                      <div className={`${isLandscape ? 'p-1 xl:p-1.5 2xl:p-2' : 'p-1 lg:p-1.5'} rounded-full bg-gradient-to-r ${color} shadow-lg group-hover:scale-110 transition-transform duration-300 flex-shrink-0`}>
+                        <IconComponent className={`${isLandscape ? 'w-4 h-4 xl:w-5 xl:h-5 2xl:w-6 2xl:h-6' : 'w-2.5 h-2.5 sm:w-3 sm:h-3 lg:w-4 lg:h-4'} text-white`} />
                       </div>
                       <div className="flex-1 min-w-0">
                         <div className="flex items-center gap-2">
-                          <span className={`font-medium group-hover:text-primary transition-colors font-rounded ${isLandscape ? 'text-xs xl:text-sm' : 'text-xs sm:text-xs lg:text-sm'} truncate`}>
+                          <span className={`font-medium group-hover:text-primary transition-colors font-rounded ${isLandscape ? 'text-sm xl:text-base 2xl:text-lg' : 'text-xs sm:text-xs lg:text-sm'} truncate`}>
                             {link.name}
                           </span>
-                          <ExternalLink className={`${isLandscape ? 'h-1.5 w-1.5 xl:h-2 xl:w-2' : 'h-1.5 w-1.5 sm:h-2 sm:w-2 lg:h-2.5 lg:w-2.5'} text-muted-foreground/50 group-hover:text-primary/70 transition-colors flex-shrink-0`} />
+                          <ExternalLink className={`${isLandscape ? 'h-3 w-3 xl:h-3.5 xl:w-3.5 2xl:h-4 2xl:w-4' : 'h-1.5 w-1.5 sm:h-2 sm:w-2 lg:h-2.5 lg:w-2.5'} text-muted-foreground/50 group-hover:text-primary/70 transition-colors flex-shrink-0`} />
                         </div>
-                        <div className={`${isLandscape ? 'text-xs' : 'text-xs sm:text-xs'} text-muted-foreground font-code truncate`}>
+                        <div className={`${isLandscape ? 'text-xs xl:text-sm 2xl:text-base' : 'text-xs sm:text-xs'} text-muted-foreground font-code truncate`}>
                           {link.handle}
                         </div>
                         {link.description && (
-                          <div className={`text-xs text-muted-foreground/80 ${isLandscape ? 'hidden xl:block' : 'hidden md:block'} font-rounded italic truncate`}>
+                          <div className={`${isLandscape ? 'text-xs xl:text-sm 2xl:text-base' : 'text-xs'} text-muted-foreground/80 ${isLandscape ? 'block' : 'hidden md:block'} font-rounded italic truncate`}>
                             {link.description}
                           </div>
                         )}
