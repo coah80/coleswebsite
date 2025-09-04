@@ -216,6 +216,17 @@ const SocialLinksSection = ({ isLandscape }: SocialLinksSectionProps) => {
     return socialLinks.length > 8 || window.innerHeight < 700;
   };
 
+  const getButtonStyle = (linkCount: number, isLandscape: boolean) => {
+    if (!isLandscape) return {};
+    
+    const gapSpace = (linkCount - 1) * 4;
+    return {
+      height: `calc((100% - ${gapSpace}px) / ${linkCount})`,
+      minHeight: '45px',
+      padding: '12px'
+    };
+  };
+
   if (isLoading) {
     return (
       <div className="h-full flex items-center justify-center">
@@ -305,6 +316,7 @@ const SocialLinksSection = ({ isLandscape }: SocialLinksSectionProps) => {
             <div className="space-y-2">
               {socialLinks.map((link, index) => {
                 const { icon: IconComponent, color } = detectPlatform(link.name, link.url);
+                const isCompact = shouldShowCompact();
                 
                 return (
                   <a
@@ -315,14 +327,15 @@ const SocialLinksSection = ({ isLandscape }: SocialLinksSectionProps) => {
                     className="block group"
                     style={{ animationDelay: `${index * 100}ms` }}
                   >
-                    <Card className="p-3 bg-card/50 border-border/30 hover:border-primary/50 transition-all duration-300 hover:shadow-link hover:-translate-y-1 group-hover:bg-gradient-card">
-                      <div className="flex items-center gap-3">
-                        {/* Icon */}
-                        <div className={`p-2 rounded-full bg-gradient-to-r shadow-lg group-hover:scale-110 transition-transform duration-300 flex-shrink-0 ${color}`}>
-                          <IconComponent className="w-4 h-4 text-white" />
+                    <Card 
+                      className={`${isLandscape ? '' : 'p-1.5 sm:p-2 lg:p-2.5'} bg-card/50 border-border/30 hover:border-primary/50 transition-all duration-300 hover:shadow-link hover:-translate-y-1 group-hover:bg-gradient-card`} 
+                      style={getButtonStyle(socialLinks.length, isLandscape)}
+                    >
+                      <div className={`flex items-center h-full ${isLandscape ? (isCompact ? 'justify-center' : 'gap-3') : 'gap-1.5 sm:gap-2 lg:gap-3'}`}>
+                        <div className={`${isLandscape ? 'p-2 rounded-full bg-gradient-to-r shadow-lg group-hover:scale-110 transition-transform duration-300 flex-shrink-0' : 'p-1 lg:p-1.5 rounded-full bg-gradient-to-r shadow-lg group-hover:scale-110 transition-transform duration-300 flex-shrink-0'} ${color}`}>
+                          <IconComponent className={`${isLandscape ? 'w-6 h-6 text-white' : 'w-2.5 h-2.5 sm:w-3 sm:h-3 lg:w-4 lg:h-4 text-white'}`} />
                         </div>
-                        
-                        {/* Text Content */}
+                        {!isCompact && (
                         <div className="flex-1 min-w-0">
                           <div className="flex items-center gap-2">
                             <span className="font-medium group-hover:text-primary transition-colors font-rounded truncate text-sm">
@@ -334,11 +347,12 @@ const SocialLinksSection = ({ isLandscape }: SocialLinksSectionProps) => {
                             {link.handle}
                           </div>
                           {link.description && (
-                            <div className="text-muted-foreground/80 text-xs font-rounded italic truncate">
+                            <div className={`text-muted-foreground/80 ${isLandscape ? 'block' : 'hidden md:block'} text-xs font-rounded italic truncate`}>
                               {link.description}
                             </div>
                           )}
                         </div>
+                        )}
                       </div>
                     </Card>
                   </a>
@@ -351,63 +365,6 @@ const SocialLinksSection = ({ isLandscape }: SocialLinksSectionProps) => {
         {/* No links message */}
         {socialLinks.length === 0 && !isLoading && (
           <div className="text-center py-8">
-            <p className="text-muted-foreground">No social links available</p>
-          </div>
-        )}
-      </div>
-    </div>
-  );
-};
-
-export default SocialLinksSection;
-            {socialLinks.map((link, index) => {
-              const { icon: IconComponent, color } = detectPlatform(link.name, link.url);
-              
-              return (
-                <a
-                  key={link.id}
-                  href={link.url}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="block group"
-                  style={{ animationDelay: `${index * 100}ms` }}
-                >
-                  <Card 
-                    className={`${isLandscape ? '' : 'p-1.5 sm:p-2 lg:p-2.5'} bg-card/50 border-border/30 hover:border-primary/50 transition-all duration-300 hover:shadow-link hover:-translate-y-1 group-hover:bg-gradient-card`} 
-                    style={getButtonStyle(socialLinks.length, isLandscape)}
-                  >
-                    <div className={`flex items-center h-full ${isLandscape ? (isCompact ? 'justify-center' : 'gap-3') : 'gap-1.5 sm:gap-2 lg:gap-3'}`}>
-                      <div className={`${isLandscape ? 'p-2 rounded-full bg-gradient-to-r shadow-lg group-hover:scale-110 transition-transform duration-300 flex-shrink-0' : 'p-1 lg:p-1.5 rounded-full bg-gradient-to-r shadow-lg group-hover:scale-110 transition-transform duration-300 flex-shrink-0'} ${color}`}>
-                        <IconComponent className={`${isLandscape ? 'w-6 h-6 text-white' : 'w-2.5 h-2.5 sm:w-3 sm:h-3 lg:w-4 lg:h-4 text-white'}`} />
-                      </div>
-                      {!isCompact && (
-                      <div className="flex-1 min-w-0">
-                        <div className="flex items-center gap-2">
-                          <span className="font-medium group-hover:text-primary transition-colors font-rounded truncate text-sm">
-                            {link.name}
-                          </span>
-                          <ExternalLink className="h-3 w-3 text-muted-foreground/50 group-hover:text-primary/70 transition-colors flex-shrink-0" />
-                        </div>
-                        <div className="text-muted-foreground font-code truncate text-xs">
-                          {link.handle}
-                        </div>
-                        {link.description && (
-                          <div className={`text-muted-foreground/80 ${isLandscape ? 'block' : 'hidden md:block'} text-xs font-rounded italic truncate`}>
-                            {link.description}
-                          </div>
-                        )}
-                      </div>
-                      )}
-                    </div>
-                  </Card>
-                </a>
-              );
-            })}
-          </div>
-        </div>
-        
-        {socialLinks.length === 0 && !isLandscape && (
-          <div className="text-center py-2">
             <p className="text-muted-foreground">No social links available</p>
           </div>
         )}
