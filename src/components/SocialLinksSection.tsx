@@ -132,12 +132,12 @@ const SocialLinksSection = ({ isLandscape }: SocialLinksSectionProps) => {
   }
 
   return (
-    <div className={`flex flex-col ${isLandscape ? 'h-full' : ''}`} data-section="social">
+    <div className={`${isLandscape ? 'h-full flex flex-col' : 'flex flex-col'}`} data-section="social">
       {/* Main Socials */}
-      <div>
-        <h2 className="text-base lg:text-lg xl:text-xl font-semibold mb-2 lg:mb-3 text-foreground font-fun">find me here</h2>
+      <div className={`${isLandscape ? 'h-full flex flex-col' : ''}`}>
+        <h2 className={`text-base lg:text-lg xl:text-xl font-semibold text-foreground font-fun ${isLandscape ? 'mb-2 xl:mb-3 flex-shrink-0' : 'mb-2 lg:mb-3'}`}>find me here</h2>
         <div className={`${isLandscape ? 'flex-1 flex flex-col' : 'flex-1'}`}>
-          <div className={`${isLandscape ? 'flex flex-col flex-1 justify-between' : 'space-y-1.5 lg:space-y-2'} pb-2 lg:pb-4`}>
+          <div className={`${isLandscape ? 'flex flex-col flex-1 gap-1 xl:gap-1.5' : 'space-y-1.5 lg:space-y-2 pb-2 lg:pb-4'}`}>
             {socialLinks.map((link, index) => {
               const { icon: IconComponent, color } = detectPlatform(link.name, link.url);
               
@@ -150,7 +150,7 @@ const SocialLinksSection = ({ isLandscape }: SocialLinksSectionProps) => {
                   className="block group"
                   style={{ animationDelay: `${index * 100}ms` }}
                 >
-                  <Card className={`${isLandscape ? 'p-1 xl:p-1.5 flex-1' : 'p-1.5 sm:p-2 lg:p-2.5'} bg-card/50 border-border/30 hover:border-primary/50 transition-all duration-300 hover:shadow-link hover:-translate-y-1 group-hover:bg-gradient-card`}>
+                  <Card className={`${isLandscape ? 'p-1 xl:p-1.5 flex-1 min-h-0' : 'p-1.5 sm:p-2 lg:p-2.5'} bg-card/50 border-border/30 hover:border-primary/50 transition-all duration-300 hover:shadow-link hover:-translate-y-1 group-hover:bg-gradient-card`}>
                     <div className={`flex items-center ${isLandscape ? 'gap-1.5 xl:gap-2' : 'gap-1.5 sm:gap-2 lg:gap-3'}`}>
                       <div className={`${isLandscape ? 'p-0.5 xl:p-1' : 'p-1 lg:p-1.5'} rounded-full bg-gradient-to-r ${color} shadow-lg group-hover:scale-110 transition-transform duration-300 flex-shrink-0`}>
                         <IconComponent className={`${isLandscape ? 'w-2.5 h-2.5 xl:w-3 xl:h-3' : 'w-2.5 h-2.5 sm:w-3 sm:h-3 lg:w-4 lg:h-4'} text-white`} />
@@ -179,7 +179,7 @@ const SocialLinksSection = ({ isLandscape }: SocialLinksSectionProps) => {
           </div>
         </div>
         
-        {socialLinks.length === 0 && !isLandscape && (
+        {socialLinks.length === 0 && (
           <div className="text-center py-2">
             <p className="text-muted-foreground">No social links available</p>
           </div>
