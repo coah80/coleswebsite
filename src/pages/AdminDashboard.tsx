@@ -139,52 +139,28 @@ const AdminDashboard = () => {
     ctx.fillText(submission.type.toUpperCase(), 35, 107);
 
     if (submission.type === 'drawing') {
-      // For drawings, load and draw the image
-      try {
-        const img = new Image();
-        img.crossOrigin = 'anonymous';
-        
-        await new Promise((resolve, reject) => {
-          img.onload = resolve;
-          img.onerror = reject;
-          img.src = submission.content;
-        });
-
-        // Calculate scaling to fit the drawing nicely
+      // For drawings, find the existing img element and use it
+      const existingImg = document.querySelector(`img[src="${submission.content}"]`) as HTMLImageElement;
+      
+      if (existingImg && existingImg.complete) {
+        // Use the already loaded image
         const maxWidth = canvas.width - 60;
         const maxHeight = canvas.height - 200;
-        const scale = Math.min(maxWidth / img.width, maxHeight / img.height, 1);
-        const scaledWidth = img.width * scale;
-        const scaledHeight = img.height * scale;
+        const scale = Math.min(maxWidth / existingImg.naturalWidth, maxHeight / existingImg.naturalHeight, 1);
+        const scaledWidth = existingImg.naturalWidth * scale;
+        const scaledHeight = existingImg.naturalHeight * scale;
         
         // Center the drawing
         const x = (canvas.width - scaledWidth) / 2;
         const y = 140;
         
-        ctx.drawImage(img, x, y, scaledWidth, scaledHeight);
-      } catch (error) {
-        // Fallback if image fails to load
+        ctx.drawImage(existingImg, x, y, scaledWidth, scaledHeight);
+      } else {
+        // Fallback if we can't find the existing image
         ctx.fillStyle = '#ef4444';
         ctx.font = '16px Inter, sans-serif';
-        ctx.fillText('Failed to load drawing', 30, 160);
+        ctx.fillText('Drawing not available for download', 30, 160);
       }
-    } else {
-      // For messages, render the text
-      ctx.fillStyle = '#ffffff';
-      ctx.font = '16px Inter, sans-serif';
-      
-      // Word wrap the message
-      const words = submission.content.split(' ');
-      const lines = [];
-      let currentLine = '';
-      const maxWidth = canvas.width - 60;
-      
-      for (const word of words) {
-        const testLine = currentLine + (currentLine ? ' ' : '') + word;
-        const metrics = ctx.measureText(testLine);
-        
-        if (metrics.width > maxWidth && currentLine) {
-          lines.push(currentLine);
           currentLine = word;
         } else {
           currentLine = testLine;
