@@ -4,7 +4,7 @@ import {
   Instagram, Youtube, Twitter, Github, Mail, MessageCircle, Coffee,
   Gamepad2, Music, Camera, Linkedin, Facebook, Twitch, ExternalLink,
   Phone, MapPin, Globe, Heart, Star, Bookmark, Video, Mic, Radio,
-  Users, Zap, Play, Headphones, Monitor, Smartphone, Tv, Film, Calendar as CalendarIcon,
+  Users, Zap, Play, Headphones, Monitor, Smartphone, Tv, Film, Calendar as CalendarIcon, Cloud,
   Share, Link, Hash, AtSign, DollarSign, Gift, ShoppingCart, Edit
 } from 'lucide-react';
 import { supabase } from '@/integrations/supabase/client';
@@ -22,7 +22,7 @@ interface SocialLink {
 const PLATFORM_CONFIG: Record<string, { icon: any; color: string }> = {
   // Social Media
   instagram: { icon: Instagram, color: 'from-pink-500 to-purple-500' },
-  tiktok: { icon: Video, color: 'from-black to-pink-500' },
+  tiktok: { icon: Music, color: 'from-black via-red-500 to-cyan-400' },
   youtube: { icon: Youtube, color: 'from-red-500 to-red-600' },
   twitter: { icon: Twitter, color: 'from-blue-400 to-blue-500' },
   x: { icon: Twitter, color: 'from-blue-400 to-blue-500' },
@@ -41,7 +41,7 @@ const PLATFORM_CONFIG: Record<string, { icon: any; color: string }> = {
   bluesky: { icon: Twitter, color: 'from-blue-400 to-sky-500' },
   
   // Gaming
-  steam: { icon: Gamepad2, color: 'from-slate-600 to-slate-700' },
+  steam: { icon: Cloud, color: 'from-slate-700 via-blue-600 to-slate-800' },
   epic: { icon: Gamepad2, color: 'from-gray-800 to-black' },
   epicgames: { icon: Gamepad2, color: 'from-gray-800 to-black' },
   playstation: { icon: Gamepad2, color: 'from-blue-600 to-blue-700' },
