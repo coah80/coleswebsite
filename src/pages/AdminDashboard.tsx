@@ -175,10 +175,25 @@ const AdminDashboard = () => {
         const metrics = ctx.measureText(testLine);
         
         if (metrics.width > canvas.width - 60) {
-          if (currentLine) lines.push(currentLine);
-          currentLine = word;
-        } else {
-          currentLine = testLine;
+          
+          // Map signature fonts to canvas fonts
+          const fontMap: { [key: string]: string } = {
+            'dancing': 'Dancing Script',
+            'pacifico': 'Pacifico',
+            'great-vibes': 'Great Vibes',
+            'caveat': 'Caveat',
+            'sacramento': 'Sacramento',
+            'allura': 'Allura',
+            'alex-brush': 'Alex Brush',
+            'kaushan': 'Kaushan Script',
+            'satisfy': 'Satisfy',
+            'cookie': 'Cookie'
+          };
+          
+          const fontFamily = fontMap[submission.signature_font || 'dancing'] || 'Dancing Script';
+          ctx.font = `italic 18px ${fontFamily}, cursive`;
+          ctx.textAlign = 'left';
+          ctx.fillText(`— ${submission.signature_text}`, 30, y);
         }
       }
       if (currentLine) lines.push(currentLine);
@@ -332,11 +347,17 @@ const AdminDashboard = () => {
                            {submission.signature_enabled && submission.signature_text && (
                              <div className="bg-muted/30 p-3 rounded border border-border/30">
                                <div className="text-xs text-muted-foreground mb-1">Signature:</div>
-                               <div className={`text-right italic text-primary ${
+                               <div className={`text-left italic text-primary ${
                                  submission.signature_font === 'dancing' ? 'font-dancing' :
                                  submission.signature_font === 'pacifico' ? 'font-pacifico' :
                                  submission.signature_font === 'great-vibes' ? 'font-great-vibes' :
-                                 submission.signature_font === 'caveat' ? 'font-caveat' : ''
+                                 submission.signature_font === 'caveat' ? 'font-caveat' :
+                                 submission.signature_font === 'sacramento' ? 'font-sacramento' :
+                                 submission.signature_font === 'allura' ? 'font-allura' :
+                                 submission.signature_font === 'alex-brush' ? 'font-alex-brush' :
+                                 submission.signature_font === 'kaushan' ? 'font-kaushan' :
+                                 submission.signature_font === 'satisfy' ? 'font-satisfy' :
+                                 submission.signature_font === 'cookie' ? 'font-cookie' : ''
                                }`}>
                                  — {submission.signature_text}
                                </div>

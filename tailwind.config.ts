@@ -30,6 +30,12 @@ export default {
 				'pacifico': ['Pacifico', 'cursive'],
 				'great-vibes': ['Great Vibes', 'cursive'],
 				'caveat': ['Caveat', 'cursive'],
+				'sacramento': ['Sacramento', 'cursive'],
+				'allura': ['Allura', 'cursive'],
+				'alex-brush': ['Alex Brush', 'cursive'],
+				'kaushan': ['Kaushan Script', 'cursive'],
+				'satisfy': ['Satisfy', 'cursive'],
+				'cookie': ['Cookie', 'cursive'],
 			},
 			colors: {
 				border: 'hsl(var(--border))',

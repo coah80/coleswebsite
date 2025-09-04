@@ -52,6 +52,12 @@ const SubmissionsSection = () => {
     { value: 'pacifico', label: 'Pacifico', className: 'font-pacifico' },
     { value: 'great-vibes', label: 'Great Vibes', className: 'font-great-vibes' },
     { value: 'caveat', label: 'Caveat', className: 'font-caveat' },
+    { value: 'sacramento', label: 'Sacramento', className: 'font-sacramento' },
+    { value: 'allura', label: 'Allura', className: 'font-allura' },
+    { value: 'alex-brush', label: 'Alex Brush', className: 'font-alex-brush' },
+    { value: 'kaushan', label: 'Kaushan Script', className: 'font-kaushan' },
+    { value: 'satisfy', label: 'Satisfy', className: 'font-satisfy' },
+    { value: 'cookie', label: 'Cookie', className: 'font-cookie' },
   ];
 
   // Cooldown management
