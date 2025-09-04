@@ -376,7 +376,7 @@ const AdminDashboard = () => {
                             {/* Signature */}
                             {submission.signature_enabled && submission.signature_text && (
                               <div className="mt-2 pt-2 border-t border-border/20">
-                                <div className={`text-xs italic text-primary/80 truncate ${
+                                <div className={`text-sm italic text-primary/80 truncate ${
                                   submission.signature_font === 'dancing' ? 'font-dancing' :
                                   submission.signature_font === 'pacifico' ? 'font-pacifico' :
                                   submission.signature_font === 'great-vibes' ? 'font-great-vibes' :
