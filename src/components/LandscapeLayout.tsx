@@ -54,7 +54,7 @@ const LandscapeLayout = () => {
         return (
           <div className="grid xl:grid-cols-2 gap-4 lg:gap-8 xl:gap-12 h-full overflow-hidden">
             <ProfileSection />
-            <SocialLinksSection />
+            <SocialLinksSection isLandscape={isLandscape} />
           </div>
         );
     }

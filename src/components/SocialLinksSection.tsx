@@ -57,6 +57,10 @@ const PLATFORM_CONFIG: Record<string, { icon: any; color: string }> = {
   default: { icon: ExternalLink, color: 'from-gray-500 to-gray-600' }
 };
 
+interface SocialLinksSectionProps {
+  isLandscape: boolean;
+}
+
 const detectPlatform = (name: string, url: string): { icon: any; color: string } => {
   const nameKey = name.toLowerCase().replace(/[^a-z]/g, '');
   const urlKey = url.toLowerCase();
@@ -76,7 +80,7 @@ const detectPlatform = (name: string, url: string): { icon: any; color: string }
   return PLATFORM_CONFIG.default;
 };
 
-const SocialLinksSection = () => {
+const SocialLinksSection = ({ isLandscape }: SocialLinksSectionProps) => {
   const [socialLinks, setSocialLinks] = useState<SocialLink[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
