@@ -90,80 +90,50 @@ const AdminDashboard = () => {
           description: "Submission deleted",
         });
       }
-    } catch (error) {
-      console.error('Error calling admin function:', error);
-      toast({
-        title: "Error",
-        description: "Failed to delete submission",
-        variant: "destructive",
-      });
-    }
-  };
-
-  const downloadSubmissionAsImage = async (submission: Submission) => {
-    const canvas = canvasRef.current;
-    if (!canvas) return;
-
-    const ctx = canvas.getContext('2d');
-    if (!ctx) return;
-
-    // Set canvas size
-    canvas.width = 800;
-    canvas.height = 600;
-
-    // Background
-    ctx.fillStyle = '#0f0f23'; // Dark background matching the theme
+    // Clear canvas with dark background like in the reference
+    ctx.fillStyle = '#1a1a2e'; // Dark blue-purple background
     ctx.fillRect(0, 0, canvas.width, canvas.height);
-
-    // Add border
-    ctx.strokeStyle = '#27272a';
-    ctx.lineWidth = 2;
-    ctx.strokeRect(10, 10, canvas.width - 20, canvas.height - 20);
-
-    // Header
-    ctx.fillStyle = '#a855f7'; // Primary color
-    ctx.font = 'bold 24px Inter, sans-serif';
-    ctx.fillText('Submission from coah\'s website', 30, 50);
-
-    // Date
-    ctx.fillStyle = '#71717a'; // Muted color
-    ctx.font = '14px Inter, sans-serif';
-    const date = new Date(submission.submitted_at).toLocaleString();
-    ctx.fillText(date, 30, 75);
-
-    // Type badge
-    ctx.fillStyle = submission.type === 'drawing' ? '#a855f7' : '#52525b';
-    ctx.fillRect(30, 90, 80, 25);
-    ctx.fillStyle = '#ffffff';
+    // Set canvas size to match the reference design
+    // Draw the type badge (like "drawing" in the reference)
+    const badgeWidth = 80;
+    const badgeHeight = 24;
+    const badgeX = 20;
     ctx.font = '12px Inter, sans-serif';
+    ctx.fillText(submission.type, badgeX + 24, badgeY + 16);
+    // Badge background
+    // Date below badge
+    ctx.fillStyle = '#9ca3af'; // Gray text
+    ctx.font = '14px Inter, sans-serif';
+    ctx.fill();
+    ctx.fillText(date, 20, 60);
     ctx.fillText(submission.type.toUpperCase(), 35, 107);
+    // Main content card (white background like in reference)
+    const cardY = 80;
+    const cardHeight = canvas.height - 100;
+    ctx.fillStyle = '#ffffff';
+    ctx.beginPath();
+    ctx.roundRect(20, cardY, canvas.width - 40, cardHeight, 12);
+    ctx.fill();
 
     if (submission.type === 'drawing') {
-      // For drawings, find the existing img element and use it
+      // For drawings - center the image in the white card
       const existingImg = document.querySelector(`img[src="${submission.content}"]`) as HTMLImageElement;
       
       if (existingImg && existingImg.complete) {
-        // Use the already loaded image
-        const maxWidth = canvas.width - 60;
-        const maxHeight = canvas.height - 200;
+        // Scale the image to fit nicely in the card
+        const maxWidth = canvas.width - 80; // Padding from card edges
+        const maxHeight = cardHeight - 40; // Padding from top/bottom of card
         const scale = Math.min(maxWidth / existingImg.naturalWidth, maxHeight / existingImg.naturalHeight, 1);
         const scaledWidth = existingImg.naturalWidth * scale;
-        const scaledHeight = existingImg.naturalHeight * scale;
         
-        // Center the drawing
-        const x = (canvas.width - scaledWidth) / 2;
-        const y = 140;
-        
-        ctx.drawImage(existingImg, x, y, scaledWidth, scaledHeight);
-      } else {
-        // Fallback if we can't find the existing image
-        ctx.fillStyle = '#ef4444';
+        // Fallback
+        ctx.fillStyle = '#6b7280';
         ctx.font = '16px Inter, sans-serif';
-        ctx.fillText('Drawing not available for download', 30, 160);
+        ctx.fillText('Drawing not available', 40, cardY + 50);
       }
     } else {
-      // For messages, wrap text
-      ctx.fillStyle = '#ffffff';
+      // For messages - display text in the white card
+      ctx.fillStyle = '#1f2937'; // Dark text
       ctx.font = '16px Inter, sans-serif';
       
       const words = submission.content.split(' ');
@@ -174,7 +144,7 @@ const AdminDashboard = () => {
         const testLine = currentLine + (currentLine ? ' ' : '') + word;
         const metrics = ctx.measureText(testLine);
         
-        if (metrics.width > canvas.width - 60) {
+        if (metrics.width > canvas.width - 80) { // Fit within card padding
           lines.push(currentLine);
           currentLine = word;
         } else {
@@ -183,17 +153,9 @@ const AdminDashboard = () => {
       }
       if (currentLine) lines.push(currentLine);
       
-      // Draw the message lines
-      let y = 150;
-      for (const line of lines) {
-        ctx.fillText(line, 30, y);
-        y += 24;
-      }
-      
-      // Add signature if present
-      if (submission.signature_enabled && submission.signature_text) {
+      // Draw the message lines in the card
         y += 20;
-        ctx.fillStyle = '#a855f7';
+        ctx.fillStyle = '#6366f1'; // Purple signature
         
         // Map signature fonts to canvas fonts
         const fontMap: { [key: string]: string } = {
@@ -211,17 +173,8 @@ const AdminDashboard = () => {
         
         const fontFamily = fontMap[submission.signature_font || 'dancing'] || 'Dancing Script';
         ctx.font = `italic 18px ${fontFamily}, cursive`;
-        ctx.textAlign = 'right';
+        ctx.fillText(`— ${submission.signature_text}`, 40, y);
         ctx.fillText(`— ${submission.signature_text}`, canvas.width - 30, y);
-        ctx.textAlign = 'left'; // Reset alignment
-      }
-    }
-
-    // Footer
-    ctx.fillStyle = '#52525b';
-    ctx.font = '12px Inter, sans-serif';
-    ctx.fillText('Generated from coah\'s admin panel', 30, canvas.height - 30);
-
     // Download the image
     const link = document.createElement('a');
     link.download = `submission-${submission.type}-${submission.id.slice(0, 8)}.png`;
