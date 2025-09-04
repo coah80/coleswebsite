@@ -254,9 +254,9 @@ const ProfileSection = () => {
     lanyardData.spotify.timestamps.end > currentTime;
 
   return (
-    <div className="h-full">
+    <div className="h-full lg:h-full">
       {/* Main Profile Card */}
-      <Card className="p-4 lg:p-6 xl:p-8 2xl:p-12 bg-card/50 border-border/30 h-full flex flex-col">
+      <Card className="p-4 lg:p-6 xl:p-8 2xl:p-12 bg-card/50 border-border/30 min-h-full lg:h-full flex flex-col">
         <div className="flex items-start gap-4 lg:gap-6 xl:gap-8 mb-4 xl:mb-6">
           {/* Avatar */}
           <div className="relative flex-shrink-0">

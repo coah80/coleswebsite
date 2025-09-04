@@ -43,7 +43,7 @@ const LandscapeLayout = () => {
   };
 
   return (
-    <div className="h-screen bg-background overflow-hidden">
+    <div className="min-h-screen bg-background lg:h-screen lg:overflow-hidden">
       <AdminButton />
       {/* Folder Tabs */}
       <div className="border-b border-border/30 bg-card/30">
@@ -78,8 +78,8 @@ const LandscapeLayout = () => {
       </div>
 
       {/* Content Area */}
-      <main className="max-w-[1800px] mx-auto p-3 sm:p-4 lg:p-6 xl:p-8 2xl:p-12 h-[calc(100vh-60px)] lg:h-[calc(100vh-80px)] xl:h-[calc(100vh-100px)]">
-        <Card className="h-full bg-gradient-card border-border/50 p-4 sm:p-6 lg:p-8 xl:p-12 2xl:p-16">
+      <main className="max-w-[1800px] mx-auto p-3 sm:p-4 lg:p-6 xl:p-8 2xl:p-12 min-h-[calc(100vh-60px)] lg:h-[calc(100vh-80px)] xl:h-[calc(100vh-100px)]">
+        <Card className="min-h-full lg:h-full bg-gradient-card border-border/50 p-4 sm:p-6 lg:p-8 xl:p-12 2xl:p-16">
           {renderContent()}
         </Card>
       </main>
