@@ -150,7 +150,7 @@ const SocialLinksSection = () => {
                 >
                   <Card className="p-2 lg:p-3 xl:p-4 bg-card/50 border-border/30 hover:border-primary/50 transition-all duration-300 hover:shadow-link hover:-translate-y-1 group-hover:bg-gradient-card">
                     <div className="flex items-center gap-2 lg:gap-3 xl:gap-4">
-                      <div className="p-1 lg:p-1.5 xl:p-2 rounded-full bg-gradient-to-r ${color} shadow-lg group-hover:scale-110 transition-transform duration-300 flex-shrink-0">
+                      <div className={`p-1 lg:p-1.5 xl:p-2 rounded-full bg-gradient-to-r ${color} shadow-lg group-hover:scale-110 transition-transform duration-300 flex-shrink-0`}>
                         <IconComponent className="w-3.5 h-3.5 lg:w-4 lg:h-4 xl:w-5 xl:h-5 text-white" />
                       </div>
                       <div className="flex-1 min-w-0">
