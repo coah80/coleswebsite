@@ -313,76 +313,87 @@ const AdminDashboard = () => {
             </div>
 
             <div className="grid gap-4">
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
               {filteredSubmissions.map((submission) => (
-                <Card key={submission.id} className="p-4 bg-gradient-card border-border/50">
-                  <div className="flex items-start justify-between gap-4">
-                    <div className="flex-1">
-                       <div className="flex items-center gap-2 mb-2">
-                         {submission.type === 'drawing' ? (
-                           <Image className="h-4 w-4" />
-                         ) : (
-                           <MessageSquare className="h-4 w-4" />
-                         )}
-                         <Badge variant={submission.type === 'drawing' ? 'default' : 'secondary'}>
-                           {submission.type}
-                         </Badge>
-                         <span className="text-sm text-muted-foreground">
-                           {new Date(submission.submitted_at).toLocaleString()}
-                         </span>
-                       </div>
-                       
-                       {submission.type === 'drawing' ? (
-                         <img
-                           src={submission.content}
-                           alt="User drawing"
-                           className="max-w-md max-h-64 rounded border border-border/50"
-                         />
-                       ) : (
-                         <div className="space-y-3">
-                           <p className="text-foreground bg-background/50 p-3 rounded border border-border/50">
-                             {submission.content}
-                           </p>
-                           
-                           {/* Display Signature */}
-                           {submission.signature_enabled && submission.signature_text && (
-                             <div className="bg-muted/30 p-3 rounded border border-border/30">
-                               <div className="text-xs text-muted-foreground mb-1">Signature:</div>
-                               <div className={`text-left italic text-primary ${
-                                 submission.signature_font === 'dancing' ? 'font-dancing' :
-                                 submission.signature_font === 'pacifico' ? 'font-pacifico' :
-                                 submission.signature_font === 'great-vibes' ? 'font-great-vibes' :
-                                 submission.signature_font === 'caveat' ? 'font-caveat' :
-                                 submission.signature_font === 'sacramento' ? 'font-sacramento' :
-                                 submission.signature_font === 'allura' ? 'font-allura' :
-                                 submission.signature_font === 'alex-brush' ? 'font-alex-brush' :
-                                 submission.signature_font === 'kaushan' ? 'font-kaushan' :
-                                 submission.signature_font === 'satisfy' ? 'font-satisfy' :
-                                 submission.signature_font === 'cookie' ? 'font-cookie' : ''
-                               }`}>
-                                 — {submission.signature_text}
-                               </div>
-                             </div>
-                           )}
-                         </div>
-                       )}
+                <Card key={submission.id} className="aspect-square bg-gradient-card border-border/50 overflow-hidden group hover:shadow-lg transition-all duration-300">
+                  <div className="h-full flex flex-col">
+                    {/* Header */}
+                    <div className="p-3 border-b border-border/30 flex-shrink-0">
+                      <div className="flex items-center justify-between mb-2">
+                        <div className="flex items-center gap-2">
+                          {submission.type === 'drawing' ? (
+                            <Image className="h-4 w-4" />
+                          ) : (
+                            <MessageSquare className="h-4 w-4" />
+                          )}
+                          <Badge variant={submission.type === 'drawing' ? 'default' : 'secondary'} className="text-xs">
+                            {submission.type}
+                          </Badge>
+                        </div>
+                        <div className="flex gap-1">
+                          <Button
+                            size="sm"
+                            variant="ghost"
+                            onClick={() => downloadSubmissionAsImage(submission)}
+                            className="h-7 w-7 p-0 opacity-0 group-hover:opacity-100 transition-opacity"
+                          >
+                            <Download className="h-3 w-3" />
+                          </Button>
+                          <Button
+                            size="sm"
+                            variant="ghost"
+                            onClick={() => deleteSubmission(submission.id)}
+                            className="h-7 w-7 p-0 opacity-0 group-hover:opacity-100 transition-opacity text-destructive hover:text-destructive"
+                          >
+                            <Trash2 className="h-3 w-3" />
+                          </Button>
+                        </div>
+                      </div>
+                      <div className="text-xs text-muted-foreground truncate">
+                        {new Date(submission.submitted_at).toLocaleDateString()} {new Date(submission.submitted_at).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
+                      </div>
                     </div>
                     
-                     <div className="flex flex-col gap-2">
-                       <Button
-                         size="sm"
-                         variant="outline"
-                         onClick={() => downloadSubmissionAsImage(submission)}
-                       >
-                         <Download className="h-4 w-4" />
-                       </Button>
-                       <Button
-                         size="sm"
-                         variant="destructive"
-                         onClick={() => deleteSubmission(submission.id)}
-                       >
-                         <Trash2 className="h-4 w-4" />
-                       </Button>
-                     </div>
+                    {/* Content */}
+                    <div className="flex-1 p-3 overflow-hidden">
+                      {submission.type === 'drawing' ? (
+                        <div className="h-full flex items-center justify-center">
+                          <img
+                            src={submission.content}
+                            alt="User drawing"
+                            className="max-w-full max-h-full object-contain rounded border border-border/30"
+                          />
+                        </div>
+                      ) : (
+                        <div className="h-full flex flex-col">
+                          <div className="flex-1 overflow-hidden">
+                            <p className="text-sm text-foreground bg-background/30 p-2 rounded border border-border/30 line-clamp-6 leading-relaxed">
+                              {submission.content}
+                            </p>
+                          </div>
+                          
+                          {/* Signature */}
+                          {submission.signature_enabled && submission.signature_text && (
+                            <div className="mt-2 pt-2 border-t border-border/20">
+                              <div className={`text-xs italic text-primary/80 truncate ${
+                                submission.signature_font === 'dancing' ? 'font-dancing' :
+                                submission.signature_font === 'pacifico' ? 'font-pacifico' :
+                                submission.signature_font === 'great-vibes' ? 'font-great-vibes' :
+                                submission.signature_font === 'caveat' ? 'font-caveat' :
+                                submission.signature_font === 'sacramento' ? 'font-sacramento' :
+                                submission.signature_font === 'allura' ? 'font-allura' :
+                                submission.signature_font === 'alex-brush' ? 'font-alex-brush' :
+                                submission.signature_font === 'kaushan' ? 'font-kaushan' :
+                                submission.signature_font === 'satisfy' ? 'font-satisfy' :
+                                submission.signature_font === 'cookie' ? 'font-cookie' : ''
+                              }`}>
+                                — {submission.signature_text}
+                              </div>
+                            </div>
+                          )}
+                        </div>
+                      )}
+                    </div>
                   </div>
                 </Card>
               ))}
