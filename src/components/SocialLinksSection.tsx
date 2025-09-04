@@ -192,6 +192,17 @@ const SocialLinksSection = ({ isLandscape }: SocialLinksSectionProps) => {
     fetchSocialLinks();
   }, []);
 
+  // Force re-render when socialLinks change to update button heights
+  useEffect(() => {
+    if (isLandscape) {
+      // Trigger a small delay to ensure DOM updates
+      const timer = setTimeout(() => {
+        setIsCompact(window.innerHeight < 600 || socialLinks.length > 8);
+      }, 100);
+      return () => clearTimeout(timer);
+    }
+  }, [socialLinks.length, isLandscape]);
+
   const fetchSocialLinks = async () => {
     setError(null);
     console.log('Fetching social links...');
@@ -260,11 +271,15 @@ const SocialLinksSection = ({ isLandscape }: SocialLinksSectionProps) => {
                   className="block group"
                   style={{ animationDelay: `${index * 100}ms` }}
                 >
-                  <Card className={`${isLandscape ? '' : 'p-1.5 sm:p-2 lg:p-2.5'} bg-card/50 border-border/30 hover:border-primary/50 transition-all duration-300 hover:shadow-link hover:-translate-y-1 group-hover:bg-gradient-card`} style={isLandscape ? { 
-                    height: `calc((100% - ${(socialLinks.length - 1) * 4}px) / ${socialLinks.length})`,
-                    minHeight: '50px',
-                    padding: '8px'
-                  } : {}}>
+                  <Card 
+                    className={`${isLandscape ? '' : 'p-1.5 sm:p-2 lg:p-2.5'} bg-card/50 border-border/30 hover:border-primary/50 transition-all duration-300 hover:shadow-link hover:-translate-y-1 group-hover:bg-gradient-card`} 
+                    style={isLandscape ? { 
+                      height: `calc((100% - ${(socialLinks.length - 1) * 4}px) / ${socialLinks.length})`,
+                      minHeight: '50px',
+                      padding: '8px',
+                      flex: `1 1 calc(100% / ${socialLinks.length})`
+                    } : {}}
+                  >
                     <div className={`flex items-center h-full ${isLandscape ? (isCompact ? 'justify-center' : 'gap-3') : 'gap-1.5 sm:gap-2 lg:gap-3'}`}>
                       <div className={`${isLandscape ? 'p-2 rounded-full bg-gradient-to-r shadow-lg group-hover:scale-110 transition-transform duration-300 flex-shrink-0' : 'p-1 lg:p-1.5 rounded-full bg-gradient-to-r shadow-lg group-hover:scale-110 transition-transform duration-300 flex-shrink-0'} ${color}`}>
                         <IconComponent className={`${isLandscape ? 'w-6 h-6 text-white' : 'w-2.5 h-2.5 sm:w-3 sm:h-3 lg:w-4 lg:h-4 text-white'}`} />
