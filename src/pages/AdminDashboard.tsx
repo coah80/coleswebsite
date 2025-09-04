@@ -5,10 +5,12 @@ import { Badge } from '@/components/ui/badge';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { useNavigate } from 'react-router-dom';
 import { ArrowLeft, Image, MessageSquare, Trash2, FolderOpen, Users } from 'lucide-react';
+import { Download } from 'lucide-react';
 import { supabase } from '@/integrations/supabase/client';
 import { useToast } from '@/hooks/use-toast';
 import { PortfolioManager } from '@/components/PortfolioManager';
 import SocialLinksManager from '@/components/SocialLinksManager';
+import { useRef } from 'react';
 
 interface Submission {
   id: string;
@@ -26,6 +28,7 @@ const AdminDashboard = () => {
   const [submissions, setSubmissions] = useState<Submission[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [filter, setFilter] = useState<'all' | 'messages' | 'drawings'>('all');
+  const canvasRef = useRef<HTMLCanvasElement>(null);
   const navigate = useNavigate();
   const { toast } = useToast();
 
@@ -95,6 +98,133 @@ const AdminDashboard = () => {
         variant: "destructive",
       });
     }
+  };
+
+  const downloadSubmissionAsImage = async (submission: Submission) => {
+    const canvas = canvasRef.current;
+    if (!canvas) return;
+
+    const ctx = canvas.getContext('2d');
+    if (!ctx) return;
+
+    // Set canvas size
+    canvas.width = 800;
+    canvas.height = 600;
+
+    // Background
+    ctx.fillStyle = '#0f0f23'; // Dark background matching the theme
+    ctx.fillRect(0, 0, canvas.width, canvas.height);
+
+    // Add border
+    ctx.strokeStyle = '#27272a';
+    ctx.lineWidth = 2;
+    ctx.strokeRect(10, 10, canvas.width - 20, canvas.height - 20);
+
+    // Header
+    ctx.fillStyle = '#a855f7'; // Primary color
+    ctx.font = 'bold 24px Inter, sans-serif';
+    ctx.fillText('Submission from coah\'s website', 30, 50);
+
+    // Date
+    ctx.fillStyle = '#71717a'; // Muted color
+    ctx.font = '14px Inter, sans-serif';
+    const date = new Date(submission.submitted_at).toLocaleString();
+    ctx.fillText(date, 30, 75);
+
+    // Type badge
+    ctx.fillStyle = submission.type === 'drawing' ? '#a855f7' : '#52525b';
+    ctx.fillRect(30, 90, 80, 25);
+    ctx.fillStyle = '#ffffff';
+    ctx.font = '12px Inter, sans-serif';
+    ctx.fillText(submission.type.toUpperCase(), 35, 107);
+
+    if (submission.type === 'drawing') {
+      // For drawings, load and draw the image
+      try {
+        const img = new Image();
+        img.crossOrigin = 'anonymous';
+        
+        await new Promise((resolve, reject) => {
+          img.onload = resolve;
+          img.onerror = reject;
+          img.src = submission.content;
+        });
+
+        // Calculate scaling to fit the drawing nicely
+        const maxWidth = canvas.width - 60;
+        const maxHeight = canvas.height - 200;
+        const scale = Math.min(maxWidth / img.width, maxHeight / img.height, 1);
+        const scaledWidth = img.width * scale;
+        const scaledHeight = img.height * scale;
+        
+        // Center the drawing
+        const x = (canvas.width - scaledWidth) / 2;
+        const y = 140;
+        
+        ctx.drawImage(img, x, y, scaledWidth, scaledHeight);
+      } catch (error) {
+        // Fallback if image fails to load
+        ctx.fillStyle = '#ef4444';
+        ctx.font = '16px Inter, sans-serif';
+        ctx.fillText('Failed to load drawing', 30, 160);
+      }
+    } else {
+      // For messages, render the text
+      ctx.fillStyle = '#ffffff';
+      ctx.font = '16px Inter, sans-serif';
+      
+      // Word wrap the message
+      const words = submission.content.split(' ');
+      const lines = [];
+      let currentLine = '';
+      const maxWidth = canvas.width - 60;
+      
+      for (const word of words) {
+        const testLine = currentLine + (currentLine ? ' ' : '') + word;
+        const metrics = ctx.measureText(testLine);
+        
+        if (metrics.width > maxWidth && currentLine) {
+          lines.push(currentLine);
+          currentLine = word;
+        } else {
+          currentLine = testLine;
+        }
+      }
+      if (currentLine) lines.push(currentLine);
+      
+      // Draw the message lines
+      let y = 150;
+      for (const line of lines) {
+        ctx.fillText(line, 30, y);
+        y += 24;
+      }
+      
+      // Add signature if present
+      if (submission.signature_enabled && submission.signature_text) {
+        y += 20;
+        ctx.fillStyle = '#a855f7';
+        ctx.font = 'italic 18px Dancing Script, cursive'; // Use signature font
+        ctx.textAlign = 'right';
+        ctx.fillText(`— ${submission.signature_text}`, canvas.width - 30, y);
+        ctx.textAlign = 'left'; // Reset alignment
+      }
+    }
+
+    // Footer
+    ctx.fillStyle = '#52525b';
+    ctx.font = '12px Inter, sans-serif';
+    ctx.fillText('Generated from coah\'s admin panel', 30, canvas.height - 30);
+
+    // Download the image
+    const link = document.createElement('a');
+    link.download = `submission-${submission.type}-${submission.id.slice(0, 8)}.png`;
+    link.href = canvas.toDataURL();
+    link.click();
+
+    toast({
+      title: "Downloaded!",
+      description: "Submission saved as image",
+    });
   };
 
   const logout = () => {
@@ -228,6 +358,13 @@ const AdminDashboard = () => {
                      <div className="flex flex-col gap-2">
                        <Button
                          size="sm"
+                         variant="outline"
+                         onClick={() => downloadSubmissionAsImage(submission)}
+                       >
+                         <Download className="h-4 w-4" />
+                       </Button>
+                       <Button
+                         size="sm"
                          variant="destructive"
                          onClick={() => deleteSubmission(submission.id)}
                        >
@@ -255,6 +392,14 @@ const AdminDashboard = () => {
           </TabsContent>
         </Tabs>
       </div>
+      
+      {/* Hidden canvas for generating images */}
+      <canvas
+        ref={canvasRef}
+        style={{ display: 'none' }}
+        width={800}
+        height={600}
+      />
     </div>
   );
 };
