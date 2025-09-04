@@ -451,9 +451,9 @@ const ProfileSection = () => {
         </div>
 
         {/* Bio */}
-        <div className="mt-auto">
-          <h3 className="font-medium mb-2 xl:mb-3 text-foreground text-sm lg:text-base xl:text-lg 2xl:text-xl font-rounded">about me</h3>
-          <p className="text-xs lg:text-sm xl:text-base 2xl:text-lg text-muted-foreground leading-relaxed xl:leading-8 font-rounded">
+        <div className="mt-auto pt-2">
+          <h3 className="font-medium mb-2 text-foreground text-sm lg:text-base font-rounded">about me</h3>
+          <p className="text-xs lg:text-sm text-muted-foreground leading-relaxed font-rounded">
             hey im cole! im a video editor, tech enthusiast, and bad coder. check out the{' '}
             <button 
               onClick={() => {
@@ -481,7 +481,7 @@ const ProfileSection = () => {
         </div>
 
         {/* Status Footer */}
-        <div className="mt-4 lg:mt-6 pt-3 lg:pt-4 border-t border-border/30">
+        <div className="mt-3 lg:mt-4 pt-2 lg:pt-3 border-t border-border/30">
           <div className="flex items-center justify-between text-xs lg:text-sm text-muted-foreground">
             <div className="flex items-center gap-2">
               <div className={`w-3 h-3 rounded-full ${
@@ -498,7 +498,7 @@ const ProfileSection = () => {
           </div>
           
           {/* Connection Status */}
-          <div className="mt-2 flex items-center gap-2">
+          <div className="mt-1.5 flex items-center gap-2">
             <div className={`w-2 h-2 rounded-full ${isConnected ? 'bg-green-500' : 'bg-red-500'}`}></div>
             <span className="text-xs text-muted-foreground font-code">
               {isConnected ? 'live status' : 'reconnecting...'}

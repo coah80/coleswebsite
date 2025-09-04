@@ -128,16 +128,14 @@ const SocialLinksSection = () => {
   }
 
   return (
-    <div className="h-full flex flex-col" data-section="social">
+    <div className="h-full flex flex-col overflow-hidden" data-section="social">
       {/* Main Socials */}
       <div>
-        <h2 className="text-base lg:text-lg xl:text-xl 2xl:text-2xl font-semibold mb-3 lg:mb-4 xl:mb-6 text-foreground font-fun">find me here</h2>
-        <div className="flex-1 overflow-y-auto">
-          <div className={`space-y-2 ${socialLinks.length > 6 ? 'lg:space-y-2 xl:space-y-3' : 'lg:space-y-3 xl:space-y-4 2xl:space-y-5'} pb-4`}>
+        <h2 className="text-base lg:text-lg xl:text-xl font-semibold mb-2 lg:mb-3 text-foreground font-fun">find me here</h2>
+        <div className="flex-1 overflow-y-auto max-h-[60vh]">
+          <div className="space-y-1.5 lg:space-y-2 pb-2">
             {socialLinks.map((link, index) => {
               const { icon: IconComponent, color } = detectPlatform(link.name, link.url);
-              // Dynamic sizing based on number of links and screen size
-              const isCompact = socialLinks.length > 6 || socialLinks.length > 4;
               
               return (
                 <a
@@ -148,23 +146,23 @@ const SocialLinksSection = () => {
                   className="block group"
                   style={{ animationDelay: `${index * 100}ms` }}
                 >
-                  <Card className="p-2 lg:p-3 xl:p-4 bg-card/50 border-border/30 hover:border-primary/50 transition-all duration-300 hover:shadow-link hover:-translate-y-1 group-hover:bg-gradient-card">
-                    <div className="flex items-center gap-2 lg:gap-3 xl:gap-4">
-                      <div className={`p-1 lg:p-1.5 xl:p-2 rounded-full bg-gradient-to-r ${color} shadow-lg group-hover:scale-110 transition-transform duration-300 flex-shrink-0`}>
-                        <IconComponent className="w-3.5 h-3.5 lg:w-4 lg:h-4 xl:w-5 xl:h-5 text-white" />
+                  <Card className="p-2 lg:p-2.5 bg-card/50 border-border/30 hover:border-primary/50 transition-all duration-300 hover:shadow-link hover:-translate-y-1 group-hover:bg-gradient-card">
+                    <div className="flex items-center gap-2 lg:gap-3">
+                      <div className={`p-1 lg:p-1.5 rounded-full bg-gradient-to-r ${color} shadow-lg group-hover:scale-110 transition-transform duration-300 flex-shrink-0`}>
+                        <IconComponent className="w-3 h-3 lg:w-4 lg:h-4 text-white" />
                       </div>
                       <div className="flex-1 min-w-0">
                         <div className="flex items-center gap-2">
-                          <span className="font-medium group-hover:text-primary transition-colors font-rounded text-xs lg:text-sm xl:text-base truncate">
+                          <span className="font-medium group-hover:text-primary transition-colors font-rounded text-xs lg:text-sm truncate">
                             {link.name}
                           </span>
-                          <ExternalLink className="h-2 w-2 lg:h-2.5 lg:w-2.5 xl:h-3 xl:w-3 text-muted-foreground/50 group-hover:text-primary/70 transition-colors flex-shrink-0" />
+                          <ExternalLink className="h-2 w-2 lg:h-2.5 lg:w-2.5 text-muted-foreground/50 group-hover:text-primary/70 transition-colors flex-shrink-0" />
                         </div>
-                        <div className="text-xs xl:text-sm text-muted-foreground font-code truncate">
+                        <div className="text-xs text-muted-foreground font-code truncate">
                           {link.handle}
                         </div>
                         {link.description && (
-                          <div className="text-xs xl:text-sm text-muted-foreground/80 hidden lg:block font-rounded italic truncate">
+                          <div className="text-xs text-muted-foreground/80 hidden lg:block font-rounded italic truncate">
                             {link.description}
                           </div>
                         )}
@@ -178,7 +176,7 @@ const SocialLinksSection = () => {
         </div>
         
         {socialLinks.length === 0 && (
-          <div className="text-center py-8 flex-1 flex items-center justify-center">
+          <div className="text-center py-4 flex-1 flex items-center justify-center">
             <p className="text-muted-foreground">No social links available</p>
           </div>
         )}
