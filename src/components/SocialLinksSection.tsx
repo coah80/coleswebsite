@@ -175,6 +175,7 @@ const SocialLinksSection = ({ isLandscape }: SocialLinksSectionProps) => {
   const [error, setError] = useState<string | null>(null);
   const [screenHeight, setScreenHeight] = useState(window.innerHeight);
   const [isCompact, setIsCompact] = useState(false);
+  const [forceUpdate, setForceUpdate] = useState(0);
 
   useEffect(() => {
     const handleResize = () => {
@@ -190,18 +191,19 @@ const SocialLinksSection = ({ isLandscape }: SocialLinksSectionProps) => {
 
   useEffect(() => {
     fetchSocialLinks();
+    // Force a layout recalculation on mount
+    setForceUpdate(prev => prev + 1);
   }, []);
 
-  // Force re-render when socialLinks change to update button heights
+  // Force layout recalculation when socialLinks change
   useEffect(() => {
-    if (isLandscape) {
-      // Trigger a small delay to ensure DOM updates
-      const timer = setTimeout(() => {
-        setIsCompact(window.innerHeight < 600 || socialLinks.length > 8);
-      }, 100);
-      return () => clearTimeout(timer);
-    }
-  }, [socialLinks.length, isLandscape]);
+    // Force a complete re-render when social links change
+    const timer = setTimeout(() => {
+      setForceUpdate(prev => prev + 1);
+      setIsCompact(window.innerHeight < 600 || socialLinks.length > 8);
+    }, 100);
+    return () => clearTimeout(timer);
+  }, [socialLinks.length]);
 
   const fetchSocialLinks = async () => {
     setError(null);
@@ -257,7 +259,9 @@ const SocialLinksSection = ({ isLandscape }: SocialLinksSectionProps) => {
         <div className={`${isLandscape ? 'flex-1 flex flex-col min-h-0' : 'flex-1'}`}>
           <div className={`${isLandscape ? 'flex flex-col h-full' : 'space-y-1.5 lg:space-y-2 pb-2 lg:pb-4'}`} style={isLandscape ? { 
             height: '100%',
-            gap: '4px'
+            gap: '4px',
+            // Force recalculation with key
+            transform: `translateZ(${forceUpdate}px)`
           } : {}}>
             {socialLinks.map((link, index) => {
               const { icon: IconComponent, color } = detectPlatform(link.name, link.url);
@@ -277,7 +281,9 @@ const SocialLinksSection = ({ isLandscape }: SocialLinksSectionProps) => {
                       height: `calc((100% - ${(socialLinks.length - 1) * 4}px) / ${socialLinks.length})`,
                       minHeight: '50px',
                       padding: '8px',
-                      flex: `1 1 calc(100% / ${socialLinks.length})`
+                      flex: `1 1 calc(100% / ${socialLinks.length})`,
+                      // Force layout recalculation
+                      willChange: 'height'
                     } : {}}
                   >
                     <div className={`flex items-center h-full ${isLandscape ? (isCompact ? 'justify-center' : 'gap-3') : 'gap-1.5 sm:gap-2 lg:gap-3'}`}>
