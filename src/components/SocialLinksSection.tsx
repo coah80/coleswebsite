@@ -194,6 +194,7 @@ const SocialLinksSection = ({ isLandscape }: SocialLinksSectionProps) => {
 
   const fetchSocialLinks = async () => {
     setError(null);
+    console.log('Fetching social links...');
     try {
       const { data, error } = await supabase
         .from('social_links')
@@ -201,8 +202,11 @@ const SocialLinksSection = ({ isLandscape }: SocialLinksSectionProps) => {
         .eq('is_published', true)
         .order('display_order', { ascending: true });
 
+      console.log('Social links query result:', { data, error });
+      
       if (error) throw error;
       setSocialLinks(data || []);
+      console.log('Social links set to:', data);
     } catch (error) {
       console.error('Error fetching social links:', error);
       setError('Unable to load social links. Please check your connection.');
