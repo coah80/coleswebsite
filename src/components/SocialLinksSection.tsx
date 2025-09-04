@@ -270,7 +270,6 @@ const SocialLinksSection = ({ isLandscape }: SocialLinksSectionProps) => {
                         } : {}} />
                       </div>
                       {!isCompact && (
-                      {!isCompact && (
                       <div className="flex-1 min-w-0">
                         <div className="flex items-center gap-2">
                           <span className={`font-medium group-hover:text-primary transition-colors font-rounded truncate`} style={isLandscape ? { fontSize: `${Math.max(8, Math.min(16, (screenHeight - 400) / Math.max(1, socialLinks.length * 2)))}px` } : {}} >
@@ -290,7 +289,6 @@ const SocialLinksSection = ({ isLandscape }: SocialLinksSectionProps) => {
                           </div>
                         )}
                       </div>
-                      )}
                       )}
                     </div>
                   </Card>
