@@ -151,8 +151,8 @@ interface SocialLinksSectionProps {
 }
 
 const detectPlatform = (name: string, url: string): { icon: any; color: string } => {
-  const nameKey = name.toLowerCase().replace(/[^a-z]/g, '');
-  const urlKey = url.toLowerCase();
+  const nameKey = (name || '').toLowerCase().replace(/[^a-z]/g, '');
+  const urlKey = (url || '').toLowerCase();
   
   // Check name first
   if (PLATFORM_CONFIG[nameKey]) {
