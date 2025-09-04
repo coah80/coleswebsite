@@ -128,59 +128,61 @@ const SocialLinksSection = () => {
   }
 
   return (
-    <div className="h-full" data-section="social">
+    <div className="h-full flex flex-col" data-section="social">
       {/* Main Socials */}
       <div>
         <h2 className="text-base lg:text-lg xl:text-xl 2xl:text-2xl font-semibold mb-3 lg:mb-4 xl:mb-6 text-foreground font-fun">find me here</h2>
-        <div className={`space-y-2 ${socialLinks.length > 6 ? 'lg:space-y-2 xl:space-y-3' : 'lg:space-y-3 xl:space-y-4 2xl:space-y-5'}`}>
-          {socialLinks.map((link, index) => {
-            const { icon: IconComponent, color } = detectPlatform(link.name, link.url);
-            const isCompact = socialLinks.length > 6;
-            
-            return (
-              <a
-                key={link.id}
-                href={link.url}
-                target="_blank"
-                rel="noopener noreferrer"
-                className="block group"
-                style={{ animationDelay: `${index * 100}ms` }}
-              >
-                <Card className={`${isCompact ? 'p-2 lg:p-3 xl:p-4' : 'p-3 lg:p-4 xl:p-5 2xl:p-6'} bg-card/50 border-border/30 hover:border-primary/50 transition-all duration-300 hover:shadow-link hover:-translate-y-1 group-hover:bg-gradient-card`}>
-                  <div className={`flex items-center ${isCompact ? 'gap-2 lg:gap-3 xl:gap-4' : 'gap-3 lg:gap-4 xl:gap-5'}`}>
-                    <div className={`${isCompact ? 'p-1 lg:p-1.5 xl:p-2' : 'p-1.5 lg:p-2 xl:p-2.5'} rounded-full bg-gradient-to-r ${color} shadow-lg group-hover:scale-110 transition-transform duration-300`}>
-                      <IconComponent className={`${isCompact ? 'w-3.5 h-3.5 lg:w-4 lg:h-4 xl:w-5 xl:h-5' : 'w-4 h-4 lg:w-5 lg:h-5 xl:w-6 xl:h-6'} text-white`} />
-                    </div>
-                    <div className="flex-1 min-w-0">
-                      <div className="flex items-center gap-2">
-                        <span className={`font-medium group-hover:text-primary transition-colors font-rounded ${isCompact ? 'text-xs lg:text-sm xl:text-base' : 'text-sm lg:text-base xl:text-lg'}`}>
-                          {link.name}
-                        </span>
-                        <ExternalLink className={`${isCompact ? 'h-2 w-2 lg:h-2.5 lg:w-2.5 xl:h-3 xl:w-3' : 'h-2.5 w-2.5 lg:h-3 lg:w-3 xl:h-4 xl:w-4'} text-muted-foreground/50 group-hover:text-primary/70 transition-colors`} />
+        <div className="flex-1 overflow-y-auto">
+          <div className={`space-y-2 ${socialLinks.length > 6 ? 'lg:space-y-2 xl:space-y-3' : 'lg:space-y-3 xl:space-y-4 2xl:space-y-5'} pb-4`}>
+            {socialLinks.map((link, index) => {
+              const { icon: IconComponent, color } = detectPlatform(link.name, link.url);
+              // Dynamic sizing based on number of links and screen size
+              const isCompact = socialLinks.length > 6 || socialLinks.length > 4;
+              
+              return (
+                <a
+                  key={link.id}
+                  href={link.url}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="block group"
+                  style={{ animationDelay: `${index * 100}ms` }}
+                >
+                  <Card className="p-2 lg:p-3 xl:p-4 bg-card/50 border-border/30 hover:border-primary/50 transition-all duration-300 hover:shadow-link hover:-translate-y-1 group-hover:bg-gradient-card">
+                    <div className="flex items-center gap-2 lg:gap-3 xl:gap-4">
+                      <div className="p-1 lg:p-1.5 xl:p-2 rounded-full bg-gradient-to-r ${color} shadow-lg group-hover:scale-110 transition-transform duration-300 flex-shrink-0">
+                        <IconComponent className="w-3.5 h-3.5 lg:w-4 lg:h-4 xl:w-5 xl:h-5 text-white" />
                       </div>
-                      <div className={`${isCompact ? 'text-xs xl:text-sm' : 'text-xs lg:text-sm xl:text-base'} text-muted-foreground font-code`}>
-                        {link.handle}
-                      </div>
-                      {link.description && !isCompact && (
-                        <div className="text-xs xl:text-sm text-muted-foreground/80 hidden lg:block font-rounded italic">
-                          {link.description}
+                      <div className="flex-1 min-w-0">
+                        <div className="flex items-center gap-2">
+                          <span className="font-medium group-hover:text-primary transition-colors font-rounded text-xs lg:text-sm xl:text-base truncate">
+                            {link.name}
+                          </span>
+                          <ExternalLink className="h-2 w-2 lg:h-2.5 lg:w-2.5 xl:h-3 xl:w-3 text-muted-foreground/50 group-hover:text-primary/70 transition-colors flex-shrink-0" />
                         </div>
-                      )}
+                        <div className="text-xs xl:text-sm text-muted-foreground font-code truncate">
+                          {link.handle}
+                        </div>
+                        {link.description && (
+                          <div className="text-xs xl:text-sm text-muted-foreground/80 hidden lg:block font-rounded italic truncate">
+                            {link.description}
+                          </div>
+                        )}
+                      </div>
                     </div>
-                  </div>
-                </Card>
-              </a>
-            );
-          })}
+                  </Card>
+                </a>
+              );
+            })}
+          </div>
         </div>
         
         {socialLinks.length === 0 && (
-          <div className="text-center py-8">
+          <div className="text-center py-8 flex-1 flex items-center justify-center">
             <p className="text-muted-foreground">No social links available</p>
           </div>
         )}
       </div>
-
     </div>
   );
 };
