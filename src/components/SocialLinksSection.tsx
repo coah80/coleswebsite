@@ -132,7 +132,7 @@ const SocialLinksSection = () => {
       {/* Main Socials */}
       <div>
         <h2 className="text-base lg:text-lg xl:text-xl font-semibold mb-2 lg:mb-3 text-foreground font-fun">find me here</h2>
-        <div className="flex-1 overflow-y-auto max-h-[60vh]">
+        <div className="flex-1 overflow-y-auto max-h-[50vh] md:max-h-[60vh]">
           <div className="space-y-1.5 lg:space-y-2 pb-2">
             {socialLinks.map((link, index) => {
               const { icon: IconComponent, color } = detectPlatform(link.name, link.url);
@@ -146,23 +146,23 @@ const SocialLinksSection = () => {
                   className="block group"
                   style={{ animationDelay: `${index * 100}ms` }}
                 >
-                  <Card className="p-2 lg:p-2.5 bg-card/50 border-border/30 hover:border-primary/50 transition-all duration-300 hover:shadow-link hover:-translate-y-1 group-hover:bg-gradient-card">
-                    <div className="flex items-center gap-2 lg:gap-3">
+                  <Card className="p-1.5 sm:p-2 lg:p-2.5 bg-card/50 border-border/30 hover:border-primary/50 transition-all duration-300 hover:shadow-link hover:-translate-y-1 group-hover:bg-gradient-card">
+                    <div className="flex items-center gap-1.5 sm:gap-2 lg:gap-3">
                       <div className={`p-1 lg:p-1.5 rounded-full bg-gradient-to-r ${color} shadow-lg group-hover:scale-110 transition-transform duration-300 flex-shrink-0`}>
-                        <IconComponent className="w-3 h-3 lg:w-4 lg:h-4 text-white" />
+                        <IconComponent className="w-2.5 h-2.5 sm:w-3 sm:h-3 lg:w-4 lg:h-4 text-white" />
                       </div>
                       <div className="flex-1 min-w-0">
                         <div className="flex items-center gap-2">
-                          <span className="font-medium group-hover:text-primary transition-colors font-rounded text-xs lg:text-sm truncate">
+                          <span className="font-medium group-hover:text-primary transition-colors font-rounded text-xs sm:text-xs lg:text-sm truncate">
                             {link.name}
                           </span>
-                          <ExternalLink className="h-2 w-2 lg:h-2.5 lg:w-2.5 text-muted-foreground/50 group-hover:text-primary/70 transition-colors flex-shrink-0" />
+                          <ExternalLink className="h-1.5 w-1.5 sm:h-2 sm:w-2 lg:h-2.5 lg:w-2.5 text-muted-foreground/50 group-hover:text-primary/70 transition-colors flex-shrink-0" />
                         </div>
-                        <div className="text-xs text-muted-foreground font-code truncate">
+                        <div className="text-xs sm:text-xs text-muted-foreground font-code truncate">
                           {link.handle}
                         </div>
                         {link.description && (
-                          <div className="text-xs text-muted-foreground/80 hidden lg:block font-rounded italic truncate">
+                          <div className="text-xs text-muted-foreground/80 hidden md:block font-rounded italic truncate">
                             {link.description}
                           </div>
                         )}
@@ -176,7 +176,7 @@ const SocialLinksSection = () => {
         </div>
         
         {socialLinks.length === 0 && (
-          <div className="text-center py-4 flex-1 flex items-center justify-center">
+          <div className="text-center py-2 flex-1 flex items-center justify-center">
             <p className="text-muted-foreground">No social links available</p>
           </div>
         )}
