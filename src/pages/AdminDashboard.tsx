@@ -23,9 +23,6 @@ import {
 type Submission = Database['public']['Tables']['submissions']['Row'];
 
 const textFont = '"DM Sans", "Inter", system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif';
-const signatureFont = '"Dancing Script", "Inter", cursive';
-
-const clamp = (value: number, min: number, max: number) => Math.min(Math.max(value, min), max);
 const sortSubmissions = (items: Submission[]) =>
   items
     .slice()
@@ -160,45 +157,35 @@ const AdminDashboard = () => {
     return byType;
   }, [submissions]);
 
-  const downloadDrawingSubmission = async (submission: Submission) => {
-    const source = submission.content.startsWith('data:')
-      ? submission.content
-      : `data:image/png;base64,${submission.content}`;
-
-    await new Promise<void>((resolve, reject) => {
+  const loadImage = (src: string) =>
+    new Promise<HTMLImageElement>((resolve, reject) => {
       const image = new Image();
       image.crossOrigin = 'anonymous';
-      image.onload = () => {
-        const maxDimension = 2048;
-        const { width, height } = image;
-        const scale = Math.min(maxDimension / width, maxDimension / height, 1);
-        const canvasWidth = Math.round(width * scale);
-        const canvasHeight = Math.round(height * scale);
-
-        const canvas = document.createElement('canvas');
-        canvas.width = canvasWidth;
-        canvas.height = canvasHeight;
-
-        const ctx = canvas.getContext('2d');
-        if (!ctx) {
-          reject(new Error('Canvas context not available'));
-          return;
-        }
-
-        ctx.fillStyle = '#ffffff';
-        ctx.fillRect(0, 0, canvasWidth, canvasHeight);
-        ctx.drawImage(image, 0, 0, canvasWidth, canvasHeight);
-
-        const link = document.createElement('a');
-        link.href = canvas.toDataURL('image/png');
-        link.download = `submission-${submission.id}.png`;
-        link.click();
-        resolve();
-      };
-
-      image.onerror = () => reject(new Error('Failed to load submission image'));
-      image.src = source;
+      image.onload = () => resolve(image);
+      image.onerror = () => reject(new Error('Unable to load submission image'));
+      image.src = src;
     });
+
+  const drawRoundedRect = (
+    ctx: CanvasRenderingContext2D,
+    x: number,
+    y: number,
+    width: number,
+    height: number,
+    radius: number
+  ) => {
+    const r = Math.min(radius, width / 2, height / 2);
+    ctx.beginPath();
+    ctx.moveTo(x + r, y);
+    ctx.lineTo(x + width - r, y);
+    ctx.quadraticCurveTo(x + width, y, x + width, y + r);
+    ctx.lineTo(x + width, y + height - r);
+    ctx.quadraticCurveTo(x + width, y + height, x + width - r, y + height);
+    ctx.lineTo(x + r, y + height);
+    ctx.quadraticCurveTo(x, y + height, x, y + height - r);
+    ctx.lineTo(x, y + r);
+    ctx.quadraticCurveTo(x, y, x + r, y);
+    ctx.closePath();
   };
 
   const wrapParagraph = (
@@ -262,122 +249,294 @@ const AdminDashboard = () => {
     return { lines: allLines, widest };
   };
 
-  const downloadMessageSubmission = (submission: Submission) => {
+  const BADGE_PADDING_X = 16;
+  const BADGE_HEIGHT = 30;
+
+  const measureBadgeWidth = (ctx: CanvasRenderingContext2D, text: string) =>
+    ctx.measureText(text).width + BADGE_PADDING_X * 2;
+
+  const drawBadge = (
+    ctx: CanvasRenderingContext2D,
+    text: string,
+    x: number,
+    y: number,
+    colors: { background: string; foreground: string }
+  ) => {
+    const badgeWidth = measureBadgeWidth(ctx, text);
+
+    ctx.save();
+    ctx.fillStyle = colors.background;
+    drawRoundedRect(ctx, x, y, badgeWidth, BADGE_HEIGHT, 999);
+    ctx.fill();
+
+    ctx.fillStyle = colors.foreground;
+    ctx.textBaseline = 'middle';
+    ctx.fillText(text, x + BADGE_PADDING_X, y + BADGE_HEIGHT / 2 + 1);
+    ctx.restore();
+
+    return badgeWidth;
+  };
+
+  const createSubmissionScreenshot = async (submission: Submission) => {
+    const isMessage = submission.type === 'message';
     const message = submission.content.trim();
     const signature = submission.signature_enabled ? submission.signature_text ?? '' : '';
 
     const measureCanvas = document.createElement('canvas');
-    const measureContext = measureCanvas.getContext('2d');
-    const canvas = document.createElement('canvas');
-    const ctx = canvas.getContext('2d');
-
-    if (!measureContext || !ctx) {
-      throw new Error('Canvas features are not available in this browser.');
+    const measureCtx = measureCanvas.getContext('2d');
+    if (!measureCtx) {
+      throw new Error('Canvas measurements are unavailable in this browser.');
     }
 
-    const messageFontSize = 30;
-    const messageLineHeight = messageFontSize * 1.45;
-    const signatureFontSize = 26;
-    const signatureLineHeight = signatureFontSize * 1.4;
-    const maxTextWidth = 860;
-    const paddingX = 72;
-    const paddingY = 88;
-    const signatureSpacing = signature ? 32 : 0;
+    const cardWidth = 960;
+    const outerPadding = 64;
+    const innerPadding = 48;
+    const contentWidth = cardWidth - innerPadding * 2;
+    const titleFontSize = 32;
+    const metadataFontSize = 20;
+    const iconSize = 34;
+    const headerSpacing = 18;
+    const metadataSpacing = 28;
 
-    const messageFont = `500 ${messageFontSize}px ${textFont}`;
-    const signatureFontResolved = submission.signature_font ? signatureFont : `${signatureFontSize}px ${textFont}`;
-    const signatureFontString = `600 ${signatureFontSize}px ${signatureFontResolved}`;
+    const headerBlockHeight =
+      Math.max(iconSize, titleFontSize) + headerSpacing + metadataFontSize + metadataSpacing;
 
-    const { lines: messageLines, widest: messageWidest } = prepareTextBlocks(
-      message,
-      measureContext,
-      messageFont,
-      maxTextWidth
-    );
-
+    let contentBoxHeight = 0;
+    let messageLines: string[] = [];
+    let messageLineHeight = 0;
+    let contentPadding = 0;
     let signatureLines: string[] = [];
-    let signatureWidest = 0;
-    if (signature) {
-      const preparedSignature = prepareTextBlocks(
-        signature,
-        measureContext,
-        signatureFontString,
-        maxTextWidth
-      );
-      signatureLines = preparedSignature.lines;
-      signatureWidest = preparedSignature.widest;
+    let signatureLineHeight = 0;
+    let signatureSpacing = 0;
+    let signatureFontString = '';
+    let messageFontString = '';
+    let imageDetails:
+      | {
+          element: HTMLImageElement;
+          drawWidth: number;
+          drawHeight: number;
+        }
+      | null = null;
+
+    if (isMessage) {
+      const messageFontSize = 28;
+      messageLineHeight = Math.round(messageFontSize * 1.5);
+      messageFontString = `500 ${messageFontSize}px ${textFont}`;
+      contentPadding = 36;
+
+      const usableWidth = contentWidth - contentPadding * 2;
+      const preparedMessage = prepareTextBlocks(message, measureCtx, messageFontString, usableWidth);
+      messageLines = preparedMessage.lines;
+
+      const computeTextHeight = (lines: string[], lineHeight: number) =>
+        lines.reduce((acc, line) => acc + (line === '' ? lineHeight * 0.6 : lineHeight), 0);
+
+      let messageHeight = computeTextHeight(messageLines, messageLineHeight);
+
+      if (!messageLines.length) {
+        messageLines = ['(empty submission)'];
+        messageHeight = messageLineHeight;
+      }
+
+      signatureSpacing = signature ? 28 : 0;
+      if (signature) {
+        const signatureFontSize = 26;
+        signatureLineHeight = Math.round(signatureFontSize * 1.45);
+        const preferredFonts =
+          '"Dancing Script","Pacifico","Great Vibes","Caveat","Sacramento","Allura","Alex Brush","Kaushan Script","Satisfy","Cookie",cursive';
+        signatureFontString = `600 ${signatureFontSize}px ${
+          submission.signature_font ? preferredFonts : textFont
+        }`;
+        const preparedSignature = prepareTextBlocks(signature, measureCtx, signatureFontString, usableWidth);
+        signatureLines = preparedSignature.lines;
+      }
+
+      const signatureHeight = signatureLines.length
+        ? signatureSpacing +
+          signatureLines.reduce(
+            (acc, line) => acc + (line === '' ? signatureLineHeight * 0.6 : signatureLineHeight),
+            0
+          )
+        : 0;
+
+      const textContentHeight = messageHeight + signatureHeight;
+      contentBoxHeight = textContentHeight + contentPadding * 2;
+    } else {
+      const source = submission.content.startsWith('data:')
+        ? submission.content
+        : `data:image/png;base64,${submission.content}`;
+      const image = await loadImage(source);
+      const contentInnerPadding = 28;
+      const maxImageHeight = 520;
+      const availableWidth = contentWidth - contentInnerPadding * 2;
+
+      const scale = Math.min(availableWidth / image.width, maxImageHeight / image.height, 1);
+      const drawWidth = Math.max(availableWidth * 0.4, image.width * scale);
+      const computedDrawWidth = Math.min(drawWidth, availableWidth);
+      const computedDrawHeight = (image.height * computedDrawWidth) / image.width;
+
+      imageDetails = {
+        element: image,
+        drawWidth: computedDrawWidth,
+        drawHeight: computedDrawHeight
+      };
+
+      contentPadding = contentInnerPadding;
+      contentBoxHeight = computedDrawHeight + contentPadding * 2;
     }
 
-    const contentHeight =
-      messageLines.length * messageLineHeight +
-      (signatureLines.length ? signatureSpacing + signatureLines.length * signatureLineHeight : 0);
+    const cardHeight = headerBlockHeight + contentBoxHeight + innerPadding * 2;
+    const canvasWidth = cardWidth + outerPadding * 2;
+    const canvasHeight = cardHeight + outerPadding * 2;
 
-    const rawContentWidth = Math.max(messageWidest, signatureWidest);
-    const contentWidth = clamp(rawContentWidth, 420, maxTextWidth);
+    const canvas = document.createElement('canvas');
+    canvas.width = Math.round(canvasWidth);
+    canvas.height = Math.round(canvasHeight);
+    const ctx = canvas.getContext('2d');
+    if (!ctx) {
+      throw new Error('Canvas features are not available.');
+    }
 
-    canvas.width = Math.round(contentWidth + paddingX * 2);
-    canvas.height = Math.round(contentHeight + paddingY * 2);
-
-    const gradient = ctx.createLinearGradient(0, 0, canvas.width, canvas.height);
-    gradient.addColorStop(0, '#f8f5ff');
-    gradient.addColorStop(1, '#e2e8ff');
-
-    ctx.fillStyle = gradient;
-    ctx.fillRect(0, 0, canvas.width, canvas.height);
-
-    ctx.fillStyle = '#ffffff';
-    ctx.globalAlpha = 0.85;
-    ctx.fillRect(16, 16, canvas.width - 32, canvas.height - 32);
-    ctx.globalAlpha = 1;
-
-    ctx.fillStyle = '#1f1b2e';
-    ctx.font = messageFont;
     ctx.textBaseline = 'top';
 
-    let cursorY = paddingY;
+    ctx.fillStyle = '#05030d';
+    ctx.fillRect(0, 0, canvas.width, canvas.height);
 
-    messageLines.forEach((line) => {
-      if (line === '') {
-        cursorY += messageLineHeight * 0.6;
-      } else {
-        ctx.fillText(line, paddingX, cursorY);
-        cursorY += messageLineHeight;
-      }
-    });
+    const cardX = outerPadding;
+    const cardY = outerPadding;
 
-    if (signatureLines.length) {
-      cursorY += signatureSpacing;
-      ctx.font = signatureFontString;
-      ctx.fillStyle = '#4b3fa7';
+    ctx.save();
+    ctx.shadowColor = 'rgba(7, 4, 17, 0.65)';
+    ctx.shadowBlur = 48;
+    ctx.shadowOffsetY = 24;
+    drawRoundedRect(ctx, cardX, cardY, cardWidth, cardHeight, 40);
+    const gradient = ctx.createLinearGradient(cardX, cardY, cardX + cardWidth, cardY + cardHeight);
+    gradient.addColorStop(0, '#130f1a');
+    gradient.addColorStop(1, '#1c1726');
+    ctx.fillStyle = gradient;
+    ctx.fill();
+    ctx.restore();
 
-      signatureLines.forEach((line) => {
+    ctx.lineWidth = 2;
+    ctx.strokeStyle = 'rgba(255,255,255,0.06)';
+    drawRoundedRect(ctx, cardX, cardY, cardWidth, cardHeight, 40);
+    ctx.stroke();
+
+    const contentX = cardX + innerPadding;
+    let cursorY = cardY + innerPadding;
+
+    const icon = isMessage ? '💬' : '🖼️';
+    ctx.font = `400 ${iconSize}px "Apple Color Emoji","Segoe UI Emoji","Noto Color Emoji",sans-serif`;
+    ctx.fillText(icon, contentX, cursorY - 2);
+
+    ctx.font = `600 ${titleFontSize}px ${textFont}`;
+    ctx.fillStyle = '#f8f6ff';
+    const titleText = isMessage ? 'Message Submission' : 'Drawing Submission';
+    ctx.fillText(titleText, contentX + 52, cursorY - 6);
+
+    const badgesFont = '600 18px "Inter","DM Sans",sans-serif';
+    ctx.font = badgesFont;
+    const statusText = submission.is_approved ? 'approved' : 'pending';
+    const statusColors = submission.is_approved
+      ? { background: 'rgba(74,222,128,0.16)', foreground: '#8ff5c7' }
+      : { background: 'rgba(246,236,255,0.12)', foreground: '#e3d4ff' };
+    const idText = `#${submission.id.slice(0, 6)}`;
+    const idColors = { background: 'rgba(255,255,255,0.08)', foreground: '#c7bdf3' };
+
+    const badgeSpacing = 14;
+    const statusWidth = measureBadgeWidth(ctx, statusText);
+    const idWidth = measureBadgeWidth(ctx, idText);
+    const badgesTotalWidth = statusWidth + badgeSpacing + idWidth;
+    const badgesStartX = cardX + cardWidth - innerPadding - badgesTotalWidth;
+
+    drawBadge(ctx, statusText, badgesStartX, cursorY, statusColors);
+    drawBadge(ctx, idText, badgesStartX + statusWidth + badgeSpacing, cursorY, idColors);
+
+    cursorY += Math.max(iconSize, titleFontSize) + headerSpacing;
+
+    const submittedAt = submission.submitted_at
+      ? new Date(submission.submitted_at).toLocaleString()
+      : 'Unknown date';
+    ctx.font = `500 ${metadataFontSize}px ${textFont}`;
+    ctx.fillStyle = 'rgba(226, 220, 255, 0.85)';
+    ctx.fillText(submittedAt, contentX, cursorY);
+
+    cursorY += metadataFontSize + metadataSpacing;
+
+    const contentBoxY = cursorY;
+    const contentRadius = 32;
+
+    ctx.save();
+    ctx.fillStyle = 'rgba(8,7,15,0.85)';
+    drawRoundedRect(ctx, contentX, contentBoxY, contentWidth, contentBoxHeight, contentRadius);
+    ctx.fill();
+
+    ctx.strokeStyle = 'rgba(255,255,255,0.05)';
+    ctx.lineWidth = 1.5;
+    drawRoundedRect(ctx, contentX, contentBoxY, contentWidth, contentBoxHeight, contentRadius);
+    ctx.stroke();
+    ctx.restore();
+
+    if (isMessage) {
+      ctx.font = messageFontString;
+      ctx.fillStyle = '#f5f3ff';
+      let textCursorY = contentBoxY + contentPadding;
+      const textCursorX = contentX + contentPadding;
+
+      messageLines.forEach((line) => {
         if (line === '') {
-          cursorY += signatureLineHeight * 0.6;
+          textCursorY += messageLineHeight * 0.6;
         } else {
-          ctx.fillText(`— ${line}`, paddingX, cursorY);
-          cursorY += signatureLineHeight;
+          ctx.fillText(line, textCursorX, textCursorY);
+          textCursorY += messageLineHeight;
         }
       });
+
+      if (signatureLines.length) {
+        textCursorY += signatureSpacing;
+        ctx.font = signatureFontString;
+        ctx.fillStyle = '#c7bdf3';
+        signatureLines.forEach((line, index) => {
+          if (line === '') {
+            textCursorY += signatureLineHeight * 0.6;
+          } else {
+            const prefix = index === 0 ? '— ' : '';
+            ctx.fillText(`${prefix}${line}`, textCursorX, textCursorY);
+            textCursorY += signatureLineHeight;
+          }
+        });
+      }
+    } else if (imageDetails) {
+      const drawX = contentX + (contentWidth - imageDetails.drawWidth) / 2;
+      const drawY = contentBoxY + (contentBoxHeight - imageDetails.drawHeight) / 2;
+
+      ctx.save();
+      ctx.fillStyle = '#090816';
+      drawRoundedRect(ctx, drawX - 6, drawY - 6, imageDetails.drawWidth + 12, imageDetails.drawHeight + 12, 28);
+      ctx.fill();
+      drawRoundedRect(ctx, drawX - 6, drawY - 6, imageDetails.drawWidth + 12, imageDetails.drawHeight + 12, 28);
+      ctx.clip();
+      ctx.drawImage(
+        imageDetails.element,
+        drawX,
+        drawY,
+        imageDetails.drawWidth,
+        imageDetails.drawHeight
+      );
+      ctx.restore();
     }
 
-    ctx.strokeStyle = '#d2cdf7';
-    ctx.lineWidth = 2;
-    ctx.strokeRect(8, 8, canvas.width - 16, canvas.height - 16);
-
-    const link = document.createElement('a');
-    link.href = canvas.toDataURL('image/png');
-    link.download = `submission-${submission.id}.png`;
-    link.click();
+    return canvas.toDataURL('image/png');
   };
 
   const handleDownloadSubmission = async (submission: Submission) => {
     setDownloadingId(submission.id);
     try {
-      if (submission.type === 'drawing') {
-        await downloadDrawingSubmission(submission);
-      } else {
-        downloadMessageSubmission(submission);
-      }
+      const dataUrl = await createSubmissionScreenshot(submission);
+      const link = document.createElement('a');
+      link.href = dataUrl;
+      link.download = `submission-${submission.id}.png`;
+      link.click();
     } catch (error) {
       console.error('Failed to download submission', error);
       toast({
