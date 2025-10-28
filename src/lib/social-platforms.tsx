@@ -1,70 +1,25 @@
-import type { ComponentType } from 'react';
-import { ExternalLink, Globe, Mail, MapPin, Phone } from 'lucide-react';
+import type { FC } from 'react';
 import {
-  SiAdobe,
-  SiAmazon,
-  SiAnchor,
-  SiApplemusic,
-  SiArtstation,
-  SiBandcamp,
-  SiBehance,
-  SiBeacons,
-  SiBluesky,
-  SiBumble,
-  SiBuymeacoffee,
-  SiCalendly,
-  SiCameo,
-  SiCarrd,
-  SiCashapp,
-  SiClubhouse,
-  SiDeezer,
-  SiDeviantart,
-  SiDiscord,
-  SiDribbble,
-  SiEbay,
-  SiEpicgames,
-  SiEtsy,
-  SiFacebook,
-  SiFansly,
-  SiFigma,
-  SiGithub,
-  SiGofundme,
-  SiHinge,
-  SiIndiegogo,
-  SiInstagram,
-  SiKickstarter,
-  SiKofi,
-  SiLastdotfm,
-  SiLinkedin,
-  SiLinktree,
-  SiMastodon,
-  SiNintendo,
-  SiOnlyfans,
-  SiPatreon,
-  SiPaypal,
-  SiPlaystation,
-  SiReddit,
-  SiRumble,
-  SiShopify,
-  SiSignal,
-  SiSnapchat,
-  SiSoundcloud,
-  SiSpotify,
-  SiSteam,
-  SiTelegram,
-  SiThreads,
-  SiTiktok,
-  SiTinder,
-  SiTwitch,
-  SiTwitter,
-  SiVenmo,
-  SiVimeo,
-  SiWhatsapp,
-  SiX,
-  SiYoutube
-} from 'react-icons/si';
+  ExternalLink,
+  Globe,
+  Instagram,
+  Linkedin,
+  Facebook,
+  Youtube,
+  Twitter,
+  Github,
+  Music,
+  MessageCircle,
+  Mail,
+  Gamepad2,
+  Coffee,
+  DollarSign,
+  Twitch,
+  Reddit,
+  Spotify
+} from 'lucide-react';
 
-type IconComponent = ComponentType<{ className?: string }>;
+type IconComponent = FC<{ className?: string }>;
 
 interface PlatformVisuals {
   icon: IconComponent;
@@ -76,158 +31,101 @@ const createVisuals = (icon: IconComponent, gradient: string): PlatformVisuals =
   gradient
 });
 
-const PLATFORM_ICON_MAP: Record<string, PlatformVisuals> = {
-  // Core social platforms
-  instagram: createVisuals(SiInstagram, 'from-pink-500 to-purple-500'),
-  tiktok: createVisuals(SiTiktok, 'from-gray-900 to-pink-500'),
-  youtube: createVisuals(SiYoutube, 'from-red-500 to-red-600'),
-  twitter: createVisuals(SiTwitter, 'from-sky-500 to-blue-500'),
-  x: createVisuals(SiX, 'from-slate-600 to-gray-900'),
-  github: createVisuals(SiGithub, 'from-gray-700 to-neutral-900'),
-  linkedin: createVisuals(SiLinkedin, 'from-blue-600 to-blue-700'),
-  facebook: createVisuals(SiFacebook, 'from-blue-500 to-blue-600'),
-  discord: createVisuals(SiDiscord, 'from-indigo-500 to-purple-500'),
-  twitch: createVisuals(SiTwitch, 'from-purple-600 to-purple-700'),
-  snapchat: createVisuals(SiSnapchat, 'from-yellow-400 to-yellow-500'),
-  reddit: createVisuals(SiReddit, 'from-orange-500 to-red-500'),
-  telegram: createVisuals(SiTelegram, 'from-sky-400 to-sky-500'),
-  whatsapp: createVisuals(SiWhatsapp, 'from-green-400 to-green-500'),
-  signal: createVisuals(SiSignal, 'from-blue-500 to-blue-600'),
-  mastodon: createVisuals(SiMastodon, 'from-purple-500 to-blue-500'),
-  threads: createVisuals(SiThreads, 'from-gray-700 to-black'),
-  bluesky: createVisuals(SiBluesky, 'from-sky-400 to-sky-500'),
+const normalize = (value: string) => value.toLowerCase().replace(/[^a-z0-9]/g, '');
 
-  // Gaming
-  steam: createVisuals(SiSteam, 'from-slate-700 to-slate-900'),
-  epicgames: createVisuals(SiEpicgames, 'from-gray-800 to-black'),
-  playstation: createVisuals(SiPlaystation, 'from-blue-600 to-blue-700'),
-  xbox: createVisuals(SiXbox, 'from-green-500 to-green-600'),
-  nintendo: createVisuals(SiNintendo, 'from-red-500 to-red-600'),
+const TikTokIcon: IconComponent = ({ className = '' }) => (
+  <svg
+    viewBox="0 0 24 24"
+    role="img"
+    aria-hidden="true"
+    className={className}
+    focusable="false"
+  >
+    <path
+      fill="currentColor"
+      d="M21.54 8.35a5.5 5.5 0 01-3.26-1.08v5.02c0 4.14-3.34 7.5-7.48 7.5-2.6 0-4.91-1.33-6.24-3.36a4.97 4.97 0 005.24 4.51c3.14 0 5.71-2.57 5.71-5.71V9.2c1.03.74 2.29 1.18 3.65 1.18V8.35zM9.96 5.03v9.15a2.24 2.24 0 11-1.68-2.17V9.15c-2.6.27-4.63 2.45-4.63 5.11 0 2.85 2.32 5.17 5.17 5.17 3.14 0 5.7-2.56 5.7-5.7V2.5h-3.22v5.32c-.68-.5-1.35-.79-2.34-.79z"
+    />
+  </svg>
+);
 
-  // Music & audio
-  spotify: createVisuals(SiSpotify, 'from-green-500 to-green-600'),
-  applemusic: createVisuals(SiApplemusic, 'from-pink-500 to-red-500'),
-  soundcloud: createVisuals(SiSoundcloud, 'from-orange-500 to-orange-600'),
-  bandcamp: createVisuals(SiBandcamp, 'from-blue-400 to-teal-500'),
-  lastfm: createVisuals(SiLastdotfm, 'from-red-500 to-red-600'),
-  deezer: createVisuals(SiDeezer, 'from-purple-500 to-pink-500'),
-  anchor: createVisuals(SiAnchor, 'from-purple-500 to-purple-600'),
-  clubhouse: createVisuals(SiClubhouse, 'from-orange-400 to-yellow-500'),
+const SteamIcon: IconComponent = ({ className = '' }) => (
+  <svg
+    viewBox="0 0 24 24"
+    role="img"
+    aria-hidden="true"
+    className={className}
+    focusable="false"
+  >
+    <path
+      fill="currentColor"
+      d="M12 0a12 12 0 00-11.21 7.7l4.2 1.73a3.72 3.72 0 014.67 2.63l3.66 1.5a2.64 2.64 0 012.16-.63 2.67 2.67 0 11-1.52 5.13 2.67 2.67 0 01-1.86-3.14l-3.59-1.47a3.73 3.73 0 01-3.65.59 3.73 3.73 0 01-2.12-4.14L0 8.43A12 12 0 1012 0zm3.82 10.88a1.62 1.62 0 100 3.24 1.62 1.62 0 000-3.24z"
+    />
+  </svg>
+);
 
-  // Creative tools
-  behance: createVisuals(SiBehance, 'from-blue-500 to-indigo-500'),
-  dribbble: createVisuals(SiDribbble, 'from-pink-500 to-red-500'),
-  deviantart: createVisuals(SiDeviantart, 'from-green-500 to-emerald-500'),
-  artstation: createVisuals(SiArtstation, 'from-blue-500 to-indigo-600'),
-  figma: createVisuals(SiFigma, 'from-purple-500 to-pink-500'),
-  adobe: createVisuals(SiAdobe, 'from-red-500 to-orange-500'),
+const DiscordIcon: IconComponent = ({ className = '' }) => (
+  <svg
+    viewBox="0 0 24 24"
+    role="img"
+    aria-hidden="true"
+    className={className}
+    focusable="false"
+  >
+    <path
+      fill="currentColor"
+      d="M20.32 4.37A19.86 19.86 0 0016.56 3a13.38 13.38 0 00-.67 1.38 18.53 18.53 0 00-5.79 0A13.24 13.24 0 009.43 3a19.71 19.71 0 00-3.76 1.37C2.41 9.05 1.48 13.58 1.82 18.06a19.9 19.9 0 004.63 2.36 15.03 15.03 0 001.23-2.02 12.89 12.89 0 01-1.95-.94l.47-.34c3.76 1.76 7.82 1.76 11.57 0l.47.34c-.6.38-1.27.7-1.96.94.35.7.75 1.38 1.22 2.03a19.88 19.88 0 004.64-2.37c.39-4.8-.63-9.3-3.95-13.69zM9.25 15.57c-1.13 0-2.05-1.04-2.05-2.31s.9-2.31 2.05-2.31c1.17 0 2.07 1.04 2.05 2.31 0 1.27-.9 2.31-2.05 2.31zm5.5 0c-1.13 0-2.05-1.04-2.05-2.31s.9-2.31 2.05-2.31c1.16 0 2.07 1.04 2.05 2.31 0 1.27-.9 2.31-2.05 2.31z"
+    />
+  </svg>
+);
 
-  // Creator economy
-  onlyfans: createVisuals(SiOnlyfans, 'from-sky-500 to-cyan-500'),
-  fansly: createVisuals(SiFansly, 'from-purple-500 to-blue-500'),
-  cameo: createVisuals(SiCameo, 'from-pink-500 to-sky-500'),
-  rumble: createVisuals(SiRumble, 'from-green-500 to-emerald-500'),
-  vimeo: createVisuals(SiVimeo, 'from-blue-400 to-blue-500'),
-  dailymotion: createVisuals(SiDailymotion, 'from-blue-500 to-yellow-500'),
-
-  // Support & donations
-  kofi: createVisuals(SiKofi, 'from-sky-400 to-sky-500'),
-  'ko-fi': createVisuals(SiKofi, 'from-sky-400 to-sky-500'),
-  patreon: createVisuals(SiPatreon, 'from-orange-500 to-red-500'),
-  paypal: createVisuals(SiPaypal, 'from-blue-500 to-blue-600'),
-  venmo: createVisuals(SiVenmo, 'from-blue-400 to-blue-500'),
-  cashapp: createVisuals(SiCashapp, 'from-green-500 to-green-600'),
-  buymeacoffee: createVisuals(SiBuymeacoffee, 'from-amber-400 to-orange-500'),
-  gofundme: createVisuals(SiGofundme, 'from-green-500 to-teal-500'),
-  kickstarter: createVisuals(SiKickstarter, 'from-emerald-500 to-blue-500'),
-  indiegogo: createVisuals(SiIndiegogo, 'from-pink-500 to-purple-500'),
-
-  // Link hubs / scheduling
-  calendly: createVisuals(SiCalendly, 'from-blue-500 to-blue-600'),
-  linktree: createVisuals(SiLinktree, 'from-green-400 to-green-500'),
-  beacons: createVisuals(SiBeacons, 'from-purple-500 to-pink-500'),
-  carrd: createVisuals(SiCarrd, 'from-blue-500 to-purple-500'),
-
-  // Commerce
-  etsy: createVisuals(SiEtsy, 'from-orange-500 to-red-500'),
-  amazon: createVisuals(SiAmazon, 'from-orange-400 to-amber-500'),
-  ebay: createVisuals(SiEbay, 'from-blue-500 to-amber-500'),
-  shopify: createVisuals(SiShopify, 'from-green-500 to-green-600'),
-
-  // Social / community extras
-  tinder: createVisuals(SiTinder, 'from-red-500 to-pink-500'),
-  bumble: createVisuals(SiBumble, 'from-yellow-400 to-amber-500'),
-  hinge: createVisuals(SiHinge, 'from-slate-500 to-slate-700'),
-
-  // General contact
-  email: createVisuals(Mail, 'from-sky-500 to-blue-600'),
-  mail: createVisuals(Mail, 'from-sky-500 to-blue-600'),
-  contact: createVisuals(Mail, 'from-sky-500 to-blue-600'),
-  phone: createVisuals(Phone, 'from-green-500 to-emerald-600'),
-  call: createVisuals(Phone, 'from-green-500 to-emerald-600'),
-  website: createVisuals(Globe, 'from-purple-500 to-indigo-500'),
-  site: createVisuals(Globe, 'from-purple-500 to-indigo-500'),
-  portfolio: createVisuals(Globe, 'from-purple-500 to-indigo-500'),
-  address: createVisuals(MapPin, 'from-rose-500 to-orange-500'),
-  location: createVisuals(MapPin, 'from-rose-500 to-orange-500')
-};
-
-const aliasGroups: Array<[string, string[]]> = [
-  ['youtube', ['youtu.be', 'music.youtube']],
-  ['twitter', ['tweetdeck']],
-  ['instagram', ['instagr.am']],
-  ['tiktok', ['vm.tiktok']],
-  ['discord', ['discord.gg']],
-  ['telegram', ['t.me']],
-  ['whatsapp', ['wa.me']],
-  ['mastodon', ['mstdn']],
-  ['bluesky', ['bsky.app']],
-  ['playstation', ['ps4', 'ps5']],
-  ['nintendo', ['switch']],
-  ['steam', ['steampowered']],
-  ['soundcloud', ['sndcdn']],
-  ['kofi', ['ko-fi', 'buymeacoffee']],
-  ['paypal', ['paypal.me']],
-  ['venmo', ['venmo.com']],
-  ['cashapp', ['cash.app']],
-  ['linktree', ['linktr.ee']],
-  ['calendly', ['cal.com']],
-  ['shopify', ['myshopify']],
-  ['amazon', ['amzn']],
-  ['gofundme', ['gofund.me']],
-  ['indiegogo', ['igg']],
-  ['rumble', ['rumble.com']]
-];
-
-aliasGroups.forEach(([key, aliases]) => {
-  const visuals = PLATFORM_ICON_MAP[key];
-  if (!visuals) return;
-  aliases.forEach((alias) => {
-    const normalizedAlias = alias.replace(/[^a-z0-9]/gi, '').toLowerCase();
-    if (!PLATFORM_ICON_MAP[normalizedAlias]) {
-      PLATFORM_ICON_MAP[normalizedAlias] = visuals;
-    }
-  });
-});
-
-const PLATFORM_ENTRIES = Object.entries(PLATFORM_ICON_MAP).sort(
-  (a, b) => b[0].length - a[0].length
+const KoFiIcon: IconComponent = ({ className = '' }) => (
+  <svg
+    viewBox="0 0 24 24"
+    role="img"
+    aria-hidden="true"
+    className={className}
+    focusable="false"
+  >
+    <path
+      fill="currentColor"
+      d="M4.27 3.5H17a3.5 3.5 0 013.5 3.5v1.1c1.57.4 2.75 1.8 2.75 3.5 0 2-1.63 3.64-3.63 3.64H17.5c-.38 2.24-2.34 4-4.75 4H6.87a1.19 1.19 0 01-1.2-1.19V4.69c0-.66.54-1.19 1.2-1.19zM13.45 7a2.43 2.43 0 00-1.96.99 2.43 2.43 0 00-1.96-.99 2.48 2.48 0 00-2.47 2.47c0 2.02 1.76 3.4 4.43 5.97 2.67-2.57 4.43-3.95 4.43-5.97A2.48 2.48 0 0013.45 7zm7.05 2.79V9.5a1.5 1.5 0 00-1.5-1.5h-.75v4.5h.75a1.5 1.5 0 001.5-1.5z"
+    />
+  </svg>
 );
 
 const FALLBACK_VISUALS = createVisuals(ExternalLink, 'from-slate-500 to-slate-700');
 
-const normalize = (value: string) => value.toLowerCase().replace(/[^a-z0-9]/g, '');
+const PLATFORM_ENTRIES: Array<{
+  matchers: string[];
+  visuals: PlatformVisuals;
+}> = [
+  { matchers: ['instagram', 'instagr'], visuals: createVisuals(Instagram, 'from-pink-500 to-purple-500') },
+  { matchers: ['tiktok'], visuals: createVisuals(TikTokIcon, 'from-gray-900 to-rose-500') },
+  { matchers: ['reddit'], visuals: createVisuals(Reddit, 'from-orange-500 to-red-500') },
+  { matchers: ['telegram', 't.me'], visuals: createVisuals(MessageCircle, 'from-sky-400 to-sky-500') },
+  { matchers: ['whatsapp', 'wa.me'], visuals: createVisuals(MessageCircle, 'from-green-400 to-green-500') },
+  { matchers: ['kofi', 'ko-fi', 'buymeacoffee'], visuals: createVisuals(KoFiIcon, 'from-sky-400 to-sky-500') },
+  { matchers: ['patreon'], visuals: createVisuals(Coffee, 'from-orange-500 to-red-500') },
+  { matchers: ['paypal'], visuals: createVisuals(DollarSign, 'from-blue-500 to-blue-600') },
+  { matchers: ['venmo'], visuals: createVisuals(DollarSign, 'from-sky-500 to-blue-500') },
+  { matchers: ['cashapp', 'cash.app'], visuals: createVisuals(DollarSign, 'from-green-500 to-green-600') },
+  { matchers: ['linktree'], visuals: createVisuals(Globe, 'from-emerald-500 to-green-500') },
+  { matchers: ['portfolio', 'website', 'site'], visuals: createVisuals(Globe, 'from-purple-500 to-indigo-500') },
+  { matchers: ['mail', 'email', 'contact'], visuals: createVisuals(Mail, 'from-sky-500 to-blue-500') }
+];
 
 export const getPlatformVisuals = (name: string, url: string): PlatformVisuals => {
-  const normalizedName = normalize(name);
-  if (normalizedName && PLATFORM_ICON_MAP[normalizedName]) {
-    return PLATFORM_ICON_MAP[normalizedName];
-  }
+  const normalizedName = normalize(name ?? '');
+  const normalizedUrl = url?.toLowerCase() ?? '';
 
-  const normalizedUrl = url.toLowerCase();
-  for (const [key, visuals] of PLATFORM_ENTRIES) {
-    if (key && normalizedUrl.includes(key)) {
-      return visuals;
+  for (const entry of PLATFORM_ENTRIES) {
+    if (
+      entry.matchers.some(
+        (matcher) =>
+          normalizedName.includes(normalize(matcher)) || normalizedUrl.includes(matcher.toLowerCase())
+      )
+    ) {
+      return entry.visuals;
     }
   }
 
