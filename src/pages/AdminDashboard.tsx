@@ -471,8 +471,8 @@ const AdminDashboard = () => {
     const canvasHeight = cardHeight + outerPadding * 2;
 
     const exportScale = Math.min(
-      Math.max(typeof window !== 'undefined' ? window.devicePixelRatio || 1 : 1, 2),
-      3
+      Math.max(typeof window !== 'undefined' ? window.devicePixelRatio || 1 : 1, 3),
+      4
     );
 
     const canvas = document.createElement('canvas');
@@ -677,20 +677,7 @@ const AdminDashboard = () => {
       ctx.restore();
     }
 
-    const outputCanvas = document.createElement('canvas');
-    outputCanvas.width = Math.round(canvasWidth);
-    outputCanvas.height = Math.round(canvasHeight);
-    const outputCtx = outputCanvas.getContext('2d');
-    if (!outputCtx) {
-      throw new Error('Canvas features are not available.');
-    }
-    outputCtx.imageSmoothingEnabled = true;
-    if ('imageSmoothingQuality' in outputCtx) {
-      outputCtx.imageSmoothingQuality = 'high';
-    }
-    outputCtx.drawImage(canvas, 0, 0, outputCanvas.width, outputCanvas.height);
-
-    return outputCanvas.toDataURL('image/png');
+    return canvas.toDataURL('image/png');
   };
 
   const handleDownloadSubmission = async (submission: Submission) => {
