@@ -599,14 +599,25 @@ const AdminDashboard = () => {
     // Footer call-to-action: "Submit your own at cole.ong!" with highlighted domain
     {
       const footerFontSize = 18;
-      const footerY = cardY + cardHeight - innerPadding - 8; // slightly above inner padding edge
       const prefix = 'Submit your own at ';
       const highlight = 'cole.ong';
       const suffix = '!';
+      const footerGap = 16;
+
+      const footerSeparatorY = cardY + cardHeight + footerGap;
+      const footerY = footerSeparatorY + footerFontSize + 12; // float in bottom margin
 
       ctx.save();
       ctx.font = `600 ${footerFontSize}px ${textFont}`;
       ctx.textBaseline = 'alphabetic';
+
+      // Light divider to separate footer area
+      ctx.strokeStyle = 'rgba(168, 85, 247, 0.25)';
+      ctx.lineWidth = 1;
+      ctx.beginPath();
+      ctx.moveTo(cardX, footerSeparatorY);
+      ctx.lineTo(cardX + cardWidth, footerSeparatorY);
+      ctx.stroke();
 
       // Measure pieces
       const prefixWidth = ctx.measureText(prefix).width;
@@ -619,7 +630,7 @@ const AdminDashboard = () => {
       const pillWidth = highlightWidth + pillPaddingX * 2;
       const totalWidth = prefixWidth + pillWidth + suffixWidth + 10; // spacing around pill
 
-      // Center horizontally inside the card content area
+      // Center horizontally inside the card area
       const startX = cardX + (cardWidth - totalWidth) / 2;
 
       // Draw prefix
@@ -629,7 +640,7 @@ const AdminDashboard = () => {
       // Draw pill background for the domain
       const pillX = startX + prefixWidth + 5;
       const pillYTop = footerY - footerFontSize + pillTextYAdjust - (pillHeight - footerFontSize) / 2;
-      ctx.fillStyle = 'rgba(168, 85, 247, 0.22)'; // purple translucent
+      ctx.fillStyle = 'rgba(168, 85, 247, 0.22)';
       drawRoundedRect(ctx, pillX, pillYTop, pillWidth, pillHeight, pillRadius);
       ctx.fill();
 
