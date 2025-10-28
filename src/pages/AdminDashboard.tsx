@@ -66,6 +66,7 @@ const AdminDashboard = () => {
   const [isRefreshing, setIsRefreshing] = useState(false);
   const [downloadingId, setDownloadingId] = useState<string | null>(null);
   const [activeTab, setActiveTab] = useState<'submissions' | 'portfolio' | 'social'>('submissions');
+  const [submissionsFilter, setSubmissionsFilter] = useState<'all' | 'message' | 'drawing' | 'other'>('all');
 
   const fetchSubmissions = useCallback(async () => {
     setIsRefreshing(true);
@@ -182,6 +183,16 @@ const AdminDashboard = () => {
 
     return byType;
   }, [submissions]);
+
+  const submissionFilterTabs = useMemo(
+    () => [
+      { value: 'all' as const, label: 'All', count: submissions.length },
+      { value: 'message' as const, label: 'Messages', count: groupedSubmissions.message.length },
+      { value: 'drawing' as const, label: 'Drawings', count: groupedSubmissions.drawing.length },
+      { value: 'other' as const, label: 'Other', count: groupedSubmissions.other.length }
+    ],
+    [groupedSubmissions, submissions.length]
+  );
 
   const loadImage = (src: string) =>
     new Promise<HTMLImageElement>((resolve, reject) => {
@@ -815,7 +826,7 @@ const AdminDashboard = () => {
               <div className="flex flex-1 items-center justify-center py-24">
                 <div className="flex flex-col items-center gap-3 text-muted-foreground">
                   <Loader2 className="h-6 w-6 animate-spin" />
-                  <span>Loading submissions…</span>
+                  <span>Loading submissions...</span>
                 </div>
               </div>
             ) : submissions.length === 0 ? (
@@ -830,48 +841,107 @@ const AdminDashboard = () => {
                 </CardContent>
               </Card>
             ) : (
-              <div className="space-y-10">
-                {groupedSubmissions.message.length ? (
-                  <section className="space-y-4">
-                    <div>
-                      <h2 className="text-xl font-semibold text-foreground">Messages</h2>
-                      <p className="text-sm text-muted-foreground">
-                        Scroll within each card to read the full message before downloading.
-                      </p>
-                    </div>
-                    <div className="grid gap-5 lg:grid-cols-2">
-                      {groupedSubmissions.message.map(renderSubmissionCard)}
-                    </div>
-                  </section>
-                ) : null}
+              <div className="space-y-6">
+                <Tabs
+                  value={submissionsFilter}
+                  onValueChange={(value) => setSubmissionsFilter(value as typeof submissionsFilter)}
+                  className="w-full"
+                >
+                  <TabsList className="h-10 bg-card/40 p-1">
+                    {submissionFilterTabs.map((tab) => (
+                      <TabsTrigger
+                        key={tab.value}
+                        value={tab.value}
+                        className="px-3 py-2 text-sm font-medium"
+                      >
+                        <span>{tab.label}</span>
+                        <span className="ml-2 rounded-full bg-primary/10 px-2 py-0.5 text-xs text-primary">
+                          {tab.count}
+                        </span>
+                      </TabsTrigger>
+                    ))}
+                  </TabsList>
 
-                {groupedSubmissions.drawing.length ? (
-                  <section className="space-y-4">
-                    <div>
-                      <h2 className="text-xl font-semibold text-foreground">Drawings</h2>
-                      <p className="text-sm text-muted-foreground">
-                        Images keep their proportions and export in their largest safe size.
-                      </p>
-                    </div>
-                    <div className="grid gap-5 lg:grid-cols-2">
-                      {groupedSubmissions.drawing.map(renderSubmissionCard)}
-                    </div>
-                  </section>
-                ) : null}
+                  <TabsContent value="all" className="mt-6 space-y-10">
+                    {groupedSubmissions.message.length ? (
+                      <section className="space-y-4">
+                        <div>
+                          <h2 className="text-xl font-semibold text-foreground">Messages</h2>
+                          <p className="text-sm text-muted-foreground">
+                            Scroll within each card to read the full message before downloading.
+                          </p>
+                        </div>
+                        <div className="grid gap-5 lg:grid-cols-2">
+                          {groupedSubmissions.message.map(renderSubmissionCard)}
+                        </div>
+                      </section>
+                    ) : null}
 
-                {groupedSubmissions.other.length ? (
-                  <section className="space-y-4">
-                    <div>
-                      <h2 className="text-xl font-semibold text-foreground">Other</h2>
-                      <p className="text-sm text-muted-foreground">
-                        Submissions that do not match the standard message or drawing type.
-                      </p>
-                    </div>
-                    <div className="grid gap-5 lg:grid-cols-2">
-                      {groupedSubmissions.other.map(renderSubmissionCard)}
-                    </div>
-                  </section>
-                ) : null}
+                    {groupedSubmissions.drawing.length ? (
+                      <section className="space-y-4">
+                        <div>
+                          <h2 className="text-xl font-semibold text-foreground">Drawings</h2>
+                          <p className="text-sm text-muted-foreground">
+                            Images keep their proportions and export in their largest safe size.
+                          </p>
+                        </div>
+                        <div className="grid gap-5 lg:grid-cols-2">
+                          {groupedSubmissions.drawing.map(renderSubmissionCard)}
+                        </div>
+                      </section>
+                    ) : null}
+
+                    {groupedSubmissions.other.length ? (
+                      <section className="space-y-4">
+                        <div>
+                          <h2 className="text-xl font-semibold text-foreground">Other</h2>
+                          <p className="text-sm text-muted-foreground">
+                            Submissions that do not match the standard message or drawing type.
+                          </p>
+                        </div>
+                        <div className="grid gap-5 lg:grid-cols-2">
+                          {groupedSubmissions.other.map(renderSubmissionCard)}
+                        </div>
+                      </section>
+                    ) : null}
+                  </TabsContent>
+
+                  <TabsContent value="message" className="mt-6">
+                    {groupedSubmissions.message.length ? (
+                      <div className="grid gap-5 lg:grid-cols-2">
+                        {groupedSubmissions.message.map(renderSubmissionCard)}
+                      </div>
+                    ) : (
+                      <div className="rounded-lg border border-border/50 bg-card/40 p-8 text-center text-sm text-muted-foreground">
+                        No message submissions yet.
+                      </div>
+                    )}
+                  </TabsContent>
+
+                  <TabsContent value="drawing" className="mt-6">
+                    {groupedSubmissions.drawing.length ? (
+                      <div className="grid gap-5 lg:grid-cols-2">
+                        {groupedSubmissions.drawing.map(renderSubmissionCard)}
+                      </div>
+                    ) : (
+                      <div className="rounded-lg border border-border/50 bg-card/40 p-8 text-center text-sm text-muted-foreground">
+                        No drawing submissions yet.
+                      </div>
+                    )}
+                  </TabsContent>
+
+                  <TabsContent value="other" className="mt-6">
+                    {groupedSubmissions.other.length ? (
+                      <div className="grid gap-5 lg:grid-cols-2">
+                        {groupedSubmissions.other.map(renderSubmissionCard)}
+                      </div>
+                    ) : (
+                      <div className="rounded-lg border border-border/50 bg-card/40 p-8 text-center text-sm text-muted-foreground">
+                        No submissions in this category yet.
+                      </div>
+                    )}
+                  </TabsContent>
+                </Tabs>
               </div>
             )}
           </TabsContent>
@@ -894,3 +964,4 @@ const AdminDashboard = () => {
 };
 
 export default AdminDashboard;
+
