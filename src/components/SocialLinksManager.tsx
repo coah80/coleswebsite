@@ -6,14 +6,10 @@ import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
 import { Switch } from '@/components/ui/switch';
 import { Badge } from '@/components/ui/badge';
-import { Trash2, Plus, ExternalLink, GripVertical, Copy, ArrowUp, ArrowDown } from 'lucide-react';
-import { 
-  Instagram, Youtube, Twitter, Github, Mail, MessageCircle, Coffee,
-  Gamepad2, Music, Camera, Linkedin, Facebook, Twitch,
-  Phone, MapPin, Globe, Heart, Star, Bookmark
-} from 'lucide-react';
+import { Trash2, Plus, Copy, ArrowUp, ArrowDown } from 'lucide-react';
 import { supabase } from '@/integrations/supabase/client';
 import { useToast } from '@/hooks/use-toast';
+import { getPlatformVisuals } from '@/lib/social-platforms';
 
 interface SocialLink {
   id: string;
@@ -24,65 +20,6 @@ interface SocialLink {
   display_order: number;
   is_published: boolean;
 }
-
-const PLATFORM_CONFIG: Record<string, { icon: any; color: string }> = {
-  // Social Media
-  instagram: { icon: Instagram, color: 'from-pink-500 to-purple-500' },
-  youtube: { icon: Youtube, color: 'from-red-500 to-red-600' },
-  twitter: { icon: Twitter, color: 'from-blue-400 to-blue-500' },
-  x: { icon: Twitter, color: 'from-blue-400 to-blue-500' },
-  github: { icon: Github, color: 'from-gray-600 to-gray-700' },
-  linkedin: { icon: Linkedin, color: 'from-blue-600 to-blue-700' },
-  facebook: { icon: Facebook, color: 'from-blue-500 to-blue-600' },
-  discord: { icon: MessageCircle, color: 'from-indigo-500 to-purple-500' },
-  twitch: { icon: Twitch, color: 'from-purple-500 to-purple-600' },
-  
-  // Gaming
-  steam: { icon: Gamepad2, color: 'from-slate-600 to-slate-700' },
-  epic: { icon: Gamepad2, color: 'from-gray-800 to-black' },
-  playstation: { icon: Gamepad2, color: 'from-blue-600 to-blue-700' },
-  xbox: { icon: Gamepad2, color: 'from-green-500 to-green-600' },
-  nintendo: { icon: Gamepad2, color: 'from-red-500 to-blue-500' },
-  
-  // Creative/Professional
-  spotify: { icon: Music, color: 'from-green-500 to-green-600' },
-  soundcloud: { icon: Music, color: 'from-orange-500 to-orange-600' },
-  behance: { icon: Camera, color: 'from-blue-500 to-purple-500' },
-  dribbble: { icon: Camera, color: 'from-pink-500 to-red-500' },
-  
-  // Support/Donation
-  'ko-fi': { icon: Coffee, color: 'from-orange-400 to-orange-500' },
-  kofi: { icon: Coffee, color: 'from-orange-400 to-orange-500' },
-  patreon: { icon: Heart, color: 'from-orange-500 to-red-500' },
-  paypal: { icon: Heart, color: 'from-blue-500 to-blue-600' },
-  
-  // Contact
-  email: { icon: Mail, color: 'from-green-500 to-green-600' },
-  phone: { icon: Phone, color: 'from-green-500 to-green-600' },
-  website: { icon: Globe, color: 'from-blue-500 to-purple-500' },
-  
-  // Default fallback
-  default: { icon: ExternalLink, color: 'from-gray-500 to-gray-600' }
-};
-
-const detectPlatform = (name: string, url: string): { icon: any; color: string } => {
-  const nameKey = name.toLowerCase().replace(/[^a-z]/g, '');
-  const urlKey = url.toLowerCase();
-  
-  // Check name first
-  if (PLATFORM_CONFIG[nameKey]) {
-    return PLATFORM_CONFIG[nameKey];
-  }
-  
-  // Check URL for platform detection
-  for (const [platform, config] of Object.entries(PLATFORM_CONFIG)) {
-    if (urlKey.includes(platform) || urlKey.includes(platform.replace('-', ''))) {
-      return config;
-    }
-  }
-  
-  return PLATFORM_CONFIG.default;
-};
 
 const SocialLinksManager = () => {
   const [socialLinks, setSocialLinks] = useState<SocialLink[]>([]);
@@ -375,7 +312,7 @@ const SocialLinksManager = () => {
         <h3 className="text-lg font-semibold text-foreground">Current Social Links</h3>
         
         {socialLinks.map((link) => {
-          const { icon: IconComponent, color } = detectPlatform(link.name, link.url);
+          const { icon: IconComponent, gradient } = getPlatformVisuals(link.name, link.url);
           
           return (
             <Card key={link.id} className="p-4 bg-gradient-card border-border/50">
@@ -401,7 +338,7 @@ const SocialLinksManager = () => {
                       <ArrowDown className="h-3 w-3" />
                     </Button>
                   </div>
-                  <div className={`p-2 rounded-full bg-gradient-to-r ${color} shadow-lg`}>
+                  <div className={`p-2 rounded-full bg-gradient-to-r ${gradient} shadow-lg`}>
                     <IconComponent className="w-4 h-4 text-white" />
                   </div>
                 </div>

@@ -23,6 +23,8 @@ import {
 type Submission = Database['public']['Tables']['submissions']['Row'];
 
 const textFont = '"DM Sans", "Inter", system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif';
+const signatureFontStack =
+  '"Dancing Script","Pacifico","Great Vibes","Caveat","Sacramento","Allura","Alex Brush","Kaushan Script","Satisfy","Cookie",cursive';
 const sortSubmissions = (items: Submission[]) =>
   items
     .slice()
@@ -279,19 +281,21 @@ const AdminDashboard = () => {
 
   const createSubmissionScreenshot = async (submission: Submission) => {
     const isMessage = submission.type === 'message';
-    const message = submission.content.trim();
-    const signature = submission.signature_enabled ? submission.signature_text ?? '' : '';
+    const messageText = submission.content.trim();
+    const signatureText = submission.signature_enabled ? submission.signature_text ?? '' : '';
 
     const measureCanvas = document.createElement('canvas');
     const measureCtx = measureCanvas.getContext('2d');
     if (!measureCtx) {
-      throw new Error('Canvas measurements are unavailable in this browser.');
+      throw new Error('Canvas measurements are not available in this browser.');
     }
 
-    const cardWidth = 960;
     const outerPadding = 64;
     const innerPadding = 48;
-    const contentWidth = cardWidth - innerPadding * 2;
+    const minCardWidth = 860;
+    const maxCardWidth = 1240;
+    const baseCardWidth = isMessage ? 1000 : 1120;
+
     const titleFontSize = 32;
     const metadataFontSize = 20;
     const iconSize = 34;
@@ -301,15 +305,19 @@ const AdminDashboard = () => {
     const headerBlockHeight =
       Math.max(iconSize, titleFontSize) + headerSpacing + metadataFontSize + metadataSpacing;
 
+    let cardWidth = baseCardWidth;
+    let contentWidth = cardWidth - innerPadding * 2;
     let contentBoxHeight = 0;
+    let contentPadding = 0;
+
     let messageLines: string[] = [];
     let messageLineHeight = 0;
-    let contentPadding = 0;
+    let messageFontString = '';
     let signatureLines: string[] = [];
     let signatureLineHeight = 0;
-    let signatureSpacing = 0;
     let signatureFontString = '';
-    let messageFontString = '';
+    let signatureSpacing = 0;
+
     let imageDetails:
       | {
           element: HTMLImageElement;
@@ -319,71 +327,108 @@ const AdminDashboard = () => {
       | null = null;
 
     if (isMessage) {
+      const message = messageText.length ? messageText : '(empty submission)';
+      const signature = signatureText;
+
+      const minContentWidth = minCardWidth - innerPadding * 2;
+      const maxContentWidth = maxCardWidth - innerPadding * 2;
       const messageFontSize = 28;
+      const signatureFontSize = 26;
+
+      contentPadding = 36;
       messageLineHeight = Math.round(messageFontSize * 1.5);
       messageFontString = `500 ${messageFontSize}px ${textFont}`;
-      contentPadding = 36;
+      signatureLineHeight = Math.round(signatureFontSize * 1.45);
+      signatureFontString = `600 ${signatureFontSize}px ${
+        submission.signature_font ? signatureFontStack : textFont
+      }`;
+      signatureSpacing = signature ? 28 : 0;
 
-      const usableWidth = contentWidth - contentPadding * 2;
-      const preparedMessage = prepareTextBlocks(message, measureCtx, messageFontString, usableWidth);
-      messageLines = preparedMessage.lines;
-
-      const computeTextHeight = (lines: string[], lineHeight: number) =>
+      const computeHeight = (lines: string[], lineHeight: number) =>
         lines.reduce((acc, line) => acc + (line === '' ? lineHeight * 0.6 : lineHeight), 0);
 
-      let messageHeight = computeTextHeight(messageLines, messageLineHeight);
+      const computeLayout = (targetContentWidth: number) => {
+        const usableWidth = Math.max(targetContentWidth - contentPadding * 2, 320);
+        const messageBlock = prepareTextBlocks(message, measureCtx, messageFontString, usableWidth);
+        const resolvedMessageLines =
+          messageBlock.lines.length > 0 ? messageBlock.lines : ['(empty submission)'];
+        const messageHeight = computeHeight(resolvedMessageLines, messageLineHeight);
 
-      if (!messageLines.length) {
-        messageLines = ['(empty submission)'];
-        messageHeight = messageLineHeight;
+        const signatureBlock = signature
+          ? prepareTextBlocks(signature, measureCtx, signatureFontString, usableWidth)
+          : { lines: [] as string[], widest: 0 };
+        const signatureHeight = signatureBlock.lines.length
+          ? signatureSpacing + computeHeight(signatureBlock.lines, signatureLineHeight)
+          : 0;
+
+        return {
+          messageLines: resolvedMessageLines,
+          signatureLines: signatureBlock.lines,
+          totalHeight: messageHeight + signatureHeight,
+          longestLineWidth: Math.max(messageBlock.widest, signatureBlock.widest)
+        };
+      };
+
+      let targetContentWidth = contentWidth;
+      let layout = computeLayout(targetContentWidth);
+      const recommendedWidth = Math.min(
+        Math.max(layout.longestLineWidth + contentPadding * 2, minContentWidth),
+        maxContentWidth
+      );
+
+      if (Math.abs(recommendedWidth - targetContentWidth) > 4) {
+        targetContentWidth = recommendedWidth;
+        layout = computeLayout(targetContentWidth);
       }
 
-      signatureSpacing = signature ? 28 : 0;
-      if (signature) {
-        const signatureFontSize = 26;
-        signatureLineHeight = Math.round(signatureFontSize * 1.45);
-        const preferredFonts =
-          '"Dancing Script","Pacifico","Great Vibes","Caveat","Sacramento","Allura","Alex Brush","Kaushan Script","Satisfy","Cookie",cursive';
-        signatureFontString = `600 ${signatureFontSize}px ${
-          submission.signature_font ? preferredFonts : textFont
-        }`;
-        const preparedSignature = prepareTextBlocks(signature, measureCtx, signatureFontString, usableWidth);
-        signatureLines = preparedSignature.lines;
-      }
+      messageLines = layout.messageLines;
+      signatureLines = layout.signatureLines;
+      contentWidth = targetContentWidth;
+      cardWidth = Math.min(Math.max(contentWidth + innerPadding * 2, minCardWidth), maxCardWidth);
 
-      const signatureHeight = signatureLines.length
-        ? signatureSpacing +
-          signatureLines.reduce(
-            (acc, line) => acc + (line === '' ? signatureLineHeight * 0.6 : signatureLineHeight),
-            0
-          )
-        : 0;
-
-      const textContentHeight = messageHeight + signatureHeight;
-      contentBoxHeight = textContentHeight + contentPadding * 2;
+      const dynamicBuffer = Math.min(160, Math.round(layout.totalHeight * 0.08));
+      contentBoxHeight = layout.totalHeight + contentPadding * 2 + 32 + dynamicBuffer;
     } else {
+      cardWidth = Math.min(Math.max(cardWidth, 1100), maxCardWidth);
+      contentWidth = cardWidth - innerPadding * 2;
+      const contentInnerPadding = 32;
+      contentPadding = contentInnerPadding;
+      const maxImageHeight = 700;
       const source = submission.content.startsWith('data:')
         ? submission.content
         : `data:image/png;base64,${submission.content}`;
       const image = await loadImage(source);
-      const contentInnerPadding = 28;
-      const maxImageHeight = 520;
-      const availableWidth = contentWidth - contentInnerPadding * 2;
+      const availableWidth = Math.max(contentWidth - contentInnerPadding * 2, 320);
+      const widthScale = availableWidth / image.width;
+      const heightScale = maxImageHeight / image.height;
+      const maxScale = 4;
 
-      const scale = Math.min(availableWidth / image.width, maxImageHeight / image.height, 1);
-      const drawWidth = Math.max(availableWidth * 0.4, image.width * scale);
-      const computedDrawWidth = Math.min(drawWidth, availableWidth);
-      const computedDrawHeight = (image.height * computedDrawWidth) / image.width;
+      let scale: number;
+      if (widthScale < 1 || heightScale < 1) {
+        scale = Math.min(widthScale, heightScale, 1);
+      } else {
+        scale = Math.min(widthScale, heightScale, maxScale);
+      }
+
+      let drawWidth = Math.min(Math.max(image.width * scale, availableWidth * 0.98), availableWidth);
+      let drawHeight = (image.height * drawWidth) / image.width;
+
+      if (drawHeight > maxImageHeight) {
+        drawHeight = maxImageHeight;
+        drawWidth = (image.width * drawHeight) / image.height;
+      }
 
       imageDetails = {
         element: image,
-        drawWidth: computedDrawWidth,
-        drawHeight: computedDrawHeight
+        drawWidth,
+        drawHeight
       };
 
-      contentPadding = contentInnerPadding;
-      contentBoxHeight = computedDrawHeight + contentPadding * 2;
+      contentBoxHeight = Math.max(drawHeight + contentInnerPadding * 2, 380);
     }
+
+    cardWidth = Math.min(Math.max(cardWidth, minCardWidth), maxCardWidth);
+    contentWidth = cardWidth - innerPadding * 2;
 
     const cardHeight = headerBlockHeight + contentBoxHeight + innerPadding * 2;
     const canvasWidth = cardWidth + outerPadding * 2;

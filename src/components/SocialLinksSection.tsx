@@ -1,13 +1,8 @@
 import { useState, useEffect } from 'react';
 import { Card } from '@/components/ui/card';
-import { 
-  Instagram, Youtube, Twitter, Github, Mail, MessageCircle, Coffee,
-  Gamepad2, Music, Camera, Linkedin, Facebook, Twitch, ExternalLink,
-  Phone, MapPin, Globe, Heart, Star, Bookmark, Video, Mic, Radio,
-  Users, Zap, Play, Headphones, Monitor, Smartphone, Tv, Film, Calendar as CalendarIcon, Cloud, Download,
-  Share, Link, Hash, AtSign, DollarSign, Gift, ShoppingCart, Edit
-} from 'lucide-react';
+import { ExternalLink } from 'lucide-react';
 import { supabase } from '@/integrations/supabase/client';
+import { getPlatformVisuals } from '@/lib/social-platforms';
 
 interface SocialLink {
   id: string;
@@ -19,155 +14,9 @@ interface SocialLink {
   is_published: boolean;
 }
 
-const PLATFORM_CONFIG: Record<string, { icon: any; color: string }> = {
-  // Social Media
-  instagram: { icon: Instagram, color: 'from-pink-500 to-purple-500' },
-  tiktok: { icon: Video, color: 'from-pink-400 to-pink-600' },
-  youtube: { icon: Youtube, color: 'from-red-500 to-red-600' },
-  twitter: { icon: Twitter, color: 'from-blue-400 to-blue-500' },
-  x: { icon: Twitter, color: 'from-blue-400 to-blue-500' },
-  github: { icon: Github, color: 'from-gray-600 to-gray-700' },
-  linkedin: { icon: Linkedin, color: 'from-blue-600 to-blue-700' },
-  facebook: { icon: Facebook, color: 'from-blue-500 to-blue-600' },
-  discord: { icon: MessageCircle, color: 'from-indigo-500 to-purple-500' },
-  twitch: { icon: Twitch, color: 'from-purple-500 to-purple-600' },
-  snapchat: { icon: Camera, color: 'from-yellow-400 to-yellow-500' },
-  reddit: { icon: MessageCircle, color: 'from-orange-500 to-red-500' },
-  telegram: { icon: MessageCircle, color: 'from-blue-400 to-blue-500' },
-  whatsapp: { icon: MessageCircle, color: 'from-green-400 to-green-500' },
-  signal: { icon: MessageCircle, color: 'from-blue-500 to-blue-600' },
-  mastodon: { icon: Share, color: 'from-purple-500 to-blue-500' },
-  threads: { icon: AtSign, color: 'from-black to-gray-700' },
-  bluesky: { icon: Twitter, color: 'from-blue-400 to-sky-500' },
-  
-  // Gaming
-  steam: { icon: Download, color: 'from-slate-600 to-slate-700' },
-  epic: { icon: Gamepad2, color: 'from-gray-800 to-black' },
-  epicgames: { icon: Gamepad2, color: 'from-gray-800 to-black' },
-  playstation: { icon: Gamepad2, color: 'from-blue-600 to-blue-700' },
-  ps4: { icon: Gamepad2, color: 'from-blue-600 to-blue-700' },
-  ps5: { icon: Gamepad2, color: 'from-blue-600 to-blue-700' },
-  xbox: { icon: Gamepad2, color: 'from-green-500 to-green-600' },
-  nintendo: { icon: Gamepad2, color: 'from-red-500 to-blue-500' },
-  switch: { icon: Gamepad2, color: 'from-red-500 to-blue-500' },
-  battlenet: { icon: Gamepad2, color: 'from-blue-500 to-blue-600' },
-  origin: { icon: Gamepad2, color: 'from-orange-500 to-orange-600' },
-  uplay: { icon: Gamepad2, color: 'from-blue-500 to-purple-500' },
-  gog: { icon: Gamepad2, color: 'from-purple-500 to-pink-500' },
-  itch: { icon: Gamepad2, color: 'from-red-500 to-pink-500' },
-  itchio: { icon: Gamepad2, color: 'from-red-500 to-pink-500' },
-  
-  // Creative/Professional
-  spotify: { icon: Music, color: 'from-green-500 to-green-600' },
-  applemusic: { icon: Music, color: 'from-red-500 to-pink-500' },
-  soundcloud: { icon: Music, color: 'from-orange-500 to-orange-600' },
-  bandcamp: { icon: Music, color: 'from-blue-400 to-teal-500' },
-  lastfm: { icon: Music, color: 'from-red-500 to-red-600' },
-  deezer: { icon: Music, color: 'from-purple-500 to-pink-500' },
-  behance: { icon: Camera, color: 'from-blue-500 to-purple-500' },
-  dribbble: { icon: Camera, color: 'from-pink-500 to-red-500' },
-  deviantart: { icon: Camera, color: 'from-green-500 to-teal-500' },
-  artstation: { icon: Camera, color: 'from-blue-500 to-indigo-600' },
-  figma: { icon: Monitor, color: 'from-purple-500 to-pink-500' },
-  adobe: { icon: Camera, color: 'from-red-500 to-orange-500' },
-  
-  // Content Creation
-  onlyfans: { icon: Heart, color: 'from-blue-500 to-cyan-500' },
-  fansly: { icon: Heart, color: 'from-purple-500 to-pink-500' },
-  cameo: { icon: Video, color: 'from-purple-500 to-blue-500' },
-  
-  // Streaming/Video
-  kick: { icon: Video, color: 'from-green-400 to-green-500' },
-  rumble: { icon: Video, color: 'from-green-500 to-green-600' },
-  vimeo: { icon: Video, color: 'from-blue-400 to-blue-500' },
-  dailymotion: { icon: Video, color: 'from-blue-500 to-orange-500' },
-  
-  // Audio/Podcasting
-  podcast: { icon: Mic, color: 'from-purple-500 to-pink-500' },
-  anchor: { icon: Mic, color: 'from-purple-500 to-purple-600' },
-  clubhouse: { icon: Mic, color: 'from-orange-400 to-yellow-500' },
-  spaces: { icon: Mic, color: 'from-blue-400 to-purple-500' },
-  
-  // Support/Donation
-  'ko-fi': { icon: Coffee, color: 'from-orange-400 to-orange-500' },
-  kofi: { icon: Coffee, color: 'from-orange-400 to-orange-500' },
-  patreon: { icon: Heart, color: 'from-orange-500 to-red-500' },
-  paypal: { icon: Heart, color: 'from-blue-500 to-blue-600' },
-  venmo: { icon: DollarSign, color: 'from-blue-400 to-blue-500' },
-  cashapp: { icon: DollarSign, color: 'from-green-500 to-green-600' },
-  buymeacoffee: { icon: Coffee, color: 'from-yellow-400 to-orange-500' },
-  gofundme: { icon: Heart, color: 'from-green-500 to-teal-500' },
-  kickstarter: { icon: Gift, color: 'from-green-500 to-blue-500' },
-  indiegogo: { icon: Gift, color: 'from-pink-500 to-purple-500' },
-  
-  // Professional/Business
-  calendly: { icon: CalendarIcon, color: 'from-blue-500 to-blue-600' },
-  linktree: { icon: Link, color: 'from-green-400 to-green-500' },
-  beacons: { icon: Link, color: 'from-purple-500 to-pink-500' },
-  carrd: { icon: Link, color: 'from-blue-500 to-purple-500' },
-  
-  // Shopping/Commerce
-  etsy: { icon: ShoppingCart, color: 'from-orange-500 to-red-500' },
-  amazon: { icon: ShoppingCart, color: 'from-orange-400 to-yellow-500' },
-  ebay: { icon: ShoppingCart, color: 'from-blue-500 to-yellow-500' },
-  shopify: { icon: ShoppingCart, color: 'from-green-500 to-green-600' },
-  
-  // Dating/Social
-  tinder: { icon: Heart, color: 'from-red-500 to-pink-500' },
-  bumble: { icon: Heart, color: 'from-yellow-400 to-orange-500' },
-  hinge: { icon: Heart, color: 'from-purple-500 to-pink-500' },
-  
-  // Other Platforms
-  medium: { icon: Edit, color: 'from-gray-700 to-black' },
-  substack: { icon: Mail, color: 'from-orange-500 to-red-500' },
-  hashnode: { icon: Hash, color: 'from-blue-500 to-purple-500' },
-  devto: { icon: Monitor, color: 'from-black to-gray-700' },
-  stackoverflow: { icon: Monitor, color: 'from-orange-500 to-orange-600' },
-  codepen: { icon: Monitor, color: 'from-black to-gray-700' },
-  replit: { icon: Monitor, color: 'from-orange-500 to-blue-500' },
-  glitch: { icon: Zap, color: 'from-purple-500 to-pink-500' },
-  netlify: { icon: Globe, color: 'from-teal-400 to-blue-500' },
-  vercel: { icon: Globe, color: 'from-black to-gray-700' },
-  
-  // Messaging/Communication
-  slack: { icon: MessageCircle, color: 'from-purple-500 to-pink-500' },
-  teams: { icon: Users, color: 'from-blue-500 to-purple-500' },
-  zoom: { icon: Video, color: 'from-blue-500 to-blue-600' },
-  skype: { icon: Video, color: 'from-blue-400 to-blue-500' },
-  
-  // Contact
-  email: { icon: Mail, color: 'from-green-500 to-green-600' },
-  phone: { icon: Phone, color: 'from-green-500 to-green-600' },
-  website: { icon: Globe, color: 'from-blue-500 to-purple-500' },
-  blog: { icon: Edit, color: 'from-blue-500 to-purple-500' },
-  portfolio: { icon: Bookmark, color: 'from-purple-500 to-pink-500' },
-  
-  // Default fallback
-  default: { icon: ExternalLink, color: 'from-gray-500 to-gray-600' }
-};
-
 interface SocialLinksSectionProps {
   isLandscape: boolean;
 }
-
-const detectPlatform = (name: string, url: string): { icon: any; color: string } => {
-  const nameKey = (name || '').toLowerCase().replace(/[^a-z]/g, '');
-  const urlKey = (url || '').toLowerCase();
-  
-  // Check name first
-  if (PLATFORM_CONFIG[nameKey]) {
-    return PLATFORM_CONFIG[nameKey];
-  }
-  
-  // Check URL for platform detection
-  for (const [platform, config] of Object.entries(PLATFORM_CONFIG)) {
-    if (urlKey.includes(platform) || urlKey.includes(platform.replace('-', ''))) {
-      return config;
-    }
-  }
-  
-  return PLATFORM_CONFIG.default;
-};
 
 const SocialLinksSection = ({ isLandscape }: SocialLinksSectionProps) => {
   const [socialLinks, setSocialLinks] = useState<SocialLink[]>([]);
@@ -263,7 +112,7 @@ const SocialLinksSection = ({ isLandscape }: SocialLinksSectionProps) => {
             // Landscape: Vertical stack with equal heights
             <div className="h-full flex flex-col gap-1">
               {socialLinks.map((link, index) => {
-                const { icon: IconComponent, color } = detectPlatform(link.name, link.url);
+                const { icon: IconComponent, gradient } = getPlatformVisuals(link.name, link.url);
                 const isCompact = shouldShowCompact();
                 
                 return (
@@ -282,7 +131,7 @@ const SocialLinksSection = ({ isLandscape }: SocialLinksSectionProps) => {
                     <Card className="h-full p-3 bg-card/50 border-border/30 hover:border-primary/50 transition-all duration-300 hover:shadow-link hover:-translate-y-1 group-hover:bg-gradient-card">
                       <div className={`flex items-center h-full ${isCompact ? 'justify-center' : 'gap-3'}`}>
                         {/* Icon */}
-                        <div className={`p-2 rounded-full bg-gradient-to-r shadow-lg group-hover:scale-110 transition-transform duration-300 flex-shrink-0 ${color}`}>
+                        <div className={`p-2 rounded-full bg-gradient-to-r shadow-lg group-hover:scale-110 transition-transform duration-300 flex-shrink-0 ${gradient}`}>
                           <IconComponent className="w-5 h-5 text-white" />
                         </div>
                         
@@ -315,7 +164,7 @@ const SocialLinksSection = ({ isLandscape }: SocialLinksSectionProps) => {
             // Portrait: Regular spacing
             <div className="space-y-2">
               {socialLinks.map((link, index) => {
-                const { icon: IconComponent, color } = detectPlatform(link.name, link.url);
+                const { icon: IconComponent, gradient } = getPlatformVisuals(link.name, link.url);
                 const isCompact = shouldShowCompact();
                 
                 return (
@@ -332,7 +181,7 @@ const SocialLinksSection = ({ isLandscape }: SocialLinksSectionProps) => {
                       style={getButtonStyle(socialLinks.length, isLandscape)}
                     >
                       <div className={`flex items-center h-full ${isLandscape ? (isCompact ? 'justify-center' : 'gap-3') : 'gap-1.5 sm:gap-2 lg:gap-3'}`}>
-                        <div className={`${isLandscape ? 'p-2 rounded-full bg-gradient-to-r shadow-lg group-hover:scale-110 transition-transform duration-300 flex-shrink-0' : 'p-1 lg:p-1.5 rounded-full bg-gradient-to-r shadow-lg group-hover:scale-110 transition-transform duration-300 flex-shrink-0'} ${color}`}>
+                        <div className={`${isLandscape ? 'p-2 rounded-full bg-gradient-to-r shadow-lg group-hover:scale-110 transition-transform duration-300 flex-shrink-0' : 'p-1 lg:p-1.5 rounded-full bg-gradient-to-r shadow-lg group-hover:scale-110 transition-transform duration-300 flex-shrink-0'} ${gradient}`}>
                           <IconComponent className={`${isLandscape ? 'w-6 h-6 text-white' : 'w-2.5 h-2.5 sm:w-3 sm:h-3 lg:w-4 lg:h-4 text-white'}`} />
                         </div>
                         {!isCompact && (
