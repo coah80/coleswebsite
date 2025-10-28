@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useMemo, useState } from 'react';
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import type { Database } from '@/integrations/supabase/types';
 import { supabase } from '@/integrations/supabase/client';
@@ -26,6 +26,14 @@ const textFont = '"DM Sans", "Inter", system-ui, -apple-system, BlinkMacSystemFo
 const signatureFont = '"Dancing Script", "Inter", cursive';
 
 const clamp = (value: number, min: number, max: number) => Math.min(Math.max(value, min), max);
+const sortSubmissions = (items: Submission[]) =>
+  items
+    .slice()
+    .sort((a, b) => {
+      const aTime = new Date(a.submitted_at ?? 0).getTime();
+      const bTime = new Date(b.submitted_at ?? 0).getTime();
+      return bTime - aTime;
+    });
 
 const AdminDashboard = () => {
   const navigate = useNavigate();
@@ -39,16 +47,18 @@ const AdminDashboard = () => {
   const fetchSubmissions = useCallback(async () => {
     setIsRefreshing(true);
     try {
-      const { data, error } = await supabase
-        .from('submissions')
-        .select('*')
-        .order('submitted_at', { ascending: false });
+      const { data, error } = await supabase.functions.invoke<{
+        submissions?: Submission[];
+      }>('admin-operations', {
+        body: { operation: 'fetchSubmissions' }
+      });
 
       if (error) {
         throw error;
       }
 
-      setSubmissions(data ?? []);
+      const fetched = data?.submissions ?? [];
+      setSubmissions(sortSubmissions(fetched));
     } catch (error) {
       console.error('Failed to load submissions', error);
       toast({
@@ -70,6 +80,65 @@ const AdminDashboard = () => {
     }
     fetchSubmissions();
   }, [fetchSubmissions, navigate]);
+
+  useEffect(() => {
+    const channel = supabase
+      .channel('admin-submissions-feed')
+      .on<'postgres_changes'>(
+        'postgres_changes',
+        { event: 'INSERT', schema: 'public', table: 'submissions' },
+        (payload) => {
+          const inserted = payload.new as Submission | null;
+          if (!inserted) return;
+          setSubmissions((prev) => {
+            const withoutCurrent = prev.filter((submission) => submission.id !== inserted.id);
+            return sortSubmissions([inserted, ...withoutCurrent]);
+          });
+        }
+      )
+      .on<'postgres_changes'>(
+        'postgres_changes',
+        { event: 'UPDATE', schema: 'public', table: 'submissions' },
+        (payload) => {
+          const updated = payload.new as Submission | null;
+          if (!updated) return;
+          setSubmissions((prev) => {
+            const index = prev.findIndex((submission) => submission.id === updated.id);
+            if (index === -1) {
+              return sortSubmissions([updated, ...prev]);
+            }
+            const copy = [...prev];
+            copy[index] = updated;
+            return sortSubmissions(copy);
+          });
+        }
+      )
+      .subscribe((status) => {
+        if (status === 'CHANNEL_ERROR') {
+          console.warn('Realtime channel error – falling back to manual refresh only');
+        }
+      });
+
+    const interval = setInterval(() => {
+      fetchSubmissions();
+    }, 60000);
+
+    return () => {
+      supabase.removeChannel(channel);
+      clearInterval(interval);
+    };
+  }, [fetchSubmissions]);
+
+  const hasMountedRef = useRef(false);
+  useEffect(() => {
+    if (!hasMountedRef.current) {
+      hasMountedRef.current = true;
+      return;
+    }
+    if (activeTab === 'submissions') {
+      fetchSubmissions();
+    }
+  }, [activeTab, fetchSubmissions]);
 
   const groupedSubmissions = useMemo(() => {
     const byType: Record<'message' | 'drawing' | 'other', Submission[]> = {
