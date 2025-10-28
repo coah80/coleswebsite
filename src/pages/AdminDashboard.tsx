@@ -470,18 +470,28 @@ const AdminDashboard = () => {
     const canvasWidth = cardWidth + outerPadding * 2;
     const canvasHeight = cardHeight + outerPadding * 2;
 
+    const exportScale = Math.min(
+      Math.max(typeof window !== 'undefined' ? window.devicePixelRatio || 1 : 1, 2),
+      3
+    );
+
     const canvas = document.createElement('canvas');
-    canvas.width = Math.round(canvasWidth);
-    canvas.height = Math.round(canvasHeight);
+    canvas.width = Math.round(canvasWidth * exportScale);
+    canvas.height = Math.round(canvasHeight * exportScale);
     const ctx = canvas.getContext('2d');
     if (!ctx) {
       throw new Error('Canvas features are not available.');
     }
 
+    ctx.scale(exportScale, exportScale);
+    ctx.imageSmoothingEnabled = true;
+    if ('imageSmoothingQuality' in ctx) {
+      ctx.imageSmoothingQuality = 'high';
+    }
     ctx.textBaseline = 'top';
 
     ctx.fillStyle = '#05030d';
-    ctx.fillRect(0, 0, canvas.width, canvas.height);
+    ctx.fillRect(0, 0, canvasWidth, canvasHeight);
 
     const cardX = outerPadding;
     const cardY = outerPadding;
@@ -667,7 +677,20 @@ const AdminDashboard = () => {
       ctx.restore();
     }
 
-    return canvas.toDataURL('image/png');
+    const outputCanvas = document.createElement('canvas');
+    outputCanvas.width = Math.round(canvasWidth);
+    outputCanvas.height = Math.round(canvasHeight);
+    const outputCtx = outputCanvas.getContext('2d');
+    if (!outputCtx) {
+      throw new Error('Canvas features are not available.');
+    }
+    outputCtx.imageSmoothingEnabled = true;
+    if ('imageSmoothingQuality' in outputCtx) {
+      outputCtx.imageSmoothingQuality = 'high';
+    }
+    outputCtx.drawImage(canvas, 0, 0, outputCanvas.width, outputCanvas.height);
+
+    return outputCanvas.toDataURL('image/png');
   };
 
   const handleDownloadSubmission = async (submission: Submission) => {
