@@ -42,9 +42,11 @@ const SubmissionsSection = () => {
   const [brushSize, setBrushSize] = useState(3);
   const [cooldownTimeLeft, setCooldownTimeLeft] = useState(0);
   const canvasRef = useRef<HTMLCanvasElement>(null);
-  const [isDrawing, setIsDrawing] = useState(false);
-  const [lastPosition, setLastPosition] = useState({ x: 0, y: 0 });
   const [history, setHistory] = useState<CanvasSnapshot[]>([]);
+  const activePointerIdRef = useRef<number | null>(null);
+  const strokePointsRef = useRef<Array<{ x: number; y: number }>>([]);
+  const lastMidpointRef = useRef<{ x: number; y: number } | null>(null);
+  const isDrawingRef = useRef(false);
   const { toast } = useToast();
 
   const signatureEndingOptions = [
@@ -338,57 +340,149 @@ const SubmissionsSection = () => {
     }
   }, [backgroundColor]);
 
-
   // Drawing functions
-  const getMousePos = (e: React.MouseEvent<HTMLCanvasElement>) => {
+  const getRelativePosition = useCallback((event: React.PointerEvent<HTMLCanvasElement>) => {
     const canvas = canvasRef.current;
-    if (!canvas) return { x: 0, y: 0 };
-    
+    if (!canvas) {
+      return { x: 0, y: 0 };
+    }
+
     const rect = canvas.getBoundingClientRect();
     const scaleX = canvas.width / rect.width;
     const scaleY = canvas.height / rect.height;
-    
+
     return {
-      x: (e.clientX - rect.left) * scaleX,
-      y: (e.clientY - rect.top) * scaleY
+      x: (event.clientX - rect.left) * scaleX,
+      y: (event.clientY - rect.top) * scaleY
     };
-  };
+  }, []);
 
-  const startDrawing = (e: React.MouseEvent<HTMLCanvasElement>) => {
-    const canvas = canvasRef.current;
-    if (!canvas) return;
+  const beginStroke = useCallback(
+    (event: React.PointerEvent<HTMLCanvasElement>) => {
+      if (event.pointerType === 'mouse' && event.button !== 0) {
+        return;
+      }
 
-    pushHistory();
-    const pos = getMousePos(e);
-    setIsDrawing(true);
-    setLastPosition(pos);
-  };
+      const canvas = canvasRef.current;
+      if (!canvas) return;
+      const ctx = canvas.getContext('2d');
+      if (!ctx) return;
 
-  const draw = (e: React.MouseEvent<HTMLCanvasElement>) => {
-    if (!isDrawing || !canvasRef.current) return;
-    
-    const canvas = canvasRef.current;
-    const ctx = canvas.getContext('2d');
-    if (!ctx) return;
-    
-    const pos = getMousePos(e);
-    
-    ctx.strokeStyle = brushColor;
-    ctx.lineWidth = brushSize;
-    ctx.lineCap = 'round';
-    ctx.lineJoin = 'round';
-    
-    ctx.beginPath();
-    ctx.moveTo(lastPosition.x, lastPosition.y);
-    ctx.lineTo(pos.x, pos.y);
-    ctx.stroke();
-    
-    setLastPosition(pos);
-  };
+      event.preventDefault();
+      pushHistory();
 
-  const stopDrawing = () => {
-    setIsDrawing(false);
-  };
+      const startPoint = getRelativePosition(event);
+      strokePointsRef.current = [startPoint];
+      lastMidpointRef.current = startPoint;
+      activePointerIdRef.current = event.pointerId;
+      isDrawingRef.current = true;
+
+      try {
+        canvas.setPointerCapture(event.pointerId);
+      } catch (_error) {
+        // Some browsers throw if capture is not supported; ignore.
+      }
+
+      ctx.strokeStyle = brushColor;
+      ctx.lineWidth = brushSize;
+      ctx.lineCap = 'round';
+      ctx.lineJoin = 'round';
+
+      ctx.beginPath();
+      ctx.moveTo(startPoint.x, startPoint.y);
+      ctx.lineTo(startPoint.x + 0.01, startPoint.y + 0.01);
+      ctx.stroke();
+    },
+    [brushColor, brushSize, getRelativePosition, pushHistory]
+  );
+
+  const extendStroke = useCallback(
+    (event: React.PointerEvent<HTMLCanvasElement>) => {
+      if (!isDrawingRef.current || activePointerIdRef.current !== event.pointerId) {
+        return;
+      }
+
+      const canvas = canvasRef.current;
+      const ctx = canvas?.getContext('2d');
+      if (!canvas || !ctx) return;
+
+      event.preventDefault();
+
+      const points = strokePointsRef.current;
+      if (points.length === 0) {
+        return;
+      }
+
+      const currentPoint = getRelativePosition(event);
+      const previousPoint = points[points.length - 1];
+      const midpoint = {
+        x: (previousPoint.x + currentPoint.x) / 2,
+        y: (previousPoint.y + currentPoint.y) / 2
+      };
+
+      ctx.strokeStyle = brushColor;
+      ctx.lineWidth = brushSize;
+      ctx.lineCap = 'round';
+      ctx.lineJoin = 'round';
+
+      ctx.beginPath();
+      const startPoint = lastMidpointRef.current ?? previousPoint;
+      ctx.moveTo(startPoint.x, startPoint.y);
+      ctx.quadraticCurveTo(previousPoint.x, previousPoint.y, midpoint.x, midpoint.y);
+      ctx.stroke();
+
+      lastMidpointRef.current = midpoint;
+      points.push(currentPoint);
+    },
+    [brushColor, brushSize, getRelativePosition]
+  );
+
+  const endStroke = useCallback(
+    (event?: React.PointerEvent<HTMLCanvasElement>) => {
+      const pointerId = event?.pointerId ?? activePointerIdRef.current;
+      if (pointerId === null) {
+        return;
+      }
+
+      const canvas = canvasRef.current;
+      const ctx = canvas?.getContext('2d');
+
+      if (canvas) {
+        try {
+          canvas.releasePointerCapture(pointerId);
+        } catch (_error) {
+          // Ignore if capture was not set
+        }
+      }
+
+      if (event) {
+        event.preventDefault();
+      }
+
+      if (ctx && strokePointsRef.current.length >= 2) {
+        const points = strokePointsRef.current;
+        const lastPoint = points[points.length - 1];
+        const previousPoint = points[points.length - 2];
+
+        ctx.strokeStyle = brushColor;
+        ctx.lineWidth = brushSize;
+        ctx.lineCap = 'round';
+        ctx.lineJoin = 'round';
+
+        ctx.beginPath();
+        const startPoint = lastMidpointRef.current ?? previousPoint;
+        ctx.moveTo(startPoint.x, startPoint.y);
+        ctx.quadraticCurveTo(previousPoint.x, previousPoint.y, lastPoint.x, lastPoint.y);
+        ctx.stroke();
+      }
+
+      isDrawingRef.current = false;
+      activePointerIdRef.current = null;
+      strokePointsRef.current = [];
+      lastMidpointRef.current = null;
+    },
+    [brushColor, brushSize]
+  );
 
   const handleColorChange = (color: string) => {
     if (colorMode === 'brush') {
@@ -399,10 +493,6 @@ const SubmissionsSection = () => {
         setBackgroundColor(color);
       }
     }
-  };
-
-  const getCurrentColor = () => {
-    return colorMode === 'brush' ? brushColor : backgroundColor;
   };
 
   const clearCanvas = () => {
@@ -598,12 +688,24 @@ const SubmissionsSection = () => {
                       aspectRatio: '4/3',
                       minHeight: '250px',
                       maxHeight: '400px',
-                      backgroundColor: backgroundColor // Ensure CSS background matches
+                      backgroundColor: backgroundColor, // Ensure CSS background matches
+                      touchAction: 'none'
                     }}
-                    onMouseDown={startDrawing}
-                    onMouseMove={draw}
-                    onMouseUp={stopDrawing}
-                    onMouseLeave={stopDrawing}
+                    onPointerDown={beginStroke}
+                    onPointerMove={extendStroke}
+                    onPointerUp={endStroke}
+                    onPointerCancel={endStroke}
+                    onPointerLeave={(event) => {
+                      if (activePointerIdRef.current === event.pointerId) {
+                        endStroke(event);
+                      }
+                    }}
+                    onLostPointerCapture={(event) => {
+                      if (activePointerIdRef.current === event.pointerId) {
+                        endStroke(event);
+                      }
+                    }}
+                    onContextMenu={(event) => event.preventDefault()}
                   />
                   <div className="absolute top-2 right-2 flex gap-2">
                     <Button
