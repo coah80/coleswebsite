@@ -596,6 +596,55 @@ const AdminDashboard = () => {
       ctx.restore();
     }
 
+    // Footer call-to-action: "Submit your own at cole.ong!" with highlighted domain
+    {
+      const footerFontSize = 18;
+      const footerY = cardY + cardHeight - innerPadding - 8; // slightly above inner padding edge
+      const prefix = 'Submit your own at ';
+      const highlight = 'cole.ong';
+      const suffix = '!';
+
+      ctx.save();
+      ctx.font = `600 ${footerFontSize}px ${textFont}`;
+      ctx.textBaseline = 'alphabetic';
+
+      // Measure pieces
+      const prefixWidth = ctx.measureText(prefix).width;
+      const suffixWidth = ctx.measureText(suffix).width;
+      const pillPaddingX = 10;
+      const pillHeight = Math.round(footerFontSize * 1.3);
+      const pillRadius = Math.round(pillHeight / 2);
+      const pillTextYAdjust = Math.round(footerFontSize * 0.25);
+      const highlightWidth = ctx.measureText(highlight).width;
+      const pillWidth = highlightWidth + pillPaddingX * 2;
+      const totalWidth = prefixWidth + pillWidth + suffixWidth + 10; // spacing around pill
+
+      // Center horizontally inside the card content area
+      const startX = cardX + (cardWidth - totalWidth) / 2;
+
+      // Draw prefix
+      ctx.fillStyle = 'rgba(226, 220, 255, 0.9)';
+      ctx.fillText(prefix, startX, footerY);
+
+      // Draw pill background for the domain
+      const pillX = startX + prefixWidth + 5;
+      const pillYTop = footerY - footerFontSize + pillTextYAdjust - (pillHeight - footerFontSize) / 2;
+      ctx.fillStyle = 'rgba(168, 85, 247, 0.22)'; // purple translucent
+      drawRoundedRect(ctx, pillX, pillYTop, pillWidth, pillHeight, pillRadius);
+      ctx.fill();
+
+      // Domain text inside the pill
+      ctx.fillStyle = '#f8f6ff';
+      ctx.fillText(highlight, pillX + pillPaddingX, footerY);
+
+      // Trailing punctuation
+      const suffixX = pillX + pillWidth + 5;
+      ctx.fillStyle = 'rgba(226, 220, 255, 0.9)';
+      ctx.fillText(suffix, suffixX, footerY);
+
+      ctx.restore();
+    }
+
     return canvas.toDataURL('image/png');
   };
 

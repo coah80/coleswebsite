@@ -14,8 +14,7 @@ import {
   Gamepad2,
   Coffee,
   DollarSign,
-  Twitch,
-  Spotify
+  Twitch
 } from 'lucide-react';
 
 type IconComponent = FC<{ className?: string }>;
@@ -104,7 +103,7 @@ const PLATFORM_ENTRIES: Array<{
   { matchers: ['facebook', 'fb.com'], visuals: createVisuals(Facebook, 'from-blue-600 to-blue-700') },
   { matchers: ['linkedin'], visuals: createVisuals(Linkedin, 'from-blue-600 to-indigo-600') },
   { matchers: ['github'], visuals: createVisuals(Github, 'from-slate-600 to-slate-800') },
-  { matchers: ['spotify', 'open.spotify'], visuals: createVisuals(Spotify, 'from-green-500 to-green-600') },
+  { matchers: ['spotify', 'open.spotify'], visuals: createVisuals(Music, 'from-green-500 to-green-600') },
   { matchers: ['twitch'], visuals: createVisuals(Twitch, 'from-purple-500 to-indigo-500') },
   { matchers: ['discord', 'discord.gg'], visuals: createVisuals(DiscordIcon, 'from-indigo-500 to-violet-500') },
   { matchers: ['steam'], visuals: createVisuals(SteamIcon, 'from-slate-600 to-slate-700') },
