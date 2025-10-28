@@ -1,4 +1,4 @@
-import { useState, useRef, useEffect } from 'react';
+import { useState, useRef, useEffect, useCallback } from 'react';
 import type React from 'react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
@@ -8,17 +8,25 @@ import { Checkbox } from '@/components/ui/checkbox';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { ColorPicker } from '@/components/ui/color-picker';
 import { useToast } from '@/hooks/use-toast';
-import { 
-  MessageCircle, 
-  Palette, 
-  Send, 
+import {
+  MessageCircle,
+  Palette,
+  Send,
   Heart,
   Smile,
   Sparkles,
-  PenTool
+  PenTool,
+  RotateCcw
 } from 'lucide-react';
 // Removed Fabric.js import - using HTML5 Canvas instead
 import { supabase } from '@/integrations/supabase/client';
+
+const HISTORY_LIMIT = 25;
+
+type CanvasSnapshot = {
+  data: ImageData;
+  background: string;
+};
 
 const SubmissionsSection = () => {
   const [activeTab, setActiveTab] = useState<'message' | 'drawing'>('message');
@@ -36,6 +44,7 @@ const SubmissionsSection = () => {
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const [isDrawing, setIsDrawing] = useState(false);
   const [lastPosition, setLastPosition] = useState({ x: 0, y: 0 });
+  const [history, setHistory] = useState<CanvasSnapshot[]>([]);
   const { toast } = useToast();
 
   const signatureEndingOptions = [
@@ -59,6 +68,39 @@ const SubmissionsSection = () => {
     { value: 'nunito', label: 'Nunito (Print)', className: 'font-rounded' },
     { value: 'source-sans', label: 'Source Sans (Print)', className: 'font-body' }
   ];
+
+  const pushHistory = useCallback(() => {
+    const canvas = canvasRef.current;
+    if (!canvas) return;
+    const ctx = canvas.getContext('2d');
+    if (!ctx) return;
+
+    try {
+      const snapshot = ctx.getImageData(0, 0, canvas.width, canvas.height);
+      setHistory((prev) => {
+        const trimmed =
+          prev.length >= HISTORY_LIMIT ? prev.slice(prev.length - HISTORY_LIMIT + 1) : prev;
+        return [...trimmed, { data: snapshot, background: backgroundColor }];
+      });
+    } catch (error) {
+      console.error('Failed to capture canvas history', error);
+    }
+  }, [backgroundColor]);
+
+  const undoLastStroke = useCallback(() => {
+    const canvas = canvasRef.current;
+    if (!canvas || history.length === 0) return;
+    const ctx = canvas.getContext('2d');
+    if (!ctx) return;
+
+    const previous = history[history.length - 1];
+    ctx.putImageData(previous.data, 0, 0);
+    setHistory((prev) => prev.slice(0, -1));
+
+    if (previous.background !== backgroundColor) {
+      setBackgroundColor(previous.background);
+    }
+  }, [history, backgroundColor]);
 
   // Cooldown management
   const COOLDOWN_MINUTES = 1;
@@ -214,6 +256,7 @@ const SubmissionsSection = () => {
           ctx.clearRect(0, 0, canvas.width, canvas.height);
           ctx.fillStyle = backgroundColor;
           ctx.fillRect(0, 0, canvas.width, canvas.height);
+          setHistory([]);
         } catch (error) {
           console.error('Error submitting drawing:', error);
           toast({
@@ -314,7 +357,8 @@ const SubmissionsSection = () => {
   const startDrawing = (e: React.MouseEvent<HTMLCanvasElement>) => {
     const canvas = canvasRef.current;
     if (!canvas) return;
-    
+
+    pushHistory();
     const pos = getMousePos(e);
     setIsDrawing(true);
     setLastPosition(pos);
@@ -350,7 +394,10 @@ const SubmissionsSection = () => {
     if (colorMode === 'brush') {
       setBrushColor(color);
     } else {
-      setBackgroundColor(color);
+      if (color !== backgroundColor) {
+        pushHistory();
+        setBackgroundColor(color);
+      }
     }
   };
 
@@ -365,11 +412,14 @@ const SubmissionsSection = () => {
     const ctx = canvas.getContext('2d');
     
     if (ctx) {
+      pushHistory();
       ctx.clearRect(0, 0, canvas.width, canvas.height);
       ctx.fillStyle = backgroundColor;
       ctx.fillRect(0, 0, canvas.width, canvas.height);
     }
   };
+
+  const canUndo = history.length > 0;
 
   return (
     <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 space-y-6 lg:space-y-8">
@@ -555,7 +605,17 @@ const SubmissionsSection = () => {
                     onMouseUp={stopDrawing}
                     onMouseLeave={stopDrawing}
                   />
-                  <div className="absolute top-2 right-2">
+                  <div className="absolute top-2 right-2 flex gap-2">
+                    <Button
+                      variant="secondary"
+                      size="sm"
+                      onClick={undoLastStroke}
+                      disabled={!canUndo}
+                      className="text-xs"
+                    >
+                      <RotateCcw className="mr-1 h-3 w-3" />
+                      Undo
+                    </Button>
                     <Button
                       variant="secondary"
                       size="sm"
