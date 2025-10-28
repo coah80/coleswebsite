@@ -15,7 +15,6 @@ import {
   Coffee,
   DollarSign,
   Twitch,
-  Reddit,
   Spotify
 } from 'lucide-react';
 
@@ -101,7 +100,7 @@ const PLATFORM_ENTRIES: Array<{
 }> = [
   { matchers: ['instagram', 'instagr'], visuals: createVisuals(Instagram, 'from-pink-500 to-purple-500') },
   { matchers: ['tiktok'], visuals: createVisuals(TikTokIcon, 'from-gray-900 to-rose-500') },
-  { matchers: ['reddit'], visuals: createVisuals(Reddit, 'from-orange-500 to-red-500') },
+  { matchers: ['reddit'], visuals: createVisuals(MessageCircle, 'from-orange-500 to-red-500') },
   { matchers: ['telegram', 't.me'], visuals: createVisuals(MessageCircle, 'from-sky-400 to-sky-500') },
   { matchers: ['whatsapp', 'wa.me'], visuals: createVisuals(MessageCircle, 'from-green-400 to-green-500') },
   { matchers: ['kofi', 'ko-fi', 'buymeacoffee'], visuals: createVisuals(KoFiIcon, 'from-sky-400 to-sky-500') },
