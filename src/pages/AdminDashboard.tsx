@@ -7,7 +7,10 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { Separator } from '@/components/ui/separator';
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { useToast } from '@/hooks/use-toast';
+import { PortfolioManager } from '@/components/PortfolioManager';
+import SocialLinksManager from '@/components/SocialLinksManager';
 import {
   Download,
   Image as ImageIcon,
@@ -31,6 +34,7 @@ const AdminDashboard = () => {
   const [isLoading, setIsLoading] = useState(true);
   const [isRefreshing, setIsRefreshing] = useState(false);
   const [downloadingId, setDownloadingId] = useState<string | null>(null);
+  const [activeTab, setActiveTab] = useState<'submissions' | 'portfolio' | 'social'>('submissions');
 
   const fetchSubmissions = useCallback(async () => {
     setIsRefreshing(true);
@@ -402,22 +406,24 @@ const AdminDashboard = () => {
           <div>
             <h1 className="text-2xl font-bold text-foreground">Admin Dashboard</h1>
             <p className="text-sm text-muted-foreground">
-              Review submissions, download artwork, and keep up with new messages.
+              Manage submissions, projects, and social links in one place.
             </p>
           </div>
           <div className="flex items-center gap-2">
-            <Button
-              variant="outline"
-              onClick={fetchSubmissions}
-              disabled={isRefreshing}
-            >
-              {isRefreshing ? (
-                <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-              ) : (
-                <RefreshCw className="mr-2 h-4 w-4" />
-              )}
-              Refresh
-            </Button>
+            {activeTab === 'submissions' ? (
+              <Button
+                variant="outline"
+                onClick={fetchSubmissions}
+                disabled={isRefreshing}
+              >
+                {isRefreshing ? (
+                  <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                ) : (
+                  <RefreshCw className="mr-2 h-4 w-4" />
+                )}
+                Refresh
+              </Button>
+            ) : null}
             <Button variant="secondary" onClick={handleLogout}>
               <LogOut className="mr-2 h-4 w-4" />
               Log out
@@ -425,73 +431,104 @@ const AdminDashboard = () => {
           </div>
         </div>
 
-        {isLoading ? (
-          <div className="flex flex-1 items-center justify-center py-24">
-            <div className="flex flex-col items-center gap-3 text-muted-foreground">
-              <Loader2 className="h-6 w-6 animate-spin" />
-              <span>Loading submissions…</span>
+        <Tabs
+          value={activeTab}
+          onValueChange={(value) => setActiveTab(value as typeof activeTab)}
+          className="w-full"
+        >
+          <TabsList className="h-11 bg-card/50 p-1.5">
+            <TabsTrigger value="submissions" className="px-4 py-2 text-sm font-medium">
+              Submissions
+            </TabsTrigger>
+            <TabsTrigger value="portfolio" className="px-4 py-2 text-sm font-medium">
+              Portfolio
+            </TabsTrigger>
+            <TabsTrigger value="social" className="px-4 py-2 text-sm font-medium">
+              Social Links
+            </TabsTrigger>
+          </TabsList>
+
+          <TabsContent value="submissions" className="mt-6">
+            {isLoading ? (
+              <div className="flex flex-1 items-center justify-center py-24">
+                <div className="flex flex-col items-center gap-3 text-muted-foreground">
+                  <Loader2 className="h-6 w-6 animate-spin" />
+                  <span>Loading submissions…</span>
+                </div>
+              </div>
+            ) : submissions.length === 0 ? (
+              <Card className="border-dashed border-border/60 bg-gradient-card/50 py-12 text-center">
+                <CardHeader>
+                  <CardTitle className="text-lg text-muted-foreground">
+                    No submissions yet
+                  </CardTitle>
+                </CardHeader>
+                <CardContent className="text-sm text-muted-foreground/80">
+                  Messages and drawings will appear here once they are submitted.
+                </CardContent>
+              </Card>
+            ) : (
+              <div className="space-y-10">
+                {groupedSubmissions.message.length ? (
+                  <section className="space-y-4">
+                    <div>
+                      <h2 className="text-xl font-semibold text-foreground">Messages</h2>
+                      <p className="text-sm text-muted-foreground">
+                        Scroll within each card to read the full message before downloading.
+                      </p>
+                    </div>
+                    <div className="grid gap-5 lg:grid-cols-2">
+                      {groupedSubmissions.message.map(renderSubmissionCard)}
+                    </div>
+                  </section>
+                ) : null}
+
+                {groupedSubmissions.drawing.length ? (
+                  <section className="space-y-4">
+                    <div>
+                      <h2 className="text-xl font-semibold text-foreground">Drawings</h2>
+                      <p className="text-sm text-muted-foreground">
+                        Images keep their proportions and export in their largest safe size.
+                      </p>
+                    </div>
+                    <div className="grid gap-5 lg:grid-cols-2">
+                      {groupedSubmissions.drawing.map(renderSubmissionCard)}
+                    </div>
+                  </section>
+                ) : null}
+
+                {groupedSubmissions.other.length ? (
+                  <section className="space-y-4">
+                    <div>
+                      <h2 className="text-xl font-semibold text-foreground">Other</h2>
+                      <p className="text-sm text-muted-foreground">
+                        Submissions that do not match the standard message or drawing type.
+                      </p>
+                    </div>
+                    <div className="grid gap-5 lg:grid-cols-2">
+                      {groupedSubmissions.other.map(renderSubmissionCard)}
+                    </div>
+                  </section>
+                ) : null}
+              </div>
+            )}
+          </TabsContent>
+
+          <TabsContent value="portfolio" className="mt-6">
+            <div className="rounded-xl border border-border/60 bg-gradient-card p-4 sm:p-6">
+              <PortfolioManager />
             </div>
-          </div>
-        ) : submissions.length === 0 ? (
-          <Card className="border-dashed border-border/60 bg-gradient-card/50 py-12 text-center">
-            <CardHeader>
-              <CardTitle className="text-lg text-muted-foreground">
-                No submissions yet
-              </CardTitle>
-            </CardHeader>
-            <CardContent className="text-sm text-muted-foreground/80">
-              Messages and drawings will appear here once they are submitted.
-            </CardContent>
-          </Card>
-        ) : (
-          <div className="space-y-10">
-            {groupedSubmissions.message.length ? (
-              <section className="space-y-4">
-                <div>
-                  <h2 className="text-xl font-semibold text-foreground">Messages</h2>
-                  <p className="text-sm text-muted-foreground">
-                    Scroll within each card to read the full message before downloading.
-                  </p>
-                </div>
-                <div className="grid gap-5 lg:grid-cols-2">
-                  {groupedSubmissions.message.map(renderSubmissionCard)}
-                </div>
-              </section>
-            ) : null}
+          </TabsContent>
 
-            {groupedSubmissions.drawing.length ? (
-              <section className="space-y-4">
-                <div>
-                  <h2 className="text-xl font-semibold text-foreground">Drawings</h2>
-                  <p className="text-sm text-muted-foreground">
-                    Images keep their proportions and export in their largest safe size.
-                  </p>
-                </div>
-                <div className="grid gap-5 lg:grid-cols-2">
-                  {groupedSubmissions.drawing.map(renderSubmissionCard)}
-                </div>
-              </section>
-            ) : null}
-
-            {groupedSubmissions.other.length ? (
-              <section className="space-y-4">
-                <div>
-                  <h2 className="text-xl font-semibold text-foreground">Other</h2>
-                  <p className="text-sm text-muted-foreground">
-                    Submissions that do not match the standard message or drawing type.
-                  </p>
-                </div>
-                <div className="grid gap-5 lg:grid-cols-2">
-                  {groupedSubmissions.other.map(renderSubmissionCard)}
-                </div>
-              </section>
-            ) : null}
-          </div>
-        )}
+          <TabsContent value="social" className="mt-6">
+            <div className="rounded-xl border border-border/60 bg-gradient-card p-4 sm:p-6">
+              <SocialLinksManager />
+            </div>
+          </TabsContent>
+        </Tabs>
       </div>
     </div>
   );
 };
 
 export default AdminDashboard;
-
