@@ -98,8 +98,22 @@ const PLATFORM_ENTRIES: Array<{
   matchers: string[];
   visuals: PlatformVisuals;
 }> = [
+  // Major socials
+  { matchers: ['youtube', 'youtu.be'], visuals: createVisuals(Youtube, 'from-red-500 to-orange-500') },
+  { matchers: ['twitter', 'x.com'], visuals: createVisuals(Twitter, 'from-sky-400 to-sky-500') },
+  { matchers: ['facebook', 'fb.com'], visuals: createVisuals(Facebook, 'from-blue-600 to-blue-700') },
+  { matchers: ['linkedin'], visuals: createVisuals(Linkedin, 'from-blue-600 to-indigo-600') },
+  { matchers: ['github'], visuals: createVisuals(Github, 'from-slate-600 to-slate-800') },
+  { matchers: ['spotify', 'open.spotify'], visuals: createVisuals(Spotify, 'from-green-500 to-green-600') },
+  { matchers: ['twitch'], visuals: createVisuals(Twitch, 'from-purple-500 to-indigo-500') },
+  { matchers: ['discord', 'discord.gg'], visuals: createVisuals(DiscordIcon, 'from-indigo-500 to-violet-500') },
+  { matchers: ['steam'], visuals: createVisuals(SteamIcon, 'from-slate-600 to-slate-700') },
+  { matchers: ['soundcloud'], visuals: createVisuals(Music, 'from-orange-500 to-yellow-500') },
+  { matchers: ['bandcamp'], visuals: createVisuals(Music, 'from-teal-500 to-cyan-500') },
+  { matchers: ['applemusic', 'music.apple.com'], visuals: createVisuals(Music, 'from-pink-500 to-red-500') },
   { matchers: ['instagram', 'instagr'], visuals: createVisuals(Instagram, 'from-pink-500 to-purple-500') },
   { matchers: ['tiktok'], visuals: createVisuals(TikTokIcon, 'from-gray-900 to-rose-500') },
+  // Reddit icon is not available in some lucide-react versions; use chat bubble
   { matchers: ['reddit'], visuals: createVisuals(MessageCircle, 'from-orange-500 to-red-500') },
   { matchers: ['telegram', 't.me'], visuals: createVisuals(MessageCircle, 'from-sky-400 to-sky-500') },
   { matchers: ['whatsapp', 'wa.me'], visuals: createVisuals(MessageCircle, 'from-green-400 to-green-500') },

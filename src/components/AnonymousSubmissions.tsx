@@ -29,11 +29,16 @@ const SubmissionsSection = () => {
     'yours truly'
   ];
 
+  // Match the main submissions font set
   const fontOptions = [
     { value: 'dancing', label: 'Dancing Script', className: 'font-dancing' },
+    { value: 'caveat', label: 'Caveat', className: 'font-caveat' },
     { value: 'pacifico', label: 'Pacifico', className: 'font-pacifico' },
     { value: 'great-vibes', label: 'Great Vibes', className: 'font-great-vibes' },
-    { value: 'caveat', label: 'Caveat', className: 'font-caveat' },
+    { value: 'inter', label: 'Inter (Print)', className: 'font-sans' },
+    { value: 'poppins', label: 'Poppins (Print)', className: 'font-heading' },
+    { value: 'nunito', label: 'Nunito (Print)', className: 'font-rounded' },
+    { value: 'source-sans', label: 'Source Sans (Print)', className: 'font-body' }
   ];
 
   const handleMessageSubmit = async () => {

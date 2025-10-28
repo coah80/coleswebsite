@@ -24,7 +24,31 @@ type Submission = Database['public']['Tables']['submissions']['Row'];
 
 const textFont = '"DM Sans", "Inter", system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif';
 const signatureFontStack =
-  '"Dancing Script","Pacifico","Great Vibes","Caveat","Sacramento","Allura","Alex Brush","Kaushan Script","Satisfy","Cookie",cursive';
+  '"Dancing Script","Pacifico","Great Vibes","Caveat",cursive';
+
+// Map submitted font slugs to canvas font-family strings
+const canvasFontBySlug: Record<string, string> = {
+  'dancing': '"Dancing Script",cursive',
+  'caveat': '"Caveat",cursive',
+  'pacifico': '"Pacifico",cursive',
+  'great-vibes': '"Great Vibes",cursive',
+  'inter': '"Inter",sans-serif',
+  'poppins': '"Poppins",sans-serif',
+  'nunito': '"Nunito",sans-serif',
+  'source-sans': '"Source Sans Pro",sans-serif'
+};
+
+// Tailwind class names for previewing the signature font in UI
+const fontClassBySlug: Record<string, string> = {
+  'dancing': 'font-dancing',
+  'caveat': 'font-caveat',
+  'pacifico': 'font-pacifico',
+  'great-vibes': 'font-great-vibes',
+  'inter': 'font-sans',
+  'poppins': 'font-heading',
+  'nunito': 'font-rounded',
+  'source-sans': 'font-body'
+};
 const sortSubmissions = (items: Submission[]) =>
   items
     .slice()
@@ -339,9 +363,10 @@ const AdminDashboard = () => {
       messageLineHeight = Math.round(messageFontSize * 1.5);
       messageFontString = `500 ${messageFontSize}px ${textFont}`;
       signatureLineHeight = Math.round(signatureFontSize * 1.45);
-      signatureFontString = `600 ${signatureFontSize}px ${
-        submission.signature_font ? signatureFontStack : textFont
-      }`;
+      const chosenSignatureFamily = submission.signature_font
+        ? canvasFontBySlug[submission.signature_font] ?? signatureFontStack
+        : textFont;
+      signatureFontString = `600 ${signatureFontSize}px ${chosenSignatureFamily}`;
       signatureSpacing = signature ? 28 : 0;
 
       const computeHeight = (lines: string[], lineHeight: number) =>
@@ -637,7 +662,11 @@ const AdminDashboard = () => {
                 </p>
               </ScrollArea>
               {submission.signature_enabled && submission.signature_text ? (
-                <div className="rounded-md border border-dashed border-primary/40 bg-primary/5 p-3 text-sm font-medium text-primary">
+                <div
+                  className={`rounded-md border border-dashed border-primary/40 bg-primary/5 p-3 text-sm font-medium text-primary ${
+                    submission.signature_font ? fontClassBySlug[submission.signature_font] ?? '' : ''
+                  }`}
+                >
                   {submission.signature_text}
                 </div>
               ) : null}

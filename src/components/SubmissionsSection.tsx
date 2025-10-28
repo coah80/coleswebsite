@@ -47,17 +47,16 @@ const SubmissionsSection = () => {
     'yours truly'
   ];
 
+  // Slimmer set + plain print options
   const fontOptions = [
     { value: 'dancing', label: 'Dancing Script', className: 'font-dancing' },
+    { value: 'caveat', label: 'Caveat', className: 'font-caveat' },
     { value: 'pacifico', label: 'Pacifico', className: 'font-pacifico' },
     { value: 'great-vibes', label: 'Great Vibes', className: 'font-great-vibes' },
-    { value: 'caveat', label: 'Caveat', className: 'font-caveat' },
-    { value: 'sacramento', label: 'Sacramento', className: 'font-sacramento' },
-    { value: 'allura', label: 'Allura', className: 'font-allura' },
-    { value: 'alex-brush', label: 'Alex Brush', className: 'font-alex-brush' },
-    { value: 'kaushan', label: 'Kaushan Script', className: 'font-kaushan' },
-    { value: 'satisfy', label: 'Satisfy', className: 'font-satisfy' },
-    { value: 'cookie', label: 'Cookie', className: 'font-cookie' },
+    { value: 'inter', label: 'Inter (Print)', className: 'font-sans' },
+    { value: 'poppins', label: 'Poppins (Print)', className: 'font-heading' },
+    { value: 'nunito', label: 'Nunito (Print)', className: 'font-rounded' },
+    { value: 'source-sans', label: 'Source Sans (Print)', className: 'font-body' }
   ];
 
   // Cooldown management
@@ -602,7 +601,7 @@ const SubmissionsSection = () => {
                 <span className="text-sm font-medium">anonymous obvs</span>
               </div>
               <p className="text-xs text-muted-foreground leading-relaxed">
-                your messages and drawings are completely anonymous. i might share the cool ones but your identity stays secret
+                your messages and drawings are completely anonymous. i might share the cool ones but your identity stays secret, unless you want to reveal it.
               </p>
             </CardContent>
           </Card>
