@@ -2,53 +2,56 @@
 @tailwind components;
 @tailwind utilities;
 
-/* Definition of the design system. All colors, gradients, fonts, etc should be defined here. 
-All colors MUST be HSL.
-*/
+/* Y2K Webcore Design System - Muted dark palette with kinetic energy */
 
 @layer base {
   :root {
-    --background: 260 15% 6%;
-    --foreground: 250 40% 98%;
+    /* Deep navy/purple base - Y2K dark vibes */
+    --background: 260 30% 6%;
+    --foreground: 0 0% 95%;
 
-    --card: 260 25% 8%;
-    --card-foreground: 210 40% 98%;
+    /* Slightly lighter purple for cards */
+    --card: 260 25% 9%;
+    --card-foreground: 0 0% 95%;
 
-    --popover: 225 20% 8%;
-    --popover-foreground: 210 40% 98%;
+    --popover: 260 25% 8%;
+    --popover-foreground: 0 0% 95%;
 
-    --primary: 270 100% 70%;
-    --primary-foreground: 210 40% 98%;
+    /* Clean white primary for that bold contrast */
+    --primary: 0 0% 95%;
+    --primary-foreground: 260 30% 6%;
 
-    --secondary: 260 25% 12%;
-    --secondary-foreground: 210 40% 98%;
+    --secondary: 260 20% 13%;
+    --secondary-foreground: 0 0% 90%;
 
-    --muted: 260 25% 12%;
-    --muted-foreground: 215 20% 65%;
+    --muted: 260 20% 16%;
+    --muted-foreground: 260 15% 55%;
 
-    --accent: 290 100% 75%;
-    --accent-foreground: 210 40% 98%;
+    /* Purple accent */
+    --accent: 270 70% 60%;
+    --accent-foreground: 0 0% 98%;
 
-    --destructive: 0 84% 60%;
-    --destructive-foreground: 210 40% 98%;
+    --destructive: 0 70% 50%;
+    --destructive-foreground: 0 0% 98%;
 
-    --border: 260 20% 15%;
-    --input: 260 20% 12%;
-    --ring: 270 100% 70%;
+    --border: 260 20% 16%;
+    --input: 260 20% 13%;
+    --ring: 270 70% 60%;
 
-    --radius: 1rem;
+    --radius: 0.5rem;
 
-    /* Fun gradients for personal vibes */
-    --gradient-primary: linear-gradient(135deg, hsl(270 100% 70%), hsl(290 100% 75%));
-    --gradient-card: linear-gradient(135deg, hsl(260 25% 8%), hsl(260 25% 12%));
-    --gradient-glow: radial-gradient(ellipse at center, hsl(270 100% 70% / 0.3), transparent);
+    /* Y2K gradients - purple tinted */
+    --gradient-primary: linear-gradient(135deg, hsl(260 30% 9%), hsl(260 25% 13%));
+    --gradient-card: linear-gradient(180deg, hsl(260 25% 11%), hsl(260 30% 7%));
+    --gradient-glow: radial-gradient(ellipse at center, hsl(270 70% 60% / 0.15), transparent);
     
-    /* Playful shadows */
-    --shadow-link: 0 4px 20px hsl(270 100% 70% / 0.4);
-    --shadow-card: 0 8px 25px -5px hsl(0 0% 0% / 0.3);
+    /* Subtle shadows */
+    --shadow-link: 0 4px 20px hsl(260 50% 5% / 0.5);
+    --shadow-card: 0 8px 30px -5px hsl(260 50% 5% / 0.6);
     
-    /* Smooth animations */
-    --transition-smooth: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    /* Snappy transitions - Y2K staccato feel */
+    --transition-snap: all 0.15s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+    --transition-bounce: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
   }
 
   /* Smooth scrolling for the entire page */
@@ -109,6 +112,55 @@ All colors MUST be HSL.
     --sidebar-border: 240 3.7% 15.9%;
     --sidebar-ring: 217.2 91.2% 59.8%;
   }
+}
+
+/* Custom keyframes for Webcore animations */
+@keyframes float {
+  0%, 100% {
+    transform: translateY(0px) rotate(0deg);
+  }
+  50% {
+    transform: translateY(-10px) rotate(2deg);
+  }
+}
+
+@keyframes float-slow {
+  0%, 100% {
+    transform: translateY(0px);
+  }
+  50% {
+    transform: translateY(-20px);
+  }
+}
+
+@keyframes glitch {
+  0%, 100% {
+    transform: translate(0);
+  }
+  20% {
+    transform: translate(-2px, 2px);
+  }
+  40% {
+    transform: translate(-2px, -2px);
+  }
+  60% {
+    transform: translate(2px, 2px);
+  }
+  80% {
+    transform: translate(2px, -2px);
+  }
+}
+
+.animate-float {
+  animation: float 3s ease-in-out infinite;
+}
+
+.animate-float-slow {
+  animation: float-slow 6s ease-in-out infinite;
+}
+
+.animate-glitch {
+  animation: glitch 0.3s ease-in-out;
 }
 
 @layer base {

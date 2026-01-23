@@ -358,6 +358,7 @@ const AdminDashboard = () => {
           element: HTMLImageElement;
           drawWidth: number;
           drawHeight: number;
+          caption?: string;
         }
       | null = null;
 
@@ -425,14 +426,27 @@ const AdminDashboard = () => {
       const dynamicBuffer = Math.min(160, Math.round(layout.totalHeight * 0.08));
       contentBoxHeight = layout.totalHeight + contentPadding * 2 + 32 + dynamicBuffer;
     } else {
+      // Parse drawing content - may be JSON with { drawing, caption } or raw base64/dataUrl
+      let imageSrc = submission.content;
+      let drawingCaption = '';
+      try {
+        const parsed = JSON.parse(submission.content);
+        if (parsed.drawing) {
+          imageSrc = parsed.drawing;
+          drawingCaption = parsed.caption || '';
+        }
+      } catch {
+        // Not JSON, use content directly
+      }
+      
       cardWidth = Math.min(Math.max(cardWidth, 1100), maxCardWidth);
       contentWidth = cardWidth - innerPadding * 2;
       const contentInnerPadding = 32;
       contentPadding = contentInnerPadding;
       const maxImageHeight = 700;
-      const source = submission.content.startsWith('data:')
-        ? submission.content
-        : `data:image/png;base64,${submission.content}`;
+      const source = imageSrc.startsWith('data:')
+        ? imageSrc
+        : `data:image/png;base64,${imageSrc}`;
       const image = await loadImage(source);
       const availableWidth = Math.max(contentWidth - contentInnerPadding * 2, 320);
       const widthScale = availableWidth / image.width;
@@ -457,10 +471,13 @@ const AdminDashboard = () => {
       imageDetails = {
         element: image,
         drawWidth,
-        drawHeight
+        drawHeight,
+        caption: drawingCaption
       };
 
-      contentBoxHeight = Math.max(drawHeight + contentInnerPadding * 2, 380);
+      // Add space for caption if present
+      const captionHeight = drawingCaption ? 50 : 0;
+      contentBoxHeight = Math.max(drawHeight + contentInnerPadding * 2 + captionHeight, 380);
     }
 
     cardWidth = Math.min(Math.max(cardWidth, minCardWidth), maxCardWidth);
@@ -598,8 +615,11 @@ const AdminDashboard = () => {
         });
       }
     } else if (imageDetails) {
+      // Calculate vertical offset for caption
+      const captionHeight = imageDetails.caption ? 40 : 0;
+      const availableHeight = contentBoxHeight - captionHeight;
       const drawX = contentX + (contentWidth - imageDetails.drawWidth) / 2;
-      const drawY = contentBoxY + (contentBoxHeight - imageDetails.drawHeight) / 2;
+      const drawY = contentBoxY + (availableHeight - imageDetails.drawHeight) / 2;
 
       ctx.save();
       ctx.fillStyle = '#090816';
@@ -615,6 +635,21 @@ const AdminDashboard = () => {
         imageDetails.drawHeight
       );
       ctx.restore();
+      
+      // Draw caption if present
+      if (imageDetails.caption) {
+        const captionFontSize = 20;
+        ctx.save();
+        ctx.font = `500 ${captionFontSize}px ${textFont}`;
+        ctx.fillStyle = '#c7bdf3';
+        ctx.textBaseline = 'top';
+        const captionY = drawY + imageDetails.drawHeight + 20;
+        const captionText = `"${imageDetails.caption}"`;
+        const captionWidth = ctx.measureText(captionText).width;
+        const captionX = contentX + (contentWidth - captionWidth) / 2;
+        ctx.fillText(captionText, captionX, captionY);
+        ctx.restore();
+      }
     }
 
     // Footer call-to-action: "Submit your own at cole.ong!" with highlighted domain
@@ -753,13 +788,39 @@ const AdminDashboard = () => {
               ) : null}
             </>
           ) : (
-            <div className="rounded-lg border border-border/60 bg-background/60 p-3">
-              <img
-                src={submission.content}
-                alt="Submitted drawing"
-                className="mx-auto max-h-[24rem] w-full rounded-md bg-muted object-contain"
-              />
-            </div>
+            (() => {
+              // Parse drawing content - may be JSON with { drawing, caption } or raw base64/dataUrl
+              let imageSrc = submission.content;
+              let caption = '';
+              try {
+                const parsed = JSON.parse(submission.content);
+                if (parsed.drawing) {
+                  imageSrc = parsed.drawing;
+                  caption = parsed.caption || '';
+                }
+              } catch {
+                // Not JSON, use content directly
+                if (!imageSrc.startsWith('data:')) {
+                  imageSrc = `data:image/png;base64,${imageSrc}`;
+                }
+              }
+              return (
+                <div className="space-y-3">
+                  <div className="rounded-lg border border-border/60 bg-background/60 p-3">
+                    <img
+                      src={imageSrc}
+                      alt="Submitted drawing"
+                      className="mx-auto max-h-[24rem] w-full rounded-md bg-muted object-contain"
+                    />
+                  </div>
+                  {caption && (
+                    <div className="rounded-md border border-dashed border-primary/40 bg-primary/5 p-3 text-sm text-primary">
+                      <span className="font-medium">Caption:</span> {caption}
+                    </div>
+                  )}
+                </div>
+              );
+            })()
           )}
 
           <div className="flex flex-wrap items-center justify-end gap-3 pt-2">
@@ -872,48 +933,10 @@ const AdminDashboard = () => {
                     ))}
                   </TabsList>
 
-                  <TabsContent value="all" className="mt-6 space-y-10">
-                    {groupedSubmissions.message.length ? (
-                      <section className="space-y-4">
-                        <div>
-                          <h2 className="text-xl font-semibold text-foreground">Messages</h2>
-                          <p className="text-sm text-muted-foreground">
-                            Scroll within each card to read the full message before downloading.
-                          </p>
-                        </div>
-                        <div className="grid gap-5 lg:grid-cols-2">
-                          {groupedSubmissions.message.map(renderSubmissionCard)}
-                        </div>
-                      </section>
-                    ) : null}
-
-                    {groupedSubmissions.drawing.length ? (
-                      <section className="space-y-4">
-                        <div>
-                          <h2 className="text-xl font-semibold text-foreground">Drawings</h2>
-                          <p className="text-sm text-muted-foreground">
-                            Images keep their proportions and export in their largest safe size.
-                          </p>
-                        </div>
-                        <div className="grid gap-5 lg:grid-cols-2">
-                          {groupedSubmissions.drawing.map(renderSubmissionCard)}
-                        </div>
-                      </section>
-                    ) : null}
-
-                    {groupedSubmissions.other.length ? (
-                      <section className="space-y-4">
-                        <div>
-                          <h2 className="text-xl font-semibold text-foreground">Other</h2>
-                          <p className="text-sm text-muted-foreground">
-                            Submissions that do not match the standard message or drawing type.
-                          </p>
-                        </div>
-                        <div className="grid gap-5 lg:grid-cols-2">
-                          {groupedSubmissions.other.map(renderSubmissionCard)}
-                        </div>
-                      </section>
-                    ) : null}
+                  <TabsContent value="all" className="mt-6">
+                    <div className="grid gap-5 lg:grid-cols-2">
+                      {submissions.map(renderSubmissionCard)}
+                    </div>
                   </TabsContent>
 
                   <TabsContent value="message" className="mt-6">

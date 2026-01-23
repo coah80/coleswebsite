@@ -22,11 +22,13 @@ type IconComponent = FC<{ className?: string }>;
 interface PlatformVisuals {
   icon: IconComponent;
   gradient: string;
+  hoverBg: string; // Subtle background tint on hover
 }
 
-const createVisuals = (icon: IconComponent, gradient: string): PlatformVisuals => ({
+const createVisuals = (icon: IconComponent, gradient: string, hoverBg: string): PlatformVisuals => ({
   icon,
-  gradient
+  gradient,
+  hoverBg
 });
 
 const normalize = (value: string) => value.toLowerCase().replace(/[^a-z0-9]/g, '');
@@ -91,39 +93,39 @@ const KoFiIcon: IconComponent = ({ className = '' }) => (
   </svg>
 );
 
-const FALLBACK_VISUALS = createVisuals(ExternalLink, 'from-slate-500 to-slate-700');
+const FALLBACK_VISUALS = createVisuals(ExternalLink, 'from-slate-500 to-slate-700', 'hover:bg-slate-500/10');
 
 const PLATFORM_ENTRIES: Array<{
   matchers: string[];
   visuals: PlatformVisuals;
 }> = [
   // Major socials
-  { matchers: ['youtube', 'youtu.be'], visuals: createVisuals(Youtube, 'from-red-500 to-orange-500') },
-  { matchers: ['twitter', 'x.com'], visuals: createVisuals(Twitter, 'from-sky-400 to-sky-500') },
-  { matchers: ['facebook', 'fb.com'], visuals: createVisuals(Facebook, 'from-blue-600 to-blue-700') },
-  { matchers: ['linkedin'], visuals: createVisuals(Linkedin, 'from-blue-600 to-indigo-600') },
-  { matchers: ['github'], visuals: createVisuals(Github, 'from-slate-600 to-slate-800') },
-  { matchers: ['spotify', 'open.spotify'], visuals: createVisuals(Music, 'from-green-500 to-green-600') },
-  { matchers: ['twitch'], visuals: createVisuals(Twitch, 'from-purple-500 to-indigo-500') },
-  { matchers: ['discord', 'discord.gg'], visuals: createVisuals(DiscordIcon, 'from-indigo-500 to-violet-500') },
-  { matchers: ['steam'], visuals: createVisuals(SteamIcon, 'from-slate-600 to-slate-700') },
-  { matchers: ['soundcloud'], visuals: createVisuals(Music, 'from-orange-500 to-yellow-500') },
-  { matchers: ['bandcamp'], visuals: createVisuals(Music, 'from-teal-500 to-cyan-500') },
-  { matchers: ['applemusic', 'music.apple.com'], visuals: createVisuals(Music, 'from-pink-500 to-red-500') },
-  { matchers: ['instagram', 'instagr'], visuals: createVisuals(Instagram, 'from-pink-500 to-purple-500') },
-  { matchers: ['tiktok'], visuals: createVisuals(TikTokIcon, 'from-gray-900 to-rose-500') },
+  { matchers: ['youtube', 'youtu.be'], visuals: createVisuals(Youtube, 'from-red-600 to-red-500', 'hover:bg-red-500/10') },
+  { matchers: ['twitter', 'x.com'], visuals: createVisuals(Twitter, 'from-sky-400 to-sky-500', 'hover:bg-sky-400/10') },
+  { matchers: ['facebook', 'fb.com'], visuals: createVisuals(Facebook, 'from-blue-600 to-blue-700', 'hover:bg-blue-600/10') },
+  { matchers: ['linkedin'], visuals: createVisuals(Linkedin, 'from-blue-600 to-indigo-600', 'hover:bg-blue-600/10') },
+  { matchers: ['github'], visuals: createVisuals(Github, 'from-slate-600 to-slate-800', 'hover:bg-slate-500/10') },
+  { matchers: ['spotify', 'open.spotify'], visuals: createVisuals(Music, 'from-green-500 to-green-600', 'hover:bg-green-500/10') },
+  { matchers: ['twitch'], visuals: createVisuals(Twitch, 'from-purple-500 to-indigo-500', 'hover:bg-purple-500/10') },
+  { matchers: ['discord', 'discord.gg'], visuals: createVisuals(DiscordIcon, 'from-indigo-500 to-violet-500', 'hover:bg-indigo-500/10') },
+  { matchers: ['steam'], visuals: createVisuals(SteamIcon, 'from-slate-600 to-slate-700', 'hover:bg-slate-500/10') },
+  { matchers: ['soundcloud'], visuals: createVisuals(Music, 'from-orange-500 to-yellow-500', 'hover:bg-orange-500/10') },
+  { matchers: ['bandcamp'], visuals: createVisuals(Music, 'from-teal-500 to-cyan-500', 'hover:bg-teal-500/10') },
+  { matchers: ['applemusic', 'music.apple.com'], visuals: createVisuals(Music, 'from-pink-500 to-red-500', 'hover:bg-pink-500/10') },
+  { matchers: ['instagram', 'instagr'], visuals: createVisuals(Instagram, 'from-pink-500 to-purple-500', 'hover:bg-pink-500/10') },
+  { matchers: ['tiktok'], visuals: createVisuals(TikTokIcon, 'from-gray-900 to-rose-500', 'hover:bg-rose-500/10') },
   // Reddit icon is not available in some lucide-react versions; use chat bubble
-  { matchers: ['reddit'], visuals: createVisuals(MessageCircle, 'from-orange-500 to-red-500') },
-  { matchers: ['telegram', 't.me'], visuals: createVisuals(MessageCircle, 'from-sky-400 to-sky-500') },
-  { matchers: ['whatsapp', 'wa.me'], visuals: createVisuals(MessageCircle, 'from-green-400 to-green-500') },
-  { matchers: ['kofi', 'ko-fi', 'buymeacoffee'], visuals: createVisuals(KoFiIcon, 'from-sky-400 to-sky-500') },
-  { matchers: ['patreon'], visuals: createVisuals(Coffee, 'from-orange-500 to-red-500') },
-  { matchers: ['paypal'], visuals: createVisuals(DollarSign, 'from-blue-500 to-blue-600') },
-  { matchers: ['venmo'], visuals: createVisuals(DollarSign, 'from-sky-500 to-blue-500') },
-  { matchers: ['cashapp', 'cash.app'], visuals: createVisuals(DollarSign, 'from-green-500 to-green-600') },
-  { matchers: ['linktree'], visuals: createVisuals(Globe, 'from-emerald-500 to-green-500') },
-  { matchers: ['portfolio', 'website', 'site'], visuals: createVisuals(Globe, 'from-purple-500 to-indigo-500') },
-  { matchers: ['mail', 'email', 'contact'], visuals: createVisuals(Mail, 'from-sky-500 to-blue-500') }
+  { matchers: ['reddit'], visuals: createVisuals(MessageCircle, 'from-orange-500 to-red-500', 'hover:bg-orange-500/10') },
+  { matchers: ['telegram', 't.me'], visuals: createVisuals(MessageCircle, 'from-sky-400 to-sky-500', 'hover:bg-sky-400/10') },
+  { matchers: ['whatsapp', 'wa.me'], visuals: createVisuals(MessageCircle, 'from-green-400 to-green-500', 'hover:bg-green-400/10') },
+  { matchers: ['kofi', 'ko-fi', 'buymeacoffee'], visuals: createVisuals(KoFiIcon, 'from-sky-400 to-sky-500', 'hover:bg-sky-400/10') },
+  { matchers: ['patreon'], visuals: createVisuals(Coffee, 'from-orange-500 to-red-500', 'hover:bg-orange-500/10') },
+  { matchers: ['paypal'], visuals: createVisuals(DollarSign, 'from-blue-500 to-blue-600', 'hover:bg-blue-500/10') },
+  { matchers: ['venmo'], visuals: createVisuals(DollarSign, 'from-sky-500 to-blue-500', 'hover:bg-sky-500/10') },
+  { matchers: ['cashapp', 'cash.app'], visuals: createVisuals(DollarSign, 'from-green-500 to-green-600', 'hover:bg-green-500/10') },
+  { matchers: ['linktree'], visuals: createVisuals(Globe, 'from-emerald-500 to-green-500', 'hover:bg-emerald-500/10') },
+  { matchers: ['portfolio', 'website', 'site'], visuals: createVisuals(Globe, 'from-purple-500 to-indigo-500', 'hover:bg-purple-500/10') },
+  { matchers: ['mail', 'email', 'contact'], visuals: createVisuals(Mail, 'from-sky-500 to-blue-500', 'hover:bg-sky-500/10') }
 ];
 
 export const getPlatformVisuals = (name: string, url: string): PlatformVisuals => {

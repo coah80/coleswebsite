@@ -1,7 +1,7 @@
-import LandscapeLayout from '@/components/LandscapeLayout';
+import BentoHome from '@/components/BentoHome';
 
 const Index = () => {
-  return <LandscapeLayout />;
+  return <BentoHome />;
 };
 
 export default Index;

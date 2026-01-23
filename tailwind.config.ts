@@ -19,13 +19,12 @@ export default {
 		},
 		extend: {
 			fontFamily: {
-				sans: ["Inter", "sans-serif"],
-				'heading': ['Poppins', 'sans-serif'],
-				'body': ['Source Sans Pro', 'sans-serif'], 
+				sans: ["Montserrat Variable", "sans-serif"],
+				'montserrat': ['Montserrat Variable', 'sans-serif'],
+				'heading': ['Montserrat Variable', 'sans-serif'],
+				'body': ['Montserrat Variable', 'sans-serif'], 
 				'code': ['Fira Code', 'monospace'],
-				'display': ['Fredoka One', 'sans-serif'],
-				'rounded': ['Nunito', 'sans-serif'],
-				'fun': ['Comfortaa', 'sans-serif'],
+				'display': ['Montserrat Variable', 'sans-serif'],
 				'dancing': ['Dancing Script', 'cursive'],
 				'pacifico': ['Pacifico', 'cursive'],
 				'great-vibes': ['Great Vibes', 'cursive'],
@@ -126,6 +125,10 @@ export default {
 			animation: {
 				'accordion-down': 'accordion-down 0.2s ease-out',
 				'accordion-up': 'accordion-up 0.2s ease-out'
+			},
+			screens: {
+				'portrait': { 'raw': '(orientation: portrait)' },
+				'landscape': { 'raw': '(orientation: landscape)' },
 			}
 		}
 	},
