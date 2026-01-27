@@ -125,72 +125,72 @@ const ContactPage = () => {
 
   return (
     <PageLayout title="say hi">
-      <div ref={formRef} className={`mx-auto h-full flex flex-col overflow-auto ${
+      <div ref={formRef} className={`mx-auto h-full flex flex-col overflow-auto pb-4 ${
         activeTab === 'drawing' ? 'max-w-4xl' : 'max-w-2xl'
       }`}>
         <BrowserFrame title="submit://anonymous" className={activeTab === 'drawing' ? 'h-full flex flex-col' : ''}>
           {/* Tab switcher */}
-          <div className="flex gap-2 mb-4">
+          <div className="flex gap-1.5 sm:gap-2 mb-3 sm:mb-4">
             <button
               onClick={() => setActiveTab('message')}
-              className={`flex items-center gap-2 px-3 py-1.5 text-xs font-mono lowercase rounded-lg transition-all ${
+              className={`flex items-center gap-1.5 sm:gap-2 px-2 sm:px-3 py-1 sm:py-1.5 text-[10px] sm:text-xs font-mono lowercase rounded-md sm:rounded-lg transition-all ${
                 activeTab === 'message'
                   ? 'bg-foreground text-background'
                   : 'bg-muted/30 text-muted-foreground hover:text-foreground'
               }`}
             >
-              <MessageCircle className="w-3 h-3" />
+              <MessageCircle className="w-2.5 h-2.5 sm:w-3 sm:h-3" />
               message
             </button>
             <button
               onClick={() => setActiveTab('drawing')}
-              className={`flex items-center gap-2 px-3 py-1.5 text-xs font-mono lowercase rounded-lg transition-all ${
+              className={`flex items-center gap-1.5 sm:gap-2 px-2 sm:px-3 py-1 sm:py-1.5 text-[10px] sm:text-xs font-mono lowercase rounded-md sm:rounded-lg transition-all ${
                 activeTab === 'drawing'
                   ? 'bg-foreground text-background'
                   : 'bg-muted/30 text-muted-foreground hover:text-foreground'
               }`}
             >
-              <Palette className="w-3 h-3" />
+              <Palette className="w-2.5 h-2.5 sm:w-3 sm:h-3" />
               drawing
             </button>
           </div>
 
           {/* Message form */}
           {activeTab === 'message' && (
-            <div className="space-y-3">
+            <div className="space-y-2 sm:space-y-3">
               <textarea
                 value={message}
                 onChange={(e) => setMessage(e.target.value)}
                 placeholder="write something nice..."
-                className="w-full h-24 p-3 bg-muted/20 border border-border/30 rounded-lg resize-none focus:outline-none focus:border-foreground/50 font-mono text-sm placeholder:text-muted-foreground/50"
+                className="w-full h-20 sm:h-24 p-2 sm:p-3 bg-muted/20 border border-border/30 rounded-md sm:rounded-lg resize-none focus:outline-none focus:border-foreground/50 font-mono text-xs sm:text-sm placeholder:text-muted-foreground/50"
               />
 
               {/* Signature toggle */}
-              <div className="flex items-center gap-3">
+              <div className="flex items-center gap-2 sm:gap-3">
                 <button
                   onClick={() => setSignatureEnabled(!signatureEnabled)}
-                  className={`w-4 h-4 rounded border-2 transition-all ${
+                  className={`w-3.5 h-3.5 sm:w-4 sm:h-4 rounded border-2 transition-all ${
                     signatureEnabled ? 'bg-foreground border-foreground' : 'border-muted-foreground'
                   }`}
                 />
-                <span className="text-xs font-mono text-muted-foreground">add signature</span>
+                <span className="text-[10px] sm:text-xs font-mono text-muted-foreground">add signature</span>
               </div>
 
               {signatureEnabled && (
-                <div className="space-y-2 p-3 bg-muted/10 rounded-lg">
+                <div className="space-y-1.5 sm:space-y-2 p-2 sm:p-3 bg-muted/10 rounded-md sm:rounded-lg">
                   <input
                     type="text"
                     value={signatureName}
                     onChange={(e) => setSignatureName(e.target.value)}
                     placeholder="your name"
-                    className="w-full p-2 bg-muted/20 border border-border/30 rounded-lg focus:outline-none focus:border-foreground/50 font-mono text-xs"
+                    className="w-full p-1.5 sm:p-2 bg-muted/20 border border-border/30 rounded-md sm:rounded-lg focus:outline-none focus:border-foreground/50 font-mono text-[10px] sm:text-xs"
                   />
-                  <div className="flex gap-1.5 flex-wrap">
+                  <div className="flex gap-1 sm:gap-1.5 flex-wrap">
                     {signatureEndingOptions.map((ending) => (
                       <button
                         key={ending}
                         onClick={() => setSignatureEnding(ending)}
-                        className={`px-2 py-1 text-[10px] font-mono rounded-full transition-all ${
+                        className={`px-1.5 sm:px-2 py-0.5 sm:py-1 text-[8px] sm:text-[10px] font-mono rounded-full transition-all ${
                           signatureEnding === ending
                             ? 'bg-foreground text-background'
                             : 'bg-muted/30 text-muted-foreground hover:text-foreground'
@@ -200,12 +200,12 @@ const ContactPage = () => {
                       </button>
                     ))}
                   </div>
-                  <div className="flex gap-1.5 flex-wrap">
+                  <div className="flex gap-1 sm:gap-1.5 flex-wrap">
                     {fontOptions.map((font) => (
                       <button
                         key={font.value}
                         onClick={() => setSignatureFont(font.value)}
-                        className={`px-2 py-1 text-xs rounded-full transition-all ${font.className} ${
+                        className={`px-1.5 sm:px-2 py-0.5 sm:py-1 text-[10px] sm:text-xs rounded-full transition-all ${font.className} ${
                           signatureFont === font.value
                             ? 'bg-foreground text-background'
                             : 'bg-muted/30 text-muted-foreground hover:text-foreground'
@@ -217,7 +217,7 @@ const ContactPage = () => {
                   </div>
                   
                   {signatureName && (
-                    <p className={`text-sm text-center pt-1 ${fontOptions.find(f => f.value === signatureFont)?.className}`}>
+                    <p className={`text-xs sm:text-sm text-center pt-1 ${fontOptions.find(f => f.value === signatureFont)?.className}`}>
                       {signatureEnding}, {signatureName}
                     </p>
                   )}
@@ -228,7 +228,7 @@ const ContactPage = () => {
               <button
                 onClick={handleMessageSubmit}
                 disabled={isSubmitting || cooldownTimeLeft > 0 || !message.trim()}
-                className={`w-full flex items-center justify-center gap-2 px-4 py-2 font-mono text-xs lowercase rounded-lg transition-all ${
+                className={`w-full flex items-center justify-center gap-1.5 sm:gap-2 px-3 sm:px-4 py-1.5 sm:py-2 font-mono text-[10px] sm:text-xs lowercase rounded-md sm:rounded-lg transition-all ${
                   submitSuccess
                     ? 'bg-green-500 text-white'
                     : cooldownTimeLeft > 0
@@ -244,7 +244,7 @@ const ContactPage = () => {
                   'sending...'
                 ) : (
                   <>
-                    <Send className="w-3 h-3" />
+                    <Send className="w-2.5 h-2.5 sm:w-3 sm:h-3" />
                     send message
                   </>
                 )}

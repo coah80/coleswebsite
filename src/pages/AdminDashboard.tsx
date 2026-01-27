@@ -845,31 +845,33 @@ const AdminDashboard = () => {
 
   return (
     <div className="min-h-screen bg-background">
-      <div className="mx-auto flex w-full max-w-6xl flex-col gap-6 px-4 py-8 sm:px-6 lg:px-8">
-        <div className="flex flex-wrap items-center justify-between gap-4">
+      <div className="mx-auto flex w-full max-w-6xl flex-col gap-4 sm:gap-6 px-3 sm:px-4 py-4 sm:py-6 lg:px-8 lg:py-8">
+        <div className="flex flex-col sm:flex-row sm:flex-wrap items-start sm:items-center justify-between gap-3 sm:gap-4">
           <div>
-            <h1 className="text-2xl font-bold text-foreground">Admin Dashboard</h1>
-            <p className="text-sm text-muted-foreground">
+            <h1 className="text-xl sm:text-2xl font-bold text-foreground">Admin Dashboard</h1>
+            <p className="text-xs sm:text-sm text-muted-foreground">
               Manage submissions, projects, and social links in one place.
             </p>
           </div>
-          <div className="flex items-center gap-2">
+          <div className="flex items-center gap-1.5 sm:gap-2">
             {activeTab === 'submissions' ? (
               <Button
                 variant="outline"
                 onClick={fetchSubmissions}
                 disabled={isRefreshing}
+                size="sm"
+                className="text-xs sm:text-sm"
               >
                 {isRefreshing ? (
-                  <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                  <Loader2 className="mr-1.5 sm:mr-2 h-3 w-3 sm:h-4 sm:w-4 animate-spin" />
                 ) : (
-                  <RefreshCw className="mr-2 h-4 w-4" />
+                  <RefreshCw className="mr-1.5 sm:mr-2 h-3 w-3 sm:h-4 sm:w-4" />
                 )}
                 Refresh
               </Button>
             ) : null}
-            <Button variant="secondary" onClick={handleLogout}>
-              <LogOut className="mr-2 h-4 w-4" />
+            <Button variant="secondary" onClick={handleLogout} size="sm" className="text-xs sm:text-sm">
+              <LogOut className="mr-1.5 sm:mr-2 h-3 w-3 sm:h-4 sm:w-4" />
               Log out
             </Button>
           </div>
@@ -880,15 +882,15 @@ const AdminDashboard = () => {
           onValueChange={(value) => setActiveTab(value as typeof activeTab)}
           className="w-full"
         >
-          <TabsList className="h-11 bg-card/50 p-1.5">
-            <TabsTrigger value="submissions" className="px-4 py-2 text-sm font-medium">
+          <TabsList className="h-9 sm:h-11 bg-card/50 p-1 sm:p-1.5 w-full sm:w-auto">
+            <TabsTrigger value="submissions" className="px-2 sm:px-4 py-1.5 sm:py-2 text-xs sm:text-sm font-medium flex-1 sm:flex-initial">
               Submissions
             </TabsTrigger>
-            <TabsTrigger value="portfolio" className="px-4 py-2 text-sm font-medium">
+            <TabsTrigger value="portfolio" className="px-2 sm:px-4 py-1.5 sm:py-2 text-xs sm:text-sm font-medium flex-1 sm:flex-initial">
               Portfolio
             </TabsTrigger>
-            <TabsTrigger value="social" className="px-4 py-2 text-sm font-medium">
-              Social Links
+            <TabsTrigger value="social" className="px-2 sm:px-4 py-1.5 sm:py-2 text-xs sm:text-sm font-medium flex-1 sm:flex-initial">
+              Social
             </TabsTrigger>
           </TabsList>
 
@@ -912,40 +914,40 @@ const AdminDashboard = () => {
                 </CardContent>
               </Card>
             ) : (
-              <div className="space-y-6">
+              <div className="space-y-4 sm:space-y-6">
                 <Tabs
                   value={submissionsFilter}
                   onValueChange={(value) => setSubmissionsFilter(value as typeof submissionsFilter)}
                   className="w-full"
                 >
-                  <TabsList className="h-10 bg-card/40 p-1">
+                  <TabsList className="h-8 sm:h-10 bg-card/40 p-0.5 sm:p-1 flex-wrap">
                     {submissionFilterTabs.map((tab) => (
                       <TabsTrigger
                         key={tab.value}
                         value={tab.value}
-                        className="px-3 py-2 text-sm font-medium"
+                        className="px-2 sm:px-3 py-1 sm:py-2 text-xs sm:text-sm font-medium"
                       >
                         <span>{tab.label}</span>
-                        <span className="ml-2 rounded-full bg-primary/10 px-2 py-0.5 text-xs text-primary">
+                        <span className="ml-1 sm:ml-2 rounded-full bg-primary/10 px-1.5 sm:px-2 py-0.5 text-[10px] sm:text-xs text-primary">
                           {tab.count}
                         </span>
                       </TabsTrigger>
                     ))}
                   </TabsList>
 
-                  <TabsContent value="all" className="mt-6">
-                    <div className="grid gap-5 lg:grid-cols-2">
+                  <TabsContent value="all" className="mt-4 sm:mt-6">
+                    <div className="grid gap-3 sm:gap-5 lg:grid-cols-2">
                       {submissions.map(renderSubmissionCard)}
                     </div>
                   </TabsContent>
 
-                  <TabsContent value="message" className="mt-6">
+                  <TabsContent value="message" className="mt-4 sm:mt-6">
                     {groupedSubmissions.message.length ? (
-                      <div className="grid gap-5 lg:grid-cols-2">
+                      <div className="grid gap-3 sm:gap-5 lg:grid-cols-2">
                         {groupedSubmissions.message.map(renderSubmissionCard)}
                       </div>
                     ) : (
-                      <div className="rounded-lg border border-border/50 bg-card/40 p-8 text-center text-sm text-muted-foreground">
+                      <div className="rounded-lg border border-border/50 bg-card/40 p-6 sm:p-8 text-center text-xs sm:text-sm text-muted-foreground">
                         No message submissions yet.
                       </div>
                     )}

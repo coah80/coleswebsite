@@ -75,12 +75,12 @@ const PortfolioPage = () => {
       <div className="h-full flex flex-col overflow-hidden">
         {/* Category filters */}
         {categories.length > 1 && (
-          <div className="flex flex-wrap gap-2 mb-4 flex-shrink-0">
+          <div className="flex flex-wrap gap-1.5 sm:gap-2 mb-3 sm:mb-4 flex-shrink-0 overflow-x-auto pb-1">
             {categories.map((category) => (
               <button
                 key={category}
                 onClick={() => setSelectedCategory(category)}
-                className={`px-3 py-1.5 text-xs font-mono lowercase rounded-full border transition-all duration-200 ${
+                className={`px-2 sm:px-3 py-1 sm:py-1.5 text-[10px] sm:text-xs font-mono lowercase rounded-full border transition-all duration-200 whitespace-nowrap ${
                   selectedCategory === category
                     ? 'bg-foreground text-background border-foreground'
                     : 'bg-transparent text-muted-foreground border-border/50 hover:border-foreground hover:text-foreground'
@@ -95,8 +95,7 @@ const PortfolioPage = () => {
         {/* Projects grid - fits to available space */}
         <div 
           ref={gridRef}
-          className="flex-1 grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-3 auto-rows-fr overflow-hidden"
-          style={{ maxHeight: 'calc(100vh - 180px)' }}
+          className="flex-1 grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-2 sm:gap-3 auto-rows-min overflow-y-auto pb-4"
         >
           {isLoading ? (
             Array.from({ length: 6 }).map((_, i) => (
@@ -106,13 +105,13 @@ const PortfolioPage = () => {
             filteredProjects.map((project) => (
               <div
                 key={project.id}
-                className="project-card group relative bg-card/30 border border-border/20 rounded-2xl overflow-hidden transition-all duration-300 hover:border-border/50 hover:bg-card/50 hover:scale-[1.02]"
+                className="project-card group relative bg-card/30 border border-border/20 rounded-xl sm:rounded-2xl overflow-hidden transition-all duration-300 hover:border-border/50 hover:bg-card/50 hover:scale-[1.02]"
               >
                 {/* Featured badge */}
                 {project.is_featured && (
-                  <div className="absolute top-3 right-3 z-10 flex items-center gap-1 px-2 py-1 bg-foreground/90 text-background text-xs font-mono rounded">
-                    <Star className="w-3 h-3 fill-current" />
-                    featured
+                  <div className="absolute top-2 right-2 sm:top-3 sm:right-3 z-10 flex items-center gap-0.5 sm:gap-1 px-1.5 sm:px-2 py-0.5 sm:py-1 bg-foreground/90 text-background text-[10px] sm:text-xs font-mono rounded">
+                    <Star className="w-2.5 h-2.5 sm:w-3 sm:h-3 fill-current" />
+                    <span className="hidden sm:inline">featured</span>
                   </div>
                 )}
 
@@ -128,24 +127,24 @@ const PortfolioPage = () => {
                 )}
 
                 {/* Content */}
-                <div className="p-3">
-                  <WarpText className="font-bold text-sm text-foreground mb-1">
+                <div className="p-2 sm:p-3">
+                  <WarpText className="font-bold text-xs sm:text-sm text-foreground mb-0.5 sm:mb-1">
                     {project.title}
                   </WarpText>
                   
                   {project.description && (
-                    <p className="text-xs text-muted-foreground mb-2 line-clamp-1">
+                    <p className="text-[10px] sm:text-xs text-muted-foreground mb-1.5 sm:mb-2 line-clamp-1 sm:line-clamp-2">
                       {project.description}
                     </p>
                   )}
 
                   {/* Tags */}
                   {project.tags && project.tags.length > 0 && (
-                    <div className="flex flex-wrap gap-1 mb-2">
+                    <div className="flex flex-wrap gap-0.5 sm:gap-1 mb-1.5 sm:mb-2">
                       {project.tags.slice(0, 2).map((tag, i) => (
                         <span 
                           key={i}
-                          className="px-1.5 py-0.5 text-[10px] font-mono text-muted-foreground bg-muted/30 rounded"
+                          className="px-1 sm:px-1.5 py-0.5 text-[8px] sm:text-[10px] font-mono text-muted-foreground bg-muted/30 rounded"
                         >
                           {tag}
                         </span>
@@ -154,15 +153,15 @@ const PortfolioPage = () => {
                   )}
 
                   {/* Links */}
-                  <div className="flex items-center gap-3">
+                  <div className="flex items-center gap-2 sm:gap-3">
                     {project.live_url && (
                       <a
                         href={project.live_url}
                         target="_blank"
                         rel="noopener noreferrer"
-                        className="flex items-center gap-1 text-xs font-mono text-foreground hover:text-accent transition-colors"
+                        className="flex items-center gap-0.5 sm:gap-1 text-[10px] sm:text-xs font-mono text-foreground hover:text-accent transition-colors"
                       >
-                        <ExternalLink className="w-3 h-3" />
+                        <ExternalLink className="w-2.5 h-2.5 sm:w-3 sm:h-3" />
                         view
                       </a>
                     )}
@@ -171,9 +170,9 @@ const PortfolioPage = () => {
                         href={project.github_url}
                         target="_blank"
                         rel="noopener noreferrer"
-                        className="flex items-center gap-1 text-xs font-mono text-foreground hover:text-accent transition-colors"
+                        className="flex items-center gap-0.5 sm:gap-1 text-[10px] sm:text-xs font-mono text-foreground hover:text-accent transition-colors"
                       >
-                        <Github className="w-3 h-3" />
+                        <Github className="w-2.5 h-2.5 sm:w-3 sm:h-3" />
                         code
                       </a>
                     )}

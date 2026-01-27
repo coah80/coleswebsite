@@ -84,11 +84,11 @@ const IntroAnimation = ({ onComplete }: IntroAnimationProps) => {
           key={word}
           className={`word-${wordIndex} absolute ${currentWord === wordIndex ? 'block' : 'hidden'}`}
         >
-          <div className="flex items-center justify-center">
+          <div className="flex items-center justify-center px-4">
             {word.split('').map((letter, letterIndex) => (
               <span
                 key={letterIndex}
-                className="letter inline-block text-[20vw] font-montserrat font-black text-foreground lowercase select-none"
+                className="letter inline-block text-[15vw] sm:text-[18vw] md:text-[20vw] font-montserrat font-black text-foreground lowercase select-none"
                 style={{ 
                   perspective: '1000px',
                   transformStyle: 'preserve-3d'

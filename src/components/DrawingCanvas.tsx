@@ -361,15 +361,15 @@ const DrawingCanvas = ({ onSubmit, isSubmitting, cooldownTimeLeft, formatCooldow
   const canRedo = historyIndex < history.length - 1;
 
   return (
-    <div className="flex flex-col landscape:flex-row gap-3 h-full flex-1 min-h-0">
+    <div className="flex flex-col gap-2 sm:gap-3 h-full flex-1 min-h-0">
       {/* Canvas - takes most space */}
       <div className="flex-1 flex items-center justify-center min-h-0 min-w-0">
-        <div className="relative aspect-square w-full max-w-full max-h-full portrait:max-h-[50vh] landscape:max-h-full">
+        <div className="relative aspect-square w-full max-w-full max-h-full">
           <canvas
             ref={displayCanvasRef}
             width={CANVAS_SIZE}
             height={CANVAS_SIZE}
-            className="w-full h-full border border-border/50 rounded-xl cursor-crosshair shadow-lg bg-white"
+            className="w-full h-full border border-border/50 rounded-lg sm:rounded-xl cursor-crosshair shadow-lg bg-white"
             style={{ touchAction: 'none' }}
             onPointerDown={beginStroke}
             onPointerMove={extendStroke}
@@ -383,23 +383,23 @@ const DrawingCanvas = ({ onSubmit, isSubmitting, cooldownTimeLeft, formatCooldow
         </div>
       </div>
 
-      {/* Toolbar - below on portrait, side on landscape */}
-      <div className="shrink-0 landscape:w-40 landscape:overflow-y-auto flex flex-col gap-2">
-        {/* Top row on mobile: layers + actions */}
-        <div className="flex landscape:flex-col gap-2">
-          {/* Layers panel - horizontal on portrait, vertical on landscape */}
-          <div className="flex-1 bg-muted/20 rounded-xl p-2 border border-border/30">
-            <div className="flex items-center gap-1.5 mb-1.5">
-              <Layers className="w-3 h-3 text-muted-foreground" />
-              <span className="text-[10px] font-medium uppercase tracking-wide">Layers</span>
+      {/* Toolbar - always below on mobile */}
+      <div className="shrink-0 flex flex-col gap-1.5 sm:gap-2 max-h-[45%] overflow-y-auto pb-2">
+        {/* Top row: layers + actions */}
+        <div className="flex gap-1.5 sm:gap-2">
+          {/* Layers panel */}
+          <div className="flex-1 bg-muted/20 rounded-lg sm:rounded-xl p-1.5 sm:p-2 border border-border/30">
+            <div className="flex items-center gap-1 sm:gap-1.5 mb-1 sm:mb-1.5">
+              <Layers className="w-2.5 h-2.5 sm:w-3 sm:h-3 text-muted-foreground" />
+              <span className="text-[8px] sm:text-[10px] font-medium uppercase tracking-wide">Layers</span>
             </div>
-            <div className="flex landscape:flex-col gap-1">
+            <div className="flex gap-0.5 sm:gap-1">
               {[...layers].reverse().map((layer, reversedIndex) => {
                 const index = layers.length - 1 - reversedIndex;
                 return (
                   <div
                     key={layer.id}
-                    className={`flex items-center gap-1.5 px-2 py-1 rounded-lg cursor-pointer transition-colors ${
+                    className={`flex items-center gap-1 sm:gap-1.5 px-1.5 sm:px-2 py-0.5 sm:py-1 rounded-md sm:rounded-lg cursor-pointer transition-colors ${
                       activeLayer === index 
                         ? 'bg-accent/30 text-foreground' 
                         : 'hover:bg-muted/40 text-muted-foreground'
@@ -414,13 +414,12 @@ const DrawingCanvas = ({ onSubmit, isSubmitting, cooldownTimeLeft, formatCooldow
                       className="hover:bg-muted/50 rounded p-0.5"
                     >
                       {layer.visible ? (
-                        <Eye className="w-3 h-3" />
+                        <Eye className="w-2.5 h-2.5 sm:w-3 sm:h-3" />
                       ) : (
-                        <EyeOff className="w-3 h-3 opacity-50" />
+                        <EyeOff className="w-2.5 h-2.5 sm:w-3 sm:h-3 opacity-50" />
                       )}
                     </button>
-                    <span className="text-[10px] hidden landscape:inline">{layer.name}</span>
-                    <span className="text-[10px] landscape:hidden">{index + 1}</span>
+                    <span className="text-[8px] sm:text-[10px]">{index + 1}</span>
                   </div>
                 );
               })}
@@ -428,51 +427,51 @@ const DrawingCanvas = ({ onSubmit, isSubmitting, cooldownTimeLeft, formatCooldow
           </div>
 
           {/* Actions */}
-          <div className="flex landscape:flex-row gap-1">
-            <Button variant="secondary" size="sm" onClick={undo} disabled={!canUndo} className="h-8 w-8 p-0">
-              <Undo2 className="w-4 h-4" />
+          <div className="flex gap-0.5 sm:gap-1">
+            <Button variant="secondary" size="sm" onClick={undo} disabled={!canUndo} className="h-7 w-7 sm:h-8 sm:w-8 p-0">
+              <Undo2 className="w-3 h-3 sm:w-4 sm:h-4" />
             </Button>
-            <Button variant="secondary" size="sm" onClick={redo} disabled={!canRedo} className="h-8 w-8 p-0">
-              <Redo2 className="w-4 h-4" />
+            <Button variant="secondary" size="sm" onClick={redo} disabled={!canRedo} className="h-7 w-7 sm:h-8 sm:w-8 p-0">
+              <Redo2 className="w-3 h-3 sm:w-4 sm:h-4" />
             </Button>
-            <Button variant="secondary" size="sm" onClick={clearActiveLayer} className="h-8 w-8 p-0" title="Clear layer">
-              <Trash2 className="w-4 h-4" />
+            <Button variant="secondary" size="sm" onClick={clearActiveLayer} className="h-7 w-7 sm:h-8 sm:w-8 p-0" title="Clear layer">
+              <Trash2 className="w-3 h-3 sm:w-4 sm:h-4" />
             </Button>
           </div>
         </div>
 
         {/* Color controls row */}
-        <div className="flex landscape:flex-col gap-2">
+        <div className="flex gap-1.5 sm:gap-2">
           {/* Color mode + palette */}
-          <div className="flex-1 bg-muted/20 rounded-xl p-2 border border-border/30">
-            <div className="flex gap-1 mb-2">
+          <div className="flex-1 bg-muted/20 rounded-lg sm:rounded-xl p-1.5 sm:p-2 border border-border/30">
+            <div className="flex gap-0.5 sm:gap-1 mb-1.5 sm:mb-2">
               <button
                 onClick={() => setColorMode('brush')}
-                className={`flex-1 flex items-center justify-center gap-1 px-2 py-1 rounded-lg text-[10px] transition-colors ${
+                className={`flex-1 flex items-center justify-center gap-0.5 sm:gap-1 px-1.5 sm:px-2 py-0.5 sm:py-1 rounded-md sm:rounded-lg text-[8px] sm:text-[10px] transition-colors ${
                   colorMode === 'brush' ? 'bg-foreground text-background' : 'bg-muted/30 text-muted-foreground hover:text-foreground'
                 }`}
               >
-                <Paintbrush className="w-3 h-3" />
-                <span className="hidden sm:inline">Brush</span>
+                <Paintbrush className="w-2.5 h-2.5 sm:w-3 sm:h-3" />
+                Brush
               </button>
               <button
                 onClick={() => setColorMode('background')}
-                className={`flex-1 flex items-center justify-center gap-1 px-2 py-1 rounded-lg text-[10px] transition-colors ${
+                className={`flex-1 flex items-center justify-center gap-0.5 sm:gap-1 px-1.5 sm:px-2 py-0.5 sm:py-1 rounded-md sm:rounded-lg text-[8px] sm:text-[10px] transition-colors ${
                   colorMode === 'background' ? 'bg-foreground text-background' : 'bg-muted/30 text-muted-foreground hover:text-foreground'
                 }`}
               >
-                <PaintBucket className="w-3 h-3" />
-                <span className="hidden sm:inline">BG</span>
+                <PaintBucket className="w-2.5 h-2.5 sm:w-3 sm:h-3" />
+                BG
               </button>
             </div>
 
             {/* Color palette - wrapping grid */}
-            <div className="flex flex-wrap gap-1">
+            <div className="flex flex-wrap gap-0.5 sm:gap-1">
               {(colorMode === 'brush' ? BRUSH_COLORS : BG_COLORS).map((color) => (
                 <button
                   key={color}
                   onClick={() => colorMode === 'brush' ? setBrushColor(color) : handleBackgroundChange(color)}
-                  className={`w-5 h-5 rounded border-2 transition-all hover:scale-110 ${
+                  className={`w-4 h-4 sm:w-5 sm:h-5 rounded border-2 transition-all hover:scale-110 ${
                     (colorMode === 'brush' ? brushColor : backgroundColor) === color
                       ? 'border-foreground scale-105'
                       : 'border-transparent'
@@ -484,27 +483,27 @@ const DrawingCanvas = ({ onSubmit, isSubmitting, cooldownTimeLeft, formatCooldow
                 type="color"
                 value={colorMode === 'brush' ? brushColor : backgroundColor}
                 onChange={(e) => colorMode === 'brush' ? setBrushColor(e.target.value) : handleBackgroundChange(e.target.value)}
-                className="w-5 h-5 rounded cursor-pointer"
+                className="w-4 h-4 sm:w-5 sm:h-5 rounded cursor-pointer"
               />
             </div>
           </div>
 
           {/* Brush size - compact */}
-          <div className="bg-muted/20 rounded-xl p-2 border border-border/30 flex landscape:flex-col items-center gap-2">
-            <span className="text-[10px] text-muted-foreground whitespace-nowrap">{brushSize}px</span>
+          <div className="bg-muted/20 rounded-lg sm:rounded-xl p-1.5 sm:p-2 border border-border/30 flex flex-col items-center justify-center gap-1 sm:gap-2 min-w-[60px] sm:min-w-[70px]">
+            <span className="text-[8px] sm:text-[10px] text-muted-foreground whitespace-nowrap">{brushSize}px</span>
             <input
               type="range"
               min="1"
               max="30"
               value={brushSize}
               onChange={(e) => setBrushSize(Number(e.target.value))}
-              className="w-16 landscape:w-full h-1.5 bg-muted rounded appearance-none cursor-pointer"
+              className="w-full h-1 sm:h-1.5 bg-muted rounded appearance-none cursor-pointer"
             />
             <div 
               className="rounded-full border border-border/50 shrink-0"
               style={{ 
-                width: Math.max(10, Math.min(brushSize, 20)), 
-                height: Math.max(10, Math.min(brushSize, 20)), 
+                width: Math.max(8, Math.min(brushSize, 18)), 
+                height: Math.max(8, Math.min(brushSize, 18)), 
                 backgroundColor: brushColor 
               }}
             />
@@ -512,21 +511,21 @@ const DrawingCanvas = ({ onSubmit, isSubmitting, cooldownTimeLeft, formatCooldow
         </div>
 
         {/* Caption + Submit row */}
-        <div className="flex landscape:flex-col gap-2">
+        <div className="flex gap-1.5 sm:gap-2">
           <Input
             value={caption}
             onChange={(e) => setCaption(e.target.value)}
             placeholder="caption..."
             maxLength={100}
-            className="flex-1 h-8 text-xs bg-background/50"
+            className="flex-1 h-7 sm:h-8 text-[10px] sm:text-xs bg-background/50"
           />
           <Button
             onClick={handleSubmit}
             disabled={isSubmitting || cooldownTimeLeft > 0}
             size="sm"
-            className="h-8 px-3 whitespace-nowrap"
+            className="h-7 sm:h-8 px-2 sm:px-3 whitespace-nowrap text-[10px] sm:text-xs"
           >
-            <Send className="w-3 h-3 mr-1.5" />
+            <Send className="w-2.5 h-2.5 sm:w-3 sm:h-3 mr-1 sm:mr-1.5" />
             {isSubmitting ? '...' : cooldownTimeLeft > 0 ? formatCooldownTime(cooldownTimeLeft) : 'send'}
           </Button>
         </div>
