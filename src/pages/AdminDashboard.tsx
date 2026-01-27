@@ -544,24 +544,6 @@ const AdminDashboard = () => {
     const titleText = isMessage ? 'Message Submission' : 'Drawing Submission';
     ctx.fillText(titleText, contentX + 52, cursorY - 6);
 
-    const badgesFont = '600 18px "Inter","DM Sans",sans-serif';
-    ctx.font = badgesFont;
-    const statusText = submission.is_approved ? 'approved' : 'pending';
-    const statusColors = submission.is_approved
-      ? { background: 'rgba(74,222,128,0.16)', foreground: '#8ff5c7' }
-      : { background: 'rgba(246,236,255,0.12)', foreground: '#e3d4ff' };
-    const idText = `#${submission.id.slice(0, 6)}`;
-    const idColors = { background: 'rgba(255,255,255,0.08)', foreground: '#c7bdf3' };
-
-    const badgeSpacing = 14;
-    const statusWidth = measureBadgeWidth(ctx, statusText);
-    const idWidth = measureBadgeWidth(ctx, idText);
-    const badgesTotalWidth = statusWidth + badgeSpacing + idWidth;
-    const badgesStartX = cardX + cardWidth - innerPadding - badgesTotalWidth;
-
-    drawBadge(ctx, statusText, badgesStartX, cursorY, statusColors);
-    drawBadge(ctx, idText, badgesStartX + statusWidth + badgeSpacing, cursorY, idColors);
-
     cursorY += Math.max(iconSize, titleFontSize) + headerSpacing;
 
     const submittedAt = submission.submitted_at
