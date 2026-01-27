@@ -1,4 +1,5 @@
 import { useState, useRef, useEffect } from 'react';
+import { Link, useLocation } from 'react-router-dom';
 import { gsap } from 'gsap';
 import { Send, Palette, MessageCircle } from 'lucide-react';
 import { supabase } from '@/integrations/supabase/client';
@@ -8,8 +9,9 @@ import DrawingCanvas from '@/components/DrawingCanvas';
 
 const ContactPage = () => {
   const formRef = useRef<HTMLDivElement>(null);
+  const location = useLocation();
 
-  const [activeTab, setActiveTab] = useState<'message' | 'drawing'>('message');
+  const [activeTab, setActiveTab] = useState<'message' | 'drawing'>('drawing');
   const [message, setMessage] = useState('');
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [signatureEnabled, setSignatureEnabled] = useState(false);
@@ -18,6 +20,26 @@ const ContactPage = () => {
   const [signatureFont, setSignatureFont] = useState('dancing');
   const [cooldownTimeLeft, setCooldownTimeLeft] = useState(0);
   const [submitSuccess, setSubmitSuccess] = useState(false);
+  const [isLandscape, setIsLandscape] = useState(false);
+
+  // Detect landscape orientation - use aspect ratio > 1.3 and max height 600px for mobile landscape
+  useEffect(() => {
+    const checkLandscape = () => {
+      const aspectRatio = window.innerWidth / window.innerHeight;
+      const isMobileSize = window.innerHeight < 600;
+      const landscape = aspectRatio > 1.3 && isMobileSize;
+      setIsLandscape(landscape);
+    };
+    
+    checkLandscape();
+    window.addEventListener('resize', checkLandscape);
+    window.addEventListener('orientationchange', checkLandscape);
+    
+    return () => {
+      window.removeEventListener('resize', checkLandscape);
+      window.removeEventListener('orientationchange', checkLandscape);
+    };
+  }, []);
 
   const signatureEndingOptions = ['thanks', 'with love', 'xoxo', 'best wishes', 'warmly', 'cheers', 'yours truly'];
   const fontOptions = [
@@ -122,6 +144,70 @@ const ContactPage = () => {
 
     setIsSubmitting(false);
   };
+
+  // Landscape mode: minimal fullscreen layout
+  if (isLandscape && activeTab === 'drawing') {
+    return (
+      <div className="fixed inset-0 z-[90] bg-background flex flex-col">
+        {/* Minimal top bar with tabs and navigation */}
+        <div className="shrink-0 flex items-center justify-between px-3 py-1.5 bg-background/95 backdrop-blur-sm border-b border-border/30">
+          <div className="flex gap-1.5">
+            <button
+              onClick={() => setActiveTab('message')}
+              className={`flex items-center gap-1 px-2 py-0.5 text-[9px] font-mono lowercase rounded transition-all ${
+                activeTab === 'message'
+                  ? 'bg-foreground text-background'
+                  : 'bg-muted/30 text-muted-foreground hover:text-foreground'
+              }`}
+            >
+              <MessageCircle className="w-2.5 h-2.5" />
+              message
+            </button>
+            <button
+              onClick={() => setActiveTab('drawing')}
+              className={`flex items-center gap-1 px-2 py-0.5 text-[9px] font-mono lowercase rounded transition-all ${
+                activeTab === 'drawing'
+                  ? 'bg-foreground text-background'
+                  : 'bg-muted/30 text-muted-foreground hover:text-foreground'
+              }`}
+            >
+              <Palette className="w-2.5 h-2.5" />
+              drawing
+            </button>
+          </div>
+          
+          {/* Navigation links */}
+          <div className="flex items-center gap-2">
+            <Link 
+              to="/" 
+              className="text-[9px] font-mono text-muted-foreground hover:text-foreground transition-colors"
+            >
+              home
+            </Link>
+            <Link 
+              to="/portfolio" 
+              className="text-[9px] font-mono text-muted-foreground hover:text-foreground transition-colors"
+            >
+              portfolio
+            </Link>
+            <span className="text-[9px] font-mono text-foreground bg-foreground/10 px-1.5 py-0.5 rounded">
+              say hi
+            </span>
+          </div>
+        </div>
+        
+        {/* Drawing canvas takes rest of screen */}
+        <div className="flex-1 min-h-0 p-2">
+          <DrawingCanvas
+            onSubmit={handleDrawingSubmit}
+            isSubmitting={isSubmitting}
+            cooldownTimeLeft={cooldownTimeLeft}
+            formatCooldownTime={formatCooldownTime}
+          />
+        </div>
+      </div>
+    );
+  }
 
   return (
     <PageLayout title="say hi">

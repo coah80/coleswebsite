@@ -507,26 +507,28 @@ const AdminDashboard = () => {
     }
     ctx.textBaseline = 'top';
 
-    ctx.fillStyle = '#05030d';
+    // Background - deep purple/navy (matches --background: 260 30% 6%)
+    ctx.fillStyle = '#0d0a14';
     ctx.fillRect(0, 0, canvasWidth, canvasHeight);
 
     const cardX = outerPadding;
     const cardY = outerPadding;
 
     ctx.save();
-    ctx.shadowColor = 'rgba(7, 4, 17, 0.65)';
+    ctx.shadowColor = 'rgba(20, 10, 40, 0.7)';
     ctx.shadowBlur = 48;
     ctx.shadowOffsetY = 24;
     drawRoundedRect(ctx, cardX, cardY, cardWidth, cardHeight, 40);
+    // Card gradient - purple tinted (matches --card: 260 25% 9%)
     const gradient = ctx.createLinearGradient(cardX, cardY, cardX + cardWidth, cardY + cardHeight);
-    gradient.addColorStop(0, '#130f1a');
-    gradient.addColorStop(1, '#1c1726');
+    gradient.addColorStop(0, '#15111f');
+    gradient.addColorStop(1, '#1a1526');
     ctx.fillStyle = gradient;
     ctx.fill();
     ctx.restore();
 
     ctx.lineWidth = 2;
-    ctx.strokeStyle = 'rgba(255,255,255,0.06)';
+    ctx.strokeStyle = 'rgba(147, 112, 219, 0.08)';
     drawRoundedRect(ctx, cardX, cardY, cardWidth, cardHeight, 40);
     ctx.stroke();
 
@@ -575,11 +577,12 @@ const AdminDashboard = () => {
     const contentRadius = 32;
 
     ctx.save();
-    ctx.fillStyle = 'rgba(8,7,15,0.85)';
+    // Content box - darker purple (matches --muted: 260 20% 16%)
+    ctx.fillStyle = 'rgba(13, 10, 20, 0.9)';
     drawRoundedRect(ctx, contentX, contentBoxY, contentWidth, contentBoxHeight, contentRadius);
     ctx.fill();
 
-    ctx.strokeStyle = 'rgba(255,255,255,0.05)';
+    ctx.strokeStyle = 'rgba(147, 112, 219, 0.06)';
     ctx.lineWidth = 1.5;
     drawRoundedRect(ctx, contentX, contentBoxY, contentWidth, contentBoxHeight, contentRadius);
     ctx.stroke();
@@ -652,11 +655,11 @@ const AdminDashboard = () => {
       }
     }
 
-    // Footer call-to-action: "Submit your own at cole.ong!" with highlighted domain
+    // Footer call-to-action: "Submit your own at coah80.com!" with highlighted domain
     {
       const footerFontSize = 18;
       const prefix = 'Submit your own at ';
-      const highlight = 'cole.ong';
+      const highlight = 'coah80.com';
       const suffix = '!';
       const footerGap = 16;
 
@@ -667,8 +670,8 @@ const AdminDashboard = () => {
       ctx.font = `600 ${footerFontSize}px ${textFont}`;
       ctx.textBaseline = 'alphabetic';
 
-      // Light divider to separate footer area
-      ctx.strokeStyle = 'rgba(168, 85, 247, 0.25)';
+      // Light divider to separate footer area - purple accent
+      ctx.strokeStyle = 'rgba(147, 112, 219, 0.3)';
       ctx.lineWidth = 1;
       ctx.beginPath();
       ctx.moveTo(cardX, footerSeparatorY);
@@ -693,10 +696,10 @@ const AdminDashboard = () => {
       ctx.fillStyle = 'rgba(226, 220, 255, 0.9)';
       ctx.fillText(prefix, startX, footerY);
 
-      // Draw pill background for the domain
+      // Draw pill background for the domain - purple accent
       const pillX = startX + prefixWidth + 5;
       const pillYTop = footerY - footerFontSize + pillTextYAdjust - (pillHeight - footerFontSize) / 2;
-      ctx.fillStyle = 'rgba(168, 85, 247, 0.22)';
+      ctx.fillStyle = 'rgba(147, 112, 219, 0.25)';
       drawRoundedRect(ctx, pillX, pillYTop, pillWidth, pillHeight, pillRadius);
       ctx.fill();
 

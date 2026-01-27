@@ -11,10 +11,14 @@ import {
   Layers, 
   Send,
   Paintbrush,
-  PaintBucket
+  PaintBucket,
+  ChevronUp,
+  ChevronDown,
+  Settings2
 } from 'lucide-react';
 
-const CANVAS_SIZE = 512; // Square canvas
+const CANVAS_WIDTH = 960;  // 16:9 aspect ratio
+const CANVAS_HEIGHT = 540;
 const HISTORY_LIMIT = 50;
 
 // Preset colors
@@ -62,6 +66,9 @@ const DrawingCanvas = ({ onSubmit, isSubmitting, cooldownTimeLeft, formatCooldow
   const [brushSize, setBrushSize] = useState(4);
   const [colorMode, setColorMode] = useState<'brush' | 'background'>('brush');
   const [caption, setCaption] = useState('');
+  const [isLandscape, setIsLandscape] = useState(false);
+  const [toolbarExpanded, setToolbarExpanded] = useState(true);
+  const [hasUserToggledToolbar, setHasUserToggledToolbar] = useState(false);
   
   // History state
   const [history, setHistory] = useState<HistoryState[]>([]);
@@ -74,16 +81,39 @@ const DrawingCanvas = ({ onSubmit, isSubmitting, cooldownTimeLeft, formatCooldow
   const lastPointRef = useRef<{ x: number; y: number } | null>(null);
   const activePointerIdRef = useRef<number | null>(null);
 
+  // Detect landscape orientation and auto-collapse toolbar
+  useEffect(() => {
+    const checkLandscape = () => {
+      const aspectRatio = window.innerWidth / window.innerHeight;
+      const isMobileSize = window.innerHeight < 600;
+      const landscape = aspectRatio > 1.3 && isMobileSize;
+      setIsLandscape(landscape);
+      // Auto-collapse toolbar in landscape if user hasn't manually toggled
+      if (!hasUserToggledToolbar) {
+        setToolbarExpanded(!landscape);
+      }
+    };
+    
+    checkLandscape();
+    window.addEventListener('resize', checkLandscape);
+    window.addEventListener('orientationchange', checkLandscape);
+    
+    return () => {
+      window.removeEventListener('resize', checkLandscape);
+      window.removeEventListener('orientationchange', checkLandscape);
+    };
+  }, [hasUserToggledToolbar]);
+
   // Initialize layer canvases
   useEffect(() => {
     layerCanvasRefs.current = layerCanvasRefs.current.map((existing, i) => {
       if (existing) return existing;
       const canvas = document.createElement('canvas');
-      canvas.width = CANVAS_SIZE;
-      canvas.height = CANVAS_SIZE;
+      canvas.width = CANVAS_WIDTH;
+      canvas.height = CANVAS_HEIGHT;
       const ctx = canvas.getContext('2d');
       if (ctx) {
-        ctx.clearRect(0, 0, CANVAS_SIZE, CANVAS_SIZE);
+        ctx.clearRect(0, 0, CANVAS_WIDTH, CANVAS_HEIGHT);
       }
       return canvas;
     });
@@ -108,7 +138,7 @@ const DrawingCanvas = ({ onSubmit, isSubmitting, cooldownTimeLeft, formatCooldow
     
     // Clear and draw background
     ctx.fillStyle = backgroundColor;
-    ctx.fillRect(0, 0, CANVAS_SIZE, CANVAS_SIZE);
+    ctx.fillRect(0, 0, CANVAS_WIDTH, CANVAS_HEIGHT);
     
     // Draw each visible layer
     layers.forEach((layer, index) => {
@@ -131,7 +161,7 @@ const DrawingCanvas = ({ onSubmit, isSubmitting, cooldownTimeLeft, formatCooldow
       if (canvas) {
         const ctx = canvas.getContext('2d');
         if (ctx) {
-          layerSnapshots.push(ctx.getImageData(0, 0, CANVAS_SIZE, CANVAS_SIZE));
+          layerSnapshots.push(ctx.getImageData(0, 0, CANVAS_WIDTH, CANVAS_HEIGHT));
         }
       }
     });
@@ -195,8 +225,8 @@ const DrawingCanvas = ({ onSubmit, isSubmitting, cooldownTimeLeft, formatCooldow
     if (!canvas) return { x: 0, y: 0 };
     
     const rect = canvas.getBoundingClientRect();
-    const scaleX = CANVAS_SIZE / rect.width;
-    const scaleY = CANVAS_SIZE / rect.height;
+    const scaleX = CANVAS_WIDTH / rect.width;
+    const scaleY = CANVAS_HEIGHT / rect.height;
     
     return {
       x: (event.clientX - rect.left) * scaleX,
@@ -289,7 +319,7 @@ const DrawingCanvas = ({ onSubmit, isSubmitting, cooldownTimeLeft, formatCooldow
     
     const ctx = layerCanvas.getContext('2d');
     if (ctx) {
-      ctx.clearRect(0, 0, CANVAS_SIZE, CANVAS_SIZE);
+      ctx.clearRect(0, 0, CANVAS_WIDTH, CANVAS_HEIGHT);
       renderToDisplay();
       saveToHistory();
     }
@@ -301,7 +331,7 @@ const DrawingCanvas = ({ onSubmit, isSubmitting, cooldownTimeLeft, formatCooldow
       if (canvas) {
         const ctx = canvas.getContext('2d');
         if (ctx) {
-          ctx.clearRect(0, 0, CANVAS_SIZE, CANVAS_SIZE);
+          ctx.clearRect(0, 0, CANVAS_WIDTH, CANVAS_HEIGHT);
         }
       }
     });
@@ -326,15 +356,15 @@ const DrawingCanvas = ({ onSubmit, isSubmitting, cooldownTimeLeft, formatCooldow
   // Export final image
   const exportImage = useCallback(() => {
     const exportCanvas = document.createElement('canvas');
-    exportCanvas.width = CANVAS_SIZE;
-    exportCanvas.height = CANVAS_SIZE;
+    exportCanvas.width = CANVAS_WIDTH;
+    exportCanvas.height = CANVAS_HEIGHT;
     const ctx = exportCanvas.getContext('2d');
     
     if (!ctx) return '';
     
     // Draw background
     ctx.fillStyle = backgroundColor;
-    ctx.fillRect(0, 0, CANVAS_SIZE, CANVAS_SIZE);
+    ctx.fillRect(0, 0, CANVAS_WIDTH, CANVAS_HEIGHT);
     
     // Draw all visible layers
     layers.forEach((layer, index) => {
@@ -361,15 +391,19 @@ const DrawingCanvas = ({ onSubmit, isSubmitting, cooldownTimeLeft, formatCooldow
   const canRedo = historyIndex < history.length - 1;
 
   return (
-    <div className="flex flex-col gap-2 sm:gap-3 h-full flex-1 min-h-0">
-      {/* Canvas - takes most space */}
-      <div className="flex-1 flex items-center justify-center min-h-0 min-w-0">
-        <div className="relative aspect-square w-full max-w-full max-h-full">
+    <div className="relative flex flex-col h-full flex-1 min-h-0">
+      {/* Canvas - fixed size, not affected by toolbar */}
+      <div className={`flex-1 flex items-center justify-center min-h-0 min-w-0 ${isLandscape ? '' : 'pb-2 md:pb-0'}`}>
+        <div className={`relative aspect-video ${isLandscape ? 'h-full w-auto' : 'w-full'} max-w-full max-h-full`}>
           <canvas
             ref={displayCanvasRef}
-            width={CANVAS_SIZE}
-            height={CANVAS_SIZE}
-            className="w-full h-full border border-border/50 rounded-lg sm:rounded-xl cursor-crosshair shadow-lg bg-white"
+            width={CANVAS_WIDTH}
+            height={CANVAS_HEIGHT}
+            className={`w-full h-full cursor-crosshair bg-white ${
+              isLandscape 
+                ? 'rounded-lg' 
+                : 'border border-border/50 rounded-lg sm:rounded-xl shadow-lg'
+            }`}
             style={{ touchAction: 'none' }}
             onPointerDown={beginStroke}
             onPointerMove={extendStroke}
@@ -383,23 +417,209 @@ const DrawingCanvas = ({ onSubmit, isSubmitting, cooldownTimeLeft, formatCooldow
         </div>
       </div>
 
-      {/* Toolbar - always below on mobile */}
-      <div className="shrink-0 flex flex-col gap-1.5 sm:gap-2 max-h-[45%] overflow-y-auto pb-2">
-        {/* Top row: layers + actions */}
-        <div className="flex gap-1.5 sm:gap-2">
-          {/* Layers panel */}
-          <div className="flex-1 bg-muted/20 rounded-lg sm:rounded-xl p-1.5 sm:p-2 border border-border/30">
-            <div className="flex items-center gap-1 sm:gap-1.5 mb-1 sm:mb-1.5">
-              <Layers className="w-2.5 h-2.5 sm:w-3 sm:h-3 text-muted-foreground" />
-              <span className="text-[8px] sm:text-[10px] font-medium uppercase tracking-wide">Layers</span>
+      {/* Mobile: Fixed overlay toolbar at bottom of screen */}
+      <div className={`md:hidden fixed z-[110] flex flex-col ${isLandscape ? 'bottom-2 right-2 left-auto' : 'bottom-0 left-0 right-0'}`}>
+        {/* Toggle button */}
+        <button
+          onClick={() => {
+            setHasUserToggledToolbar(true);
+            setToolbarExpanded(!toolbarExpanded);
+          }}
+          className={`flex items-center justify-center gap-1.5 py-2 bg-background/95 backdrop-blur-sm transition-all ${
+            isLandscape 
+              ? 'rounded-full px-3 shadow-lg border border-border/50' 
+              : 'w-full border-t border-border/50'
+          }`}
+        >
+          <Settings2 className="w-4 h-4 text-muted-foreground" />
+          {!isLandscape && (
+            <>
+              <span className="text-xs text-muted-foreground font-medium">
+                {toolbarExpanded ? 'Hide Tools' : 'Show Tools'}
+              </span>
+              {toolbarExpanded ? (
+                <ChevronDown className="w-4 h-4 text-muted-foreground" />
+              ) : (
+                <ChevronUp className="w-4 h-4 text-muted-foreground" />
+              )}
+            </>
+          )}
+        </button>
+
+        {/* Expandable toolbar content - overlays canvas */}
+        <div 
+          className={`overflow-hidden transition-all duration-300 ease-in-out bg-background/95 backdrop-blur-sm ${
+            toolbarExpanded 
+              ? isLandscape ? 'max-h-[80vh] max-w-[90vw] border border-border/50 shadow-xl' : 'max-h-[60vh]' 
+              : 'max-h-0 border-0'
+          } ${isLandscape ? 'absolute bottom-full right-0 mb-2 rounded-xl' : ''}`}
+        >
+          <div className={`flex flex-col gap-1.5 p-3 ${isLandscape ? 'pb-3' : 'pb-6 border-t border-border/30'}`}>
+            {/* Top row: layers + actions */}
+            <div className="flex gap-1.5">
+              {/* Layers panel */}
+              <div className="flex-1 bg-muted/30 rounded-lg p-1.5 border border-border/20">
+                <div className="flex items-center gap-1 mb-1">
+                  <Layers className="w-3 h-3 text-muted-foreground" />
+                  <span className="text-[9px] font-medium uppercase tracking-wide">Layers</span>
+                </div>
+                <div className="flex gap-1">
+                  {[...layers].reverse().map((layer, reversedIndex) => {
+                    const index = layers.length - 1 - reversedIndex;
+                    return (
+                      <div
+                        key={layer.id}
+                        className={`flex items-center gap-1 px-2 py-1 rounded-md cursor-pointer transition-colors ${
+                          activeLayer === index 
+                            ? 'bg-accent/30 text-foreground' 
+                            : 'hover:bg-muted/40 text-muted-foreground'
+                        }`}
+                        onClick={() => setActiveLayer(index)}
+                      >
+                        <button
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            toggleLayerVisibility(index);
+                          }}
+                          className="hover:bg-muted/50 rounded p-0.5"
+                        >
+                          {layer.visible ? (
+                            <Eye className="w-3 h-3" />
+                          ) : (
+                            <EyeOff className="w-3 h-3 opacity-50" />
+                          )}
+                        </button>
+                        <span className="text-[9px]">{index + 1}</span>
+                      </div>
+                    );
+                  })}
+                </div>
+              </div>
+
+              {/* Actions */}
+              <div className="flex gap-1">
+                <Button variant="secondary" size="sm" onClick={undo} disabled={!canUndo} className="h-8 w-8 p-0">
+                  <Undo2 className="w-4 h-4" />
+                </Button>
+                <Button variant="secondary" size="sm" onClick={redo} disabled={!canRedo} className="h-8 w-8 p-0">
+                  <Redo2 className="w-4 h-4" />
+                </Button>
+                <Button variant="secondary" size="sm" onClick={clearActiveLayer} className="h-8 w-8 p-0" title="Clear layer">
+                  <Trash2 className="w-4 h-4" />
+                </Button>
+              </div>
             </div>
-            <div className="flex gap-0.5 sm:gap-1">
+
+            {/* Color controls row */}
+            <div className="flex gap-1.5">
+              {/* Color mode + palette */}
+              <div className="flex-1 bg-muted/30 rounded-lg p-1.5 border border-border/20">
+                <div className="flex gap-1 mb-1.5">
+                  <button
+                    onClick={() => setColorMode('brush')}
+                    className={`flex-1 flex items-center justify-center gap-1 px-2 py-1 rounded-md text-[9px] transition-colors ${
+                      colorMode === 'brush' ? 'bg-foreground text-background' : 'bg-muted/30 text-muted-foreground hover:text-foreground'
+                    }`}
+                  >
+                    <Paintbrush className="w-3 h-3" />
+                    Brush
+                  </button>
+                  <button
+                    onClick={() => setColorMode('background')}
+                    className={`flex-1 flex items-center justify-center gap-1 px-2 py-1 rounded-md text-[9px] transition-colors ${
+                      colorMode === 'background' ? 'bg-foreground text-background' : 'bg-muted/30 text-muted-foreground hover:text-foreground'
+                    }`}
+                  >
+                    <PaintBucket className="w-3 h-3" />
+                    BG
+                  </button>
+                </div>
+
+                {/* Color palette */}
+                <div className="flex flex-wrap gap-1">
+                  {(colorMode === 'brush' ? BRUSH_COLORS : BG_COLORS).map((color) => (
+                    <button
+                      key={color}
+                      onClick={() => colorMode === 'brush' ? setBrushColor(color) : handleBackgroundChange(color)}
+                      className={`w-5 h-5 rounded border-2 transition-all hover:scale-110 ${
+                        (colorMode === 'brush' ? brushColor : backgroundColor) === color
+                          ? 'border-foreground scale-105'
+                          : 'border-transparent'
+                      }`}
+                      style={{ backgroundColor: color }}
+                    />
+                  ))}
+                  <input
+                    type="color"
+                    value={colorMode === 'brush' ? brushColor : backgroundColor}
+                    onChange={(e) => colorMode === 'brush' ? setBrushColor(e.target.value) : handleBackgroundChange(e.target.value)}
+                    className="w-5 h-5 rounded cursor-pointer"
+                  />
+                </div>
+              </div>
+
+              {/* Brush size */}
+              <div className="bg-muted/30 rounded-lg p-1.5 border border-border/20 flex flex-col items-center justify-center gap-1 min-w-[65px]">
+                <span className="text-[9px] text-muted-foreground">{brushSize}px</span>
+                <input
+                  type="range"
+                  min="1"
+                  max="30"
+                  value={brushSize}
+                  onChange={(e) => setBrushSize(Number(e.target.value))}
+                  className="w-full h-1.5 bg-muted rounded appearance-none cursor-pointer"
+                />
+                <div 
+                  className="rounded-full border border-border/50 shrink-0"
+                  style={{ 
+                    width: Math.max(8, Math.min(brushSize, 18)), 
+                    height: Math.max(8, Math.min(brushSize, 18)), 
+                    backgroundColor: brushColor 
+                  }}
+                />
+              </div>
+            </div>
+
+            {/* Caption + Submit row */}
+            <div className="flex gap-1.5">
+              <Input
+                value={caption}
+                onChange={(e) => setCaption(e.target.value)}
+                placeholder="caption..."
+                maxLength={100}
+                className="flex-1 h-8 text-xs bg-background/50"
+              />
+              <Button
+                onClick={handleSubmit}
+                disabled={isSubmitting || cooldownTimeLeft > 0}
+                size="sm"
+                className="h-8 px-3 whitespace-nowrap text-xs"
+              >
+                <Send className="w-3 h-3 mr-1.5" />
+                {isSubmitting ? '...' : cooldownTimeLeft > 0 ? formatCooldownTime(cooldownTimeLeft) : 'send'}
+              </Button>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      {/* Desktop: Normal toolbar below canvas */}
+      <div className="hidden md:flex shrink-0 flex-col gap-2 pt-3">
+        {/* Top row: layers + actions */}
+        <div className="flex gap-2">
+          {/* Layers panel */}
+          <div className="flex-1 bg-muted/20 rounded-xl p-2 border border-border/30">
+            <div className="flex items-center gap-1.5 mb-1.5">
+              <Layers className="w-3 h-3 text-muted-foreground" />
+              <span className="text-[10px] font-medium uppercase tracking-wide">Layers</span>
+            </div>
+            <div className="flex gap-1">
               {[...layers].reverse().map((layer, reversedIndex) => {
                 const index = layers.length - 1 - reversedIndex;
                 return (
                   <div
                     key={layer.id}
-                    className={`flex items-center gap-1 sm:gap-1.5 px-1.5 sm:px-2 py-0.5 sm:py-1 rounded-md sm:rounded-lg cursor-pointer transition-colors ${
+                    className={`flex items-center gap-1.5 px-2 py-1 rounded-lg cursor-pointer transition-colors ${
                       activeLayer === index 
                         ? 'bg-accent/30 text-foreground' 
                         : 'hover:bg-muted/40 text-muted-foreground'
@@ -414,12 +634,12 @@ const DrawingCanvas = ({ onSubmit, isSubmitting, cooldownTimeLeft, formatCooldow
                       className="hover:bg-muted/50 rounded p-0.5"
                     >
                       {layer.visible ? (
-                        <Eye className="w-2.5 h-2.5 sm:w-3 sm:h-3" />
+                        <Eye className="w-3 h-3" />
                       ) : (
-                        <EyeOff className="w-2.5 h-2.5 sm:w-3 sm:h-3 opacity-50" />
+                        <EyeOff className="w-3 h-3 opacity-50" />
                       )}
                     </button>
-                    <span className="text-[8px] sm:text-[10px]">{index + 1}</span>
+                    <span className="text-[10px]">{index + 1}</span>
                   </div>
                 );
               })}
@@ -427,51 +647,51 @@ const DrawingCanvas = ({ onSubmit, isSubmitting, cooldownTimeLeft, formatCooldow
           </div>
 
           {/* Actions */}
-          <div className="flex gap-0.5 sm:gap-1">
-            <Button variant="secondary" size="sm" onClick={undo} disabled={!canUndo} className="h-7 w-7 sm:h-8 sm:w-8 p-0">
-              <Undo2 className="w-3 h-3 sm:w-4 sm:h-4" />
+          <div className="flex gap-1">
+            <Button variant="secondary" size="sm" onClick={undo} disabled={!canUndo} className="h-8 w-8 p-0">
+              <Undo2 className="w-4 h-4" />
             </Button>
-            <Button variant="secondary" size="sm" onClick={redo} disabled={!canRedo} className="h-7 w-7 sm:h-8 sm:w-8 p-0">
-              <Redo2 className="w-3 h-3 sm:w-4 sm:h-4" />
+            <Button variant="secondary" size="sm" onClick={redo} disabled={!canRedo} className="h-8 w-8 p-0">
+              <Redo2 className="w-4 h-4" />
             </Button>
-            <Button variant="secondary" size="sm" onClick={clearActiveLayer} className="h-7 w-7 sm:h-8 sm:w-8 p-0" title="Clear layer">
-              <Trash2 className="w-3 h-3 sm:w-4 sm:h-4" />
+            <Button variant="secondary" size="sm" onClick={clearActiveLayer} className="h-8 w-8 p-0" title="Clear layer">
+              <Trash2 className="w-4 h-4" />
             </Button>
           </div>
         </div>
 
         {/* Color controls row */}
-        <div className="flex gap-1.5 sm:gap-2">
+        <div className="flex gap-2">
           {/* Color mode + palette */}
-          <div className="flex-1 bg-muted/20 rounded-lg sm:rounded-xl p-1.5 sm:p-2 border border-border/30">
-            <div className="flex gap-0.5 sm:gap-1 mb-1.5 sm:mb-2">
+          <div className="flex-1 bg-muted/20 rounded-xl p-2 border border-border/30">
+            <div className="flex gap-1 mb-2">
               <button
                 onClick={() => setColorMode('brush')}
-                className={`flex-1 flex items-center justify-center gap-0.5 sm:gap-1 px-1.5 sm:px-2 py-0.5 sm:py-1 rounded-md sm:rounded-lg text-[8px] sm:text-[10px] transition-colors ${
+                className={`flex-1 flex items-center justify-center gap-1 px-2 py-1 rounded-lg text-[10px] transition-colors ${
                   colorMode === 'brush' ? 'bg-foreground text-background' : 'bg-muted/30 text-muted-foreground hover:text-foreground'
                 }`}
               >
-                <Paintbrush className="w-2.5 h-2.5 sm:w-3 sm:h-3" />
+                <Paintbrush className="w-3 h-3" />
                 Brush
               </button>
               <button
                 onClick={() => setColorMode('background')}
-                className={`flex-1 flex items-center justify-center gap-0.5 sm:gap-1 px-1.5 sm:px-2 py-0.5 sm:py-1 rounded-md sm:rounded-lg text-[8px] sm:text-[10px] transition-colors ${
+                className={`flex-1 flex items-center justify-center gap-1 px-2 py-1 rounded-lg text-[10px] transition-colors ${
                   colorMode === 'background' ? 'bg-foreground text-background' : 'bg-muted/30 text-muted-foreground hover:text-foreground'
                 }`}
               >
-                <PaintBucket className="w-2.5 h-2.5 sm:w-3 sm:h-3" />
+                <PaintBucket className="w-3 h-3" />
                 BG
               </button>
             </div>
 
-            {/* Color palette - wrapping grid */}
-            <div className="flex flex-wrap gap-0.5 sm:gap-1">
+            {/* Color palette */}
+            <div className="flex flex-wrap gap-1">
               {(colorMode === 'brush' ? BRUSH_COLORS : BG_COLORS).map((color) => (
                 <button
                   key={color}
                   onClick={() => colorMode === 'brush' ? setBrushColor(color) : handleBackgroundChange(color)}
-                  className={`w-4 h-4 sm:w-5 sm:h-5 rounded border-2 transition-all hover:scale-110 ${
+                  className={`w-5 h-5 rounded border-2 transition-all hover:scale-110 ${
                     (colorMode === 'brush' ? brushColor : backgroundColor) === color
                       ? 'border-foreground scale-105'
                       : 'border-transparent'
@@ -483,21 +703,21 @@ const DrawingCanvas = ({ onSubmit, isSubmitting, cooldownTimeLeft, formatCooldow
                 type="color"
                 value={colorMode === 'brush' ? brushColor : backgroundColor}
                 onChange={(e) => colorMode === 'brush' ? setBrushColor(e.target.value) : handleBackgroundChange(e.target.value)}
-                className="w-4 h-4 sm:w-5 sm:h-5 rounded cursor-pointer"
+                className="w-5 h-5 rounded cursor-pointer"
               />
             </div>
           </div>
 
-          {/* Brush size - compact */}
-          <div className="bg-muted/20 rounded-lg sm:rounded-xl p-1.5 sm:p-2 border border-border/30 flex flex-col items-center justify-center gap-1 sm:gap-2 min-w-[60px] sm:min-w-[70px]">
-            <span className="text-[8px] sm:text-[10px] text-muted-foreground whitespace-nowrap">{brushSize}px</span>
+          {/* Brush size */}
+          <div className="bg-muted/20 rounded-xl p-2 border border-border/30 flex flex-col items-center justify-center gap-2 min-w-[70px]">
+            <span className="text-[10px] text-muted-foreground">{brushSize}px</span>
             <input
               type="range"
               min="1"
               max="30"
               value={brushSize}
               onChange={(e) => setBrushSize(Number(e.target.value))}
-              className="w-full h-1 sm:h-1.5 bg-muted rounded appearance-none cursor-pointer"
+              className="w-full h-1.5 bg-muted rounded appearance-none cursor-pointer"
             />
             <div 
               className="rounded-full border border-border/50 shrink-0"
@@ -511,21 +731,21 @@ const DrawingCanvas = ({ onSubmit, isSubmitting, cooldownTimeLeft, formatCooldow
         </div>
 
         {/* Caption + Submit row */}
-        <div className="flex gap-1.5 sm:gap-2">
+        <div className="flex gap-2">
           <Input
             value={caption}
             onChange={(e) => setCaption(e.target.value)}
             placeholder="caption..."
             maxLength={100}
-            className="flex-1 h-7 sm:h-8 text-[10px] sm:text-xs bg-background/50"
+            className="flex-1 h-8 text-xs bg-background/50"
           />
           <Button
             onClick={handleSubmit}
             disabled={isSubmitting || cooldownTimeLeft > 0}
             size="sm"
-            className="h-7 sm:h-8 px-2 sm:px-3 whitespace-nowrap text-[10px] sm:text-xs"
+            className="h-8 px-3 whitespace-nowrap text-xs"
           >
-            <Send className="w-2.5 h-2.5 sm:w-3 sm:h-3 mr-1 sm:mr-1.5" />
+            <Send className="w-3 h-3 mr-1.5" />
             {isSubmitting ? '...' : cooldownTimeLeft > 0 ? formatCooldownTime(cooldownTimeLeft) : 'send'}
           </Button>
         </div>
