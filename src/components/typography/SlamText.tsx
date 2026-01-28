@@ -1,8 +1,5 @@
-import { useRef, useEffect } from 'react';
-import { gsap } from 'gsap';
-import { ScrollTrigger } from 'gsap/ScrollTrigger';
-
-gsap.registerPlugin(ScrollTrigger);
+import { useRef } from 'react';
+import { motion, useInView } from 'framer-motion';
 
 interface SlamTextProps {
   children: string;
@@ -13,6 +10,24 @@ interface SlamTextProps {
   as?: 'h1' | 'h2' | 'h3' | 'p' | 'span' | 'div';
 }
 
+const letterVariants = {
+  hidden: { 
+    y: 80, 
+    opacity: 0, 
+    rotateX: -90,
+  },
+  visible: (i: number) => ({
+    y: 0,
+    opacity: 1,
+    rotateX: 0,
+    transition: {
+      delay: i * 0.03,
+      duration: 0.5,
+      ease: [0.34, 1.56, 0.64, 1], // back.out equivalent
+    },
+  }),
+};
+
 const SlamText = ({ 
   children, 
   className = '', 
@@ -22,51 +37,9 @@ const SlamText = ({
   as: Component = 'div'
 }: SlamTextProps) => {
   const containerRef = useRef<HTMLDivElement>(null);
-  const hasAnimated = useRef(false);
+  const isInView = useInView(containerRef, { once: true, margin: '-15%' });
 
-  useEffect(() => {
-    if (!containerRef.current || hasAnimated.current) return;
-
-    const letters = containerRef.current.querySelectorAll('.letter');
-    
-    // Set initial state
-    gsap.set(letters, {
-      y: 80,
-      opacity: 0,
-      rotateX: -90,
-      transformOrigin: 'center bottom'
-    });
-
-    const animate = () => {
-      if (hasAnimated.current) return;
-      hasAnimated.current = true;
-
-      gsap.to(letters, {
-        y: 0,
-        opacity: 1,
-        rotateX: 0,
-        duration: 0.5,
-        stagger: stagger,
-        delay: delay,
-        ease: 'back.out(1.7)'
-      });
-    };
-
-    if (scrollTrigger) {
-      ScrollTrigger.create({
-        trigger: containerRef.current,
-        start: 'top 85%',
-        onEnter: animate,
-        once: true
-      });
-    } else {
-      animate();
-    }
-
-    return () => {
-      ScrollTrigger.getAll().forEach(trigger => trigger.kill());
-    };
-  }, [delay, stagger, scrollTrigger]);
+  const shouldAnimate = scrollTrigger ? isInView : true;
 
   return (
     <Component 
@@ -75,16 +48,22 @@ const SlamText = ({
       style={{ perspective: '1000px' }}
     >
       {children.split('').map((char, i) => (
-        <span
+        <motion.span
           key={i}
-          className="letter inline-block"
+          custom={i}
+          variants={letterVariants}
+          initial="hidden"
+          animate={shouldAnimate ? "visible" : "hidden"}
           style={{ 
             transformStyle: 'preserve-3d',
+            transformOrigin: 'center bottom',
+            display: 'inline-block',
             whiteSpace: char === ' ' ? 'pre' : 'normal'
           }}
+          transition={{ delay: delay + i * stagger }}
         >
           {char === ' ' ? '\u00A0' : char}
-        </span>
+        </motion.span>
       ))}
     </Component>
   );

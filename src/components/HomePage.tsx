@@ -1,15 +1,8 @@
-import { useRef, useEffect, useState } from 'react';
-import { gsap } from 'gsap';
-import { ScrollTrigger } from 'gsap/ScrollTrigger';
-
-// Typography
-import SlamText from '@/components/typography/SlamText';
-import WarpText from '@/components/typography/WarpText';
+import { useRef } from 'react';
 
 // Decorations
 import FakeSearchBar from '@/components/decorations/FakeSearchBar';
 import CursorIcon from '@/components/decorations/CursorIcon';
-import BrowserFrame from '@/components/decorations/BrowserFrame';
 
 // Sections
 import HeroSection from '@/components/sections/HeroSection';
@@ -19,19 +12,8 @@ import ContactSection from '@/components/sections/ContactSection';
 
 import AdminButton from '@/components/AdminButton';
 
-gsap.registerPlugin(ScrollTrigger);
-
 const HomePage = () => {
   const containerRef = useRef<HTMLDivElement>(null);
-
-  useEffect(() => {
-    // Refresh ScrollTrigger when component mounts
-    ScrollTrigger.refresh();
-
-    return () => {
-      ScrollTrigger.getAll().forEach(trigger => trigger.kill());
-    };
-  }, []);
 
   return (
     <div ref={containerRef} className="min-h-screen bg-background text-foreground">

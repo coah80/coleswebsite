@@ -1,11 +1,8 @@
 import { useState, useEffect, useRef } from 'react';
-import { gsap } from 'gsap';
-import { ScrollTrigger } from 'gsap/ScrollTrigger';
+import { motion, useInView } from 'framer-motion';
 import { ExternalLink, Github, Star } from 'lucide-react';
 import { supabase } from '@/integrations/supabase/client';
 import SlamText from '@/components/typography/SlamText';
-
-gsap.registerPlugin(ScrollTrigger);
 
 interface Project {
   id: string;
@@ -21,6 +18,20 @@ interface Project {
   created_at: string;
 }
 
+const cardVariants = {
+  hidden: { y: 60, opacity: 0, scale: 0.95 },
+  visible: (i: number) => ({
+    y: 0,
+    opacity: 1,
+    scale: 1,
+    transition: {
+      delay: i * 0.1,
+      duration: 0.5,
+      ease: [0.34, 1.56, 0.64, 1],
+    },
+  }),
+};
+
 const WorkSection = () => {
   const sectionRef = useRef<HTMLElement>(null);
   const projectsRef = useRef<HTMLDivElement>(null);
@@ -28,46 +39,11 @@ const WorkSection = () => {
   const [selectedCategory, setSelectedCategory] = useState('All');
   const [categories, setCategories] = useState<string[]>(['All']);
   const [isLoading, setIsLoading] = useState(true);
-  const hasAnimated = useRef(false);
+  const isInView = useInView(sectionRef, { once: true, margin: '-40%' });
 
   useEffect(() => {
     fetchProjects();
   }, []);
-
-  useEffect(() => {
-    if (!projectsRef.current || isLoading || hasAnimated.current) return;
-
-    const cards = projectsRef.current.querySelectorAll('.project-card');
-    
-    gsap.set(cards, {
-      y: 60,
-      opacity: 0,
-      scale: 0.95
-    });
-
-    ScrollTrigger.create({
-      trigger: sectionRef.current,
-      start: 'top 60%',
-      onEnter: () => {
-        if (hasAnimated.current) return;
-        hasAnimated.current = true;
-
-        gsap.to(cards, {
-          y: 0,
-          opacity: 1,
-          scale: 1,
-          duration: 0.5,
-          stagger: 0.1,
-          ease: 'back.out(1.4)'
-        });
-      },
-      once: true
-    });
-
-    return () => {
-      ScrollTrigger.getAll().forEach(trigger => trigger.kill());
-    };
-  }, [isLoading]);
 
   const fetchProjects = async () => {
     try {
@@ -141,10 +117,16 @@ const WorkSection = () => {
             <div key={i} className="aspect-[4/3] bg-card/30 rounded-lg animate-pulse" />
           ))
         ) : (
-          filteredProjects.map((project) => (
-            <div
+          filteredProjects.map((project, i) => (
+            <motion.div
               key={project.id}
-              className="project-card group relative bg-card/30 border border-border/20 rounded-lg overflow-hidden transition-all duration-300 hover:border-border/50 hover:bg-card/50"
+              custom={i}
+              variants={cardVariants}
+              initial="hidden"
+              animate={isInView ? "visible" : "hidden"}
+              className="group relative bg-card/30 border border-border/20 rounded-lg overflow-hidden transition-colors duration-300 hover:border-border/50 hover:bg-card/50"
+              whileHover={{ scale: 1.02, y: -4 }}
+              whileTap={{ scale: 0.98 }}
             >
               {/* Featured badge */}
               {project.is_featured && (
@@ -217,7 +199,7 @@ const WorkSection = () => {
                   )}
                 </div>
               </div>
-            </div>
+            </motion.div>
           ))
         )}
       </div>

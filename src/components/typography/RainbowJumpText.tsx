@@ -1,10 +1,10 @@
-import { useRef, useCallback, useEffect } from 'react';
-import { gsap } from 'gsap';
+import { useState, useRef, useEffect, useCallback } from 'react';
+import { motion } from 'framer-motion';
 
 interface RainbowJumpTextProps {
   children: string;
   className?: string;
-  triggerOnParentHover?: boolean; // If true, parent must add group class and this responds to group-hover
+  triggerOnParentHover?: boolean;
 }
 
 const rainbowColors = [
@@ -19,56 +19,13 @@ const rainbowColors = [
 
 const RainbowJumpText = ({ children, className = '', triggerOnParentHover = false }: RainbowJumpTextProps) => {
   const containerRef = useRef<HTMLSpanElement>(null);
-  const lettersRef = useRef<(HTMLSpanElement | null)[]>([]);
-  const animationRef = useRef<gsap.core.Timeline | null>(null);
-  const isAnimatingRef = useRef(false);
+  const [animationKey, setAnimationKey] = useState(0);
 
   const runAnimation = useCallback(() => {
-    // Don't interrupt ongoing animation
-    if (isAnimatingRef.current) return;
-    isAnimatingRef.current = true;
-
-    const letters = lettersRef.current.filter(Boolean);
-    
-    // Create jump + rainbow animation
-    animationRef.current = gsap.timeline({
-      onComplete: () => {
-        isAnimatingRef.current = false;
-      }
-    });
-    
-    letters.forEach((letter, i) => {
-      if (!letter) return;
-      
-      const color = rainbowColors[i % rainbowColors.length];
-      
-      // Jump up with color change
-      animationRef.current!.to(letter, {
-        y: -8,
-        color: color,
-        textShadow: `0 0 8px ${color}80`,
-        duration: 0.12,
-        ease: 'power2.out'
-      }, i * 0.025);
-      
-      // Bounce back down
-      animationRef.current!.to(letter, {
-        y: 0,
-        duration: 0.2,
-        ease: 'bounce.out'
-      }, i * 0.025 + 0.12);
-      
-      // Fade color back
-      animationRef.current!.to(letter, {
-        color: 'inherit',
-        textShadow: 'none',
-        duration: 0.25,
-        ease: 'power2.out'
-      }, i * 0.025 + 0.25);
-    });
+    setAnimationKey(prev => prev + 1);
   }, []);
 
-  // For parent hover trigger - watch for mouseenter on closest .group ancestor
+  // For parent hover trigger
   useEffect(() => {
     if (!triggerOnParentHover || !containerRef.current) return;
     
@@ -78,10 +35,7 @@ const RainbowJumpText = ({ children, className = '', triggerOnParentHover = fals
     const handleEnter = () => runAnimation();
     
     groupParent.addEventListener('mouseenter', handleEnter);
-    
-    return () => {
-      groupParent.removeEventListener('mouseenter', handleEnter);
-    };
+    return () => groupParent.removeEventListener('mouseenter', handleEnter);
   }, [triggerOnParentHover, runAnimation]);
 
   return (
@@ -89,17 +43,34 @@ const RainbowJumpText = ({ children, className = '', triggerOnParentHover = fals
       ref={containerRef}
       className={`inline-flex ${className}`}
       onMouseEnter={!triggerOnParentHover ? runAnimation : undefined}
+      style={{ color: 'inherit' }}
     >
-      {children.split('').map((char, i) => (
-        <span
-          key={i}
-          ref={(el) => { lettersRef.current[i] = el; }}
-          className="inline-block"
-          style={{ display: char === ' ' ? 'inline' : 'inline-block' }}
-        >
-          {char === ' ' ? '\u00A0' : char}
-        </span>
-      ))}
+      {children.split('').map((char, i) => {
+        const color = rainbowColors[i % rainbowColors.length];
+        
+        return (
+          <motion.span
+            key={`${i}-${animationKey}`}
+            style={{ 
+              display: 'inline-block',
+              whiteSpace: char === ' ' ? 'pre' : 'normal',
+              color: 'inherit',
+            }}
+            animate={{
+              y: [0, -8, 0],
+              color: ['hsl(0, 0%, 95%)', color, 'hsl(0, 0%, 95%)'],
+              textShadow: ['none', `0 0 12px ${color}`, 'none'],
+            }}
+            transition={{
+              duration: 0.35,
+              delay: i * 0.02,
+              ease: [0.25, 0.46, 0.45, 0.94],
+            }}
+          >
+            {char === ' ' ? '\u00A0' : char}
+          </motion.span>
+        );
+      })}
     </span>
   );
 };

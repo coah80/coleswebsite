@@ -1,5 +1,5 @@
 import { useState, useEffect, useRef } from 'react';
-import { gsap } from 'gsap';
+import { motion } from 'framer-motion';
 import { Headphones, Gamepad2, Clock, ExternalLink } from 'lucide-react';
 import { supabase } from '@/integrations/supabase/client';
 import { getPlatformVisuals } from '@/lib/social-platforms';
@@ -159,22 +159,19 @@ const BentoHome = () => {
   const customStatus = lanyardData?.activities?.find(a => a.type === 4);
   const isSpotifyActive = lanyardData?.spotify && lanyardData.spotify.timestamps.end > currentTime;
 
-  // Animate tiles on mount
-  useEffect(() => {
-    if (!containerRef.current) return;
-    const tiles = containerRef.current.querySelectorAll('.bento-tile');
-    
-    gsap.set(tiles, { opacity: 0, y: 30, scale: 0.95 });
-    gsap.to(tiles, {
+  const tileVariants = {
+    hidden: { opacity: 0, y: 30, scale: 0.95 },
+    visible: (i: number) => ({
       opacity: 1,
       y: 0,
       scale: 1,
-      duration: 0.5,
-      stagger: 0.08,
-      ease: 'back.out(1.4)',
-      delay: 0.2
-    });
-  }, []);
+      transition: {
+        delay: 0.2 + i * 0.08,
+        duration: 0.5,
+        ease: [0.34, 1.56, 0.64, 1],
+      },
+    }),
+  };
 
   return (
     <div className="min-h-screen bg-background p-3 sm:p-4 md:p-6 lg:p-8 flex items-center justify-center">
@@ -199,7 +196,13 @@ const BentoHome = () => {
         className="relative z-10 w-full max-w-6xl grid grid-cols-2 sm:grid-cols-4 md:grid-cols-6 lg:grid-cols-12 auto-rows-[60px] sm:auto-rows-[70px] md:auto-rows-[100px] gap-2 sm:gap-3 md:gap-4"
       >
         {/* ===== MAIN PROFILE TILE (Large) ===== */}
-        <div className="bento-tile col-span-2 sm:col-span-4 md:col-span-4 lg:col-span-7 row-span-4 sm:row-span-4 bg-card/40 border border-border/20 rounded-xl sm:rounded-2xl p-3 sm:p-4 md:p-6 lg:p-8 flex flex-col justify-between overflow-hidden relative group">
+        <motion.div 
+          custom={0}
+          variants={tileVariants}
+          initial="hidden"
+          animate="visible"
+          className="col-span-2 sm:col-span-4 md:col-span-4 lg:col-span-7 row-span-4 sm:row-span-4 bg-card/40 border border-border/20 rounded-xl sm:rounded-2xl p-3 sm:p-4 md:p-6 lg:p-8 flex flex-col justify-between overflow-hidden relative group"
+        >
           {/* Background glow */}
           <div className="absolute inset-0 bg-gradient-to-br from-accent/5 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500" />
           
@@ -313,19 +316,24 @@ const BentoHome = () => {
               </div>
             )}
           </div>
-        </div>
+        </motion.div>
 
         {/* ===== SOCIAL LINKS (Right side stack) ===== */}
         {socialLinks.slice(0, 5).map((link, i) => {
           const { icon: IconComponent, gradient } = getPlatformVisuals(link.name, link.url);
           return (
-            <a
+            <motion.a
               key={link.id}
+              custom={i + 1}
+              variants={tileVariants}
+              initial="hidden"
+              animate="visible"
               href={link.url}
               target="_blank"
               rel="noopener noreferrer"
-              className={`bento-tile col-span-1 sm:col-span-2 md:col-span-2 lg:col-span-5 row-span-1 bg-card/30 border border-border/20 rounded-lg sm:rounded-xl p-2 sm:p-3 md:p-4 flex items-center gap-2 sm:gap-3 group hover:bg-card/50 hover:border-border/40 transition-all duration-200 hover:scale-[1.02]`}
-              style={{ animationDelay: `${i * 50}ms` }}
+              className="col-span-1 sm:col-span-2 md:col-span-2 lg:col-span-5 row-span-1 bg-card/30 border border-border/20 rounded-lg sm:rounded-xl p-2 sm:p-3 md:p-4 flex items-center gap-2 sm:gap-3 group hover:bg-card/50 hover:border-border/40 transition-all duration-200 hover:scale-[1.02]"
+              whileHover={{ scale: 1.02 }}
+              whileTap={{ scale: 0.98 }}
             >
               <div className={`p-1 sm:p-1.5 md:p-2 rounded-md sm:rounded-lg bg-gradient-to-br ${gradient} group-hover:scale-110 transition-transform`}>
                 <IconComponent className="w-3 h-3 sm:w-3.5 sm:h-3.5 md:w-4 md:h-4 text-white" />
@@ -335,33 +343,51 @@ const BentoHome = () => {
                 <span className="text-[8px] sm:text-[10px] md:text-xs font-mono text-muted-foreground truncate block hidden sm:block">{link.handle}</span>
               </div>
               <ExternalLink className="w-3 h-3 sm:w-3.5 sm:h-3.5 md:w-4 md:h-4 text-muted-foreground opacity-0 group-hover:opacity-100 transition-opacity hidden sm:block" />
-            </a>
+            </motion.a>
           );
         })}
 
         {/* ===== BOTTOM NAVIGATION TILES ===== */}
-        <div 
+        <motion.div 
+          custom={6}
+          variants={tileVariants}
+          initial="hidden"
+          animate="visible"
           onClick={() => setActiveView('portfolio')}
-          className="bento-tile col-span-1 sm:col-span-2 md:col-span-3 lg:col-span-4 row-span-2 bg-card/30 border border-border/20 rounded-xl sm:rounded-2xl p-3 sm:p-4 md:p-5 flex flex-col justify-center cursor-pointer group hover:bg-card/50 hover:border-border/40 transition-all duration-200"
+          className="col-span-1 sm:col-span-2 md:col-span-3 lg:col-span-4 row-span-2 bg-card/30 border border-border/20 rounded-xl sm:rounded-2xl p-3 sm:p-4 md:p-5 flex flex-col justify-center cursor-pointer group hover:bg-card/50 hover:border-border/40 transition-all duration-200"
+          whileHover={{ scale: 1.02 }}
+          whileTap={{ scale: 0.98 }}
         >
           <WarpText className="text-lg sm:text-xl md:text-2xl lg:text-3xl font-black lowercase text-foreground group-hover:text-accent transition-colors">
             portfolio
           </WarpText>
           <p className="text-[8px] sm:text-[10px] md:text-xs font-mono text-muted-foreground mt-1 sm:mt-2">my work & projects</p>
-        </div>
+        </motion.div>
 
-        <div 
+        <motion.div 
+          custom={7}
+          variants={tileVariants}
+          initial="hidden"
+          animate="visible"
           onClick={() => setActiveView('contact')}
-          className="bento-tile col-span-1 sm:col-span-2 md:col-span-3 lg:col-span-4 row-span-2 bg-card/30 border border-border/20 rounded-xl sm:rounded-2xl p-3 sm:p-4 md:p-5 flex flex-col justify-center cursor-pointer group hover:bg-card/50 hover:border-border/40 transition-all duration-200"
+          className="col-span-1 sm:col-span-2 md:col-span-3 lg:col-span-4 row-span-2 bg-card/30 border border-border/20 rounded-xl sm:rounded-2xl p-3 sm:p-4 md:p-5 flex flex-col justify-center cursor-pointer group hover:bg-card/50 hover:border-border/40 transition-all duration-200"
+          whileHover={{ scale: 1.02 }}
+          whileTap={{ scale: 0.98 }}
         >
           <WarpText className="text-lg sm:text-xl md:text-2xl lg:text-3xl font-black lowercase text-foreground group-hover:text-accent transition-colors">
             say hi
           </WarpText>
           <p className="text-[8px] sm:text-[10px] md:text-xs font-mono text-muted-foreground mt-1 sm:mt-2">send a message or drawing</p>
-        </div>
+        </motion.div>
 
         {/* ===== DECORATIVE TILE ===== */}
-        <div className="bento-tile col-span-2 sm:col-span-4 md:col-span-6 lg:col-span-4 row-span-2 bg-card/20 border border-border/10 rounded-xl sm:rounded-2xl p-3 sm:p-4 md:p-5 flex items-center justify-center overflow-hidden">
+        <motion.div 
+          custom={8}
+          variants={tileVariants}
+          initial="hidden"
+          animate="visible"
+          className="col-span-2 sm:col-span-4 md:col-span-6 lg:col-span-4 row-span-2 bg-card/20 border border-border/10 rounded-xl sm:rounded-2xl p-3 sm:p-4 md:p-5 flex items-center justify-center overflow-hidden"
+        >
           <div className="text-center">
             <p className="text-4xl sm:text-5xl md:text-6xl lg:text-7xl font-black text-foreground/5 select-none">
               2026
@@ -370,7 +396,7 @@ const BentoHome = () => {
               © coah
             </p>
           </div>
-        </div>
+        </motion.div>
       </div>
     </div>
   );

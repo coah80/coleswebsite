@@ -1,5 +1,5 @@
 import { useState, useEffect, useRef } from 'react';
-import { gsap } from 'gsap';
+import { motion, AnimatePresence } from 'framer-motion';
 import { ExternalLink, Github, Star } from 'lucide-react';
 import { supabase } from '@/integrations/supabase/client';
 import PageLayout from '@/components/PageLayout';
@@ -30,22 +30,6 @@ const PortfolioPage = () => {
     fetchProjects();
   }, []);
 
-  useEffect(() => {
-    if (!gridRef.current || isLoading) return;
-    const cards = gridRef.current.querySelectorAll('.project-card');
-    
-    gsap.set(cards, { opacity: 0, y: 30, scale: 0.95 });
-    gsap.to(cards, {
-      opacity: 1,
-      y: 0,
-      scale: 1,
-      duration: 0.4,
-      stagger: 0.08,
-      ease: 'back.out(1.4)',
-      delay: 1.8
-    });
-  }, [isLoading]);
-
   const fetchProjects = async () => {
     try {
       const { data, error } = await supabase
@@ -75,21 +59,31 @@ const PortfolioPage = () => {
       <div className="h-full flex flex-col overflow-hidden">
         {/* Category filters */}
         {categories.length > 1 && (
-          <div className="flex flex-wrap gap-1.5 sm:gap-2 mb-3 sm:mb-4 flex-shrink-0 overflow-x-auto pb-1">
-            {categories.map((category) => (
-              <button
+          <motion.div 
+            initial={{ opacity: 0, y: -10 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.3, delay: 0.1 }}
+            className="flex flex-wrap gap-1.5 sm:gap-2 mb-3 sm:mb-4 flex-shrink-0 overflow-x-auto pb-1"
+          >
+            {categories.map((category, index) => (
+              <motion.button
                 key={category}
+                initial={{ opacity: 0, scale: 0.9 }}
+                animate={{ opacity: 1, scale: 1 }}
+                transition={{ duration: 0.2, delay: 0.1 + index * 0.03 }}
+                whileHover={{ scale: 1.05 }}
+                whileTap={{ scale: 0.95 }}
                 onClick={() => setSelectedCategory(category)}
-                className={`px-2 sm:px-3 py-1 sm:py-1.5 text-[10px] sm:text-xs font-mono lowercase rounded-full border transition-all duration-200 whitespace-nowrap ${
+                className={`px-2 sm:px-3 py-1 sm:py-1.5 text-[10px] sm:text-xs font-mono lowercase rounded-full border transition-colors duration-200 whitespace-nowrap ${
                   selectedCategory === category
                     ? 'bg-foreground text-background border-foreground'
                     : 'bg-transparent text-muted-foreground border-border/50 hover:border-foreground hover:text-foreground'
                 }`}
               >
                 {category}
-              </button>
+              </motion.button>
             ))}
-          </div>
+          </motion.div>
         )}
 
         {/* Projects grid - fits to available space */}
@@ -102,11 +96,18 @@ const PortfolioPage = () => {
               <div key={i} className="aspect-[4/3] bg-card/30 rounded-2xl animate-pulse" />
             ))
           ) : (
-            filteredProjects.map((project) => (
-              <div
-                key={project.id}
-                className="project-card group relative bg-card/30 border border-border/20 rounded-xl sm:rounded-2xl overflow-hidden transition-all duration-300 hover:border-border/50 hover:bg-card/50 hover:scale-[1.02]"
-              >
+            <AnimatePresence mode="popLayout">
+              {filteredProjects.map((project, index) => (
+                <motion.div
+                  key={project.id}
+                  layout
+                  initial={{ opacity: 0, y: 20, scale: 0.95 }}
+                  animate={{ opacity: 1, y: 0, scale: 1 }}
+                  exit={{ opacity: 0, scale: 0.9 }}
+                  transition={{ duration: 0.3, delay: index * 0.05, ease: [0.16, 1, 0.3, 1] }}
+                  whileHover={{ y: -4, scale: 1.02 }}
+                  className="group relative bg-card/30 border border-border/20 rounded-xl sm:rounded-2xl overflow-hidden transition-colors duration-300 hover:border-border/50 hover:bg-card/50"
+                >
                 {/* Featured badge */}
                 {project.is_featured && (
                   <div className="absolute top-2 right-2 sm:top-3 sm:right-3 z-10 flex items-center gap-0.5 sm:gap-1 px-1.5 sm:px-2 py-0.5 sm:py-1 bg-foreground/90 text-background text-[10px] sm:text-xs font-mono rounded">
@@ -178,8 +179,9 @@ const PortfolioPage = () => {
                     )}
                   </div>
                 </div>
-              </div>
-            ))
+              </motion.div>
+            ))}
+            </AnimatePresence>
           )}
         </div>
 

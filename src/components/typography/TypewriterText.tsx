@@ -1,14 +1,11 @@
-import { useRef, useEffect, useState } from 'react';
-import { gsap } from 'gsap';
-import { ScrollTrigger } from 'gsap/ScrollTrigger';
-
-gsap.registerPlugin(ScrollTrigger);
+import { useEffect, useState, useRef } from 'react';
+import { motion, useInView } from 'framer-motion';
 
 interface TypewriterTextProps {
   children: string;
   className?: string;
   delay?: number;
-  speed?: number; // ms per character
+  speed?: number;
   cursor?: boolean;
   scrollTrigger?: boolean;
   as?: 'h1' | 'h2' | 'h3' | 'p' | 'span' | 'div';
@@ -29,16 +26,16 @@ const TypewriterText = ({
   const [displayText, setDisplayText] = useState('');
   const [showCursor, setShowCursor] = useState(true);
   const hasAnimated = useRef(false);
+  const isInView = useInView(containerRef, { once: true, margin: '-15%' });
 
   useEffect(() => {
     if (hasAnimated.current) return;
+    if (scrollTrigger && !isInView) return;
 
-    const animate = () => {
-      if (hasAnimated.current) return;
-      hasAnimated.current = true;
-
-      let currentIndex = 0;
-      
+    hasAnimated.current = true;
+    let currentIndex = 0;
+    
+    const timeout = setTimeout(() => {
       const typeInterval = setInterval(() => {
         if (currentIndex <= children.length) {
           setDisplayText(children.slice(0, currentIndex));
@@ -48,33 +45,15 @@ const TypewriterText = ({
           onComplete?.();
         }
       }, speed);
+    }, delay * 1000);
 
-      return () => clearInterval(typeInterval);
-    };
-
-    if (scrollTrigger && containerRef.current) {
-      ScrollTrigger.create({
-        trigger: containerRef.current,
-        start: 'top 85%',
-        onEnter: () => {
-          setTimeout(animate, delay * 1000);
-        },
-        once: true
-      });
-    } else {
-      const timeout = setTimeout(animate, delay * 1000);
-      return () => clearTimeout(timeout);
-    }
-  }, [children, delay, speed, scrollTrigger, onComplete]);
+    return () => clearTimeout(timeout);
+  }, [children, delay, speed, scrollTrigger, isInView, onComplete]);
 
   // Cursor blink
   useEffect(() => {
     if (!cursor) return;
-    
-    const blinkInterval = setInterval(() => {
-      setShowCursor(prev => !prev);
-    }, 530);
-
+    const blinkInterval = setInterval(() => setShowCursor(prev => !prev), 530);
     return () => clearInterval(blinkInterval);
   }, [cursor]);
 
@@ -85,10 +64,9 @@ const TypewriterText = ({
     >
       {displayText}
       {cursor && (
-        <span 
-          className={`inline-block w-[3px] h-[1em] bg-current ml-1 align-middle transition-opacity ${
-            showCursor ? 'opacity-100' : 'opacity-0'
-          }`}
+        <motion.span 
+          animate={{ opacity: showCursor ? 1 : 0 }}
+          className="inline-block w-[3px] h-[1em] bg-current ml-1 align-middle"
         />
       )}
     </Component>

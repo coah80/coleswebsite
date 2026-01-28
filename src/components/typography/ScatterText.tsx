@@ -1,8 +1,5 @@
-import { useRef, useEffect } from 'react';
-import { gsap } from 'gsap';
-import { ScrollTrigger } from 'gsap/ScrollTrigger';
-
-gsap.registerPlugin(ScrollTrigger);
+import { useRef, useMemo } from 'react';
+import { motion, useInView } from 'framer-motion';
 
 interface ScatterTextProps {
   children: string;
@@ -20,57 +17,19 @@ const ScatterText = ({
   as: Component = 'div'
 }: ScatterTextProps) => {
   const containerRef = useRef<HTMLDivElement>(null);
-  const hasAnimated = useRef(false);
+  const isInView = useInView(containerRef, { once: true, margin: '-15%' });
 
-  useEffect(() => {
-    if (!containerRef.current || hasAnimated.current) return;
+  const shouldAnimate = scrollTrigger ? isInView : true;
 
-    const letters = containerRef.current.querySelectorAll('.letter');
-    
-    // Set initial state - scattered
-    gsap.set(letters, {
-      x: () => gsap.utils.random(-200, 200),
-      y: () => gsap.utils.random(-150, 150),
-      rotation: () => gsap.utils.random(-180, 180),
-      scale: 0,
-      opacity: 0
-    });
-
-    const animate = () => {
-      if (hasAnimated.current) return;
-      hasAnimated.current = true;
-
-      gsap.to(letters, {
-        x: 0,
-        y: 0,
-        rotation: 0,
-        scale: 1,
-        opacity: 1,
-        duration: 0.6,
-        stagger: {
-          each: 0.04,
-          from: 'random'
-        },
-        delay: delay,
-        ease: 'back.out(1.2)'
-      });
-    };
-
-    if (scrollTrigger) {
-      ScrollTrigger.create({
-        trigger: containerRef.current,
-        start: 'top 85%',
-        onEnter: animate,
-        once: true
-      });
-    } else {
-      animate();
-    }
-
-    return () => {
-      ScrollTrigger.getAll().forEach(trigger => trigger.kill());
-    };
-  }, [delay, scrollTrigger]);
+  // Generate random initial positions once
+  const randomPositions = useMemo(() => 
+    children.split('').map(() => ({
+      x: (Math.random() - 0.5) * 400,
+      y: (Math.random() - 0.5) * 300,
+      rotation: (Math.random() - 0.5) * 360,
+    })),
+    [children]
+  );
 
   return (
     <Component 
@@ -78,15 +37,34 @@ const ScatterText = ({
       className={`inline-flex flex-wrap justify-center ${className}`}
     >
       {children.split('').map((char, i) => (
-        <span
+        <motion.span
           key={i}
-          className="letter inline-block"
+          initial={{ 
+            x: randomPositions[i].x,
+            y: randomPositions[i].y,
+            rotate: randomPositions[i].rotation,
+            scale: 0,
+            opacity: 0
+          }}
+          animate={shouldAnimate ? {
+            x: 0,
+            y: 0,
+            rotate: 0,
+            scale: 1,
+            opacity: 1
+          } : {}}
+          transition={{
+            duration: 0.6,
+            delay: delay + Math.random() * 0.3,
+            ease: [0.34, 1.56, 0.64, 1],
+          }}
           style={{ 
+            display: 'inline-block',
             whiteSpace: char === ' ' ? 'pre' : 'normal'
           }}
         >
           {char === ' ' ? '\u00A0' : char}
-        </span>
+        </motion.span>
       ))}
     </Component>
   );

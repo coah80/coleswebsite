@@ -1,68 +1,63 @@
-import { useRef, useCallback } from 'react';
-import { gsap } from 'gsap';
+import { useState, useRef, useEffect } from 'react';
+import { motion } from 'framer-motion';
 
 interface WarpTextProps {
   children: string;
   className?: string;
   as?: 'h1' | 'h2' | 'h3' | 'p' | 'span' | 'div';
+  triggerOnParentHover?: boolean;
 }
 
 const WarpText = ({ 
   children, 
   className = '',
-  as: Component = 'div'
+  as: Component = 'div',
+  triggerOnParentHover = false
 }: WarpTextProps) => {
-  const lettersRef = useRef<(HTMLSpanElement | null)[]>([]);
-  const animationRef = useRef<gsap.core.Timeline | null>(null);
+  const containerRef = useRef<HTMLDivElement>(null);
+  const [isHovered, setIsHovered] = useState(false);
 
-  const handleMouseEnter = useCallback(() => {
-    // Kill any existing animation
-    if (animationRef.current) animationRef.current.kill();
-
-    const letters = lettersRef.current.filter(Boolean);
+  // For parent hover trigger
+  useEffect(() => {
+    if (!triggerOnParentHover || !containerRef.current) return;
     
-    // Create wavy animation - each letter moves up/down in sequence
-    animationRef.current = gsap.timeline();
+    const groupParent = containerRef.current.closest('.group');
+    if (!groupParent) return;
     
-    letters.forEach((letter, i) => {
-      animationRef.current!.to(letter, {
-        y: -8,
-        duration: 0.15,
-        ease: 'power2.out'
-      }, i * 0.04);
-      
-      animationRef.current!.to(letter, {
-        y: 0,
-        duration: 0.3,
-        ease: 'elastic.out(1, 0.4)'
-      }, i * 0.04 + 0.15);
-    });
-  }, []);
-
-  const handleMouseLeave = useCallback(() => {
-    const letters = lettersRef.current.filter(Boolean);
-    gsap.to(letters, {
-      y: 0,
-      duration: 0.2,
-      ease: 'power2.out'
-    });
-  }, []);
+    const handleEnter = () => setIsHovered(true);
+    const handleLeave = () => setIsHovered(false);
+    
+    groupParent.addEventListener('mouseenter', handleEnter);
+    groupParent.addEventListener('mouseleave', handleLeave);
+    return () => {
+      groupParent.removeEventListener('mouseenter', handleEnter);
+      groupParent.removeEventListener('mouseleave', handleLeave);
+    };
+  }, [triggerOnParentHover]);
 
   return (
     <Component 
+      ref={containerRef as any}
       className={`inline-flex cursor-pointer ${className}`}
-      onMouseEnter={handleMouseEnter}
-      onMouseLeave={handleMouseLeave}
+      onMouseEnter={!triggerOnParentHover ? () => setIsHovered(true) : undefined}
+      onMouseLeave={!triggerOnParentHover ? () => setIsHovered(false) : undefined}
     >
       {children.split('').map((char, i) => (
-        <span
+        <motion.span
           key={i}
-          ref={(el) => { lettersRef.current[i] = el; }}
           className="inline-block"
           style={{ display: char === ' ' ? 'inline' : 'inline-block' }}
+          animate={isHovered ? {
+            y: [0, -8, 0],
+            transition: {
+              duration: 0.4,
+              delay: i * 0.03,
+              ease: [0.25, 0.46, 0.45, 0.94]
+            }
+          } : { y: 0 }}
         >
           {char === ' ' ? '\u00A0' : char}
-        </span>
+        </motion.span>
       ))}
     </Component>
   );

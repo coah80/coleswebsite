@@ -1,12 +1,9 @@
 import { useState, useRef, useEffect, useCallback } from 'react';
-import { gsap } from 'gsap';
-import { ScrollTrigger } from 'gsap/ScrollTrigger';
+import { motion, useInView } from 'framer-motion';
 import { Send, Palette, MessageCircle, RotateCcw } from 'lucide-react';
 import { supabase } from '@/integrations/supabase/client';
 import SlamText from '@/components/typography/SlamText';
 import BrowserFrame from '@/components/decorations/BrowserFrame';
-
-gsap.registerPlugin(ScrollTrigger);
 
 const HISTORY_LIMIT = 25;
 
@@ -19,7 +16,7 @@ const ContactSection = () => {
   const sectionRef = useRef<HTMLElement>(null);
   const formRef = useRef<HTMLDivElement>(null);
   const canvasRef = useRef<HTMLCanvasElement>(null);
-  const hasAnimated = useRef(false);
+  const isInView = useInView(sectionRef, { once: true, margin: '-30%' });
 
   const [activeTab, setActiveTab] = useState<'message' | 'drawing'>('message');
   const [message, setMessage] = useState('');
@@ -48,36 +45,17 @@ const ContactSection = () => {
     { value: 'great-vibes', label: 'Great Vibes', className: 'font-great-vibes' },
   ];
 
-  // ScrollTrigger animation
-  useEffect(() => {
-    if (!formRef.current || hasAnimated.current) return;
-
-    gsap.set(formRef.current, {
-      y: 40,
-      opacity: 0
-    });
-
-    ScrollTrigger.create({
-      trigger: sectionRef.current,
-      start: 'top 70%',
-      onEnter: () => {
-        if (hasAnimated.current) return;
-        hasAnimated.current = true;
-
-        gsap.to(formRef.current, {
-          y: 0,
-          opacity: 1,
-          duration: 0.6,
-          ease: 'back.out(1.2)'
-        });
+  const formVariants = {
+    hidden: { y: 40, opacity: 0 },
+    visible: {
+      y: 0,
+      opacity: 1,
+      transition: {
+        duration: 0.6,
+        ease: [0.34, 1.56, 0.64, 1],
       },
-      once: true
-    });
-
-    return () => {
-      ScrollTrigger.getAll().forEach(trigger => trigger.kill());
-    };
-  }, []);
+    },
+  };
 
   // Canvas initialization
   useEffect(() => {
@@ -294,7 +272,13 @@ const ContactSection = () => {
         </p>
       </div>
 
-      <div ref={formRef} className="w-full max-w-xl">
+      <motion.div 
+        ref={formRef} 
+        className="w-full max-w-xl"
+        variants={formVariants}
+        initial="hidden"
+        animate={isInView ? "visible" : "hidden"}
+      >
         <BrowserFrame title="submit://anonymous">
           {/* Tab switcher */}
           <div className="flex gap-2 mb-6">
@@ -472,7 +456,7 @@ const ContactSection = () => {
             )}
           </button>
         </BrowserFrame>
-      </div>
+      </motion.div>
     </section>
   );
 };

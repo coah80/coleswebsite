@@ -1,6 +1,6 @@
 import { useState, useRef, useEffect } from 'react';
 import { Link, useLocation } from 'react-router-dom';
-import { gsap } from 'gsap';
+import { motion, AnimatePresence } from 'framer-motion';
 import { Send, Palette, MessageCircle } from 'lucide-react';
 import { supabase } from '@/integrations/supabase/client';
 import PageLayout from '@/components/PageLayout';
@@ -48,20 +48,6 @@ const ContactPage = () => {
     { value: 'pacifico', label: 'Pacifico', className: 'font-pacifico' },
     { value: 'great-vibes', label: 'Great Vibes', className: 'font-great-vibes' },
   ];
-
-  // Animate form on mount
-  useEffect(() => {
-    if (!formRef.current) return;
-    
-    gsap.set(formRef.current, { opacity: 0, y: 30 });
-    gsap.to(formRef.current, {
-      opacity: 1,
-      y: 0,
-      duration: 0.5,
-      ease: 'back.out(1.4)',
-      delay: 1.8
-    });
-  }, []);
 
   // Cooldown timer
   useEffect(() => {
@@ -211,15 +197,22 @@ const ContactPage = () => {
 
   return (
     <PageLayout title="say hi">
-      <div ref={formRef} className={`mx-auto h-full flex flex-col overflow-auto pb-4 ${
+      <motion.div 
+        ref={formRef} 
+        initial={{ opacity: 0, y: 30 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ duration: 0.5, delay: 0.1, ease: [0.16, 1, 0.3, 1] }}
+        className={`mx-auto h-full flex flex-col overflow-auto pb-4 ${
         activeTab === 'drawing' ? 'max-w-4xl' : 'max-w-2xl'
       }`}>
         <BrowserFrame title="submit://anonymous" className={activeTab === 'drawing' ? 'h-full flex flex-col' : ''}>
           {/* Tab switcher */}
           <div className="flex gap-1.5 sm:gap-2 mb-3 sm:mb-4">
-            <button
+            <motion.button
+              whileHover={{ scale: 1.05 }}
+              whileTap={{ scale: 0.95 }}
               onClick={() => setActiveTab('message')}
-              className={`flex items-center gap-1.5 sm:gap-2 px-2 sm:px-3 py-1 sm:py-1.5 text-[10px] sm:text-xs font-mono lowercase rounded-md sm:rounded-lg transition-all ${
+              className={`flex items-center gap-1.5 sm:gap-2 px-2 sm:px-3 py-1 sm:py-1.5 text-[10px] sm:text-xs font-mono lowercase rounded-md sm:rounded-lg transition-colors ${
                 activeTab === 'message'
                   ? 'bg-foreground text-background'
                   : 'bg-muted/30 text-muted-foreground hover:text-foreground'
@@ -227,10 +220,12 @@ const ContactPage = () => {
             >
               <MessageCircle className="w-2.5 h-2.5 sm:w-3 sm:h-3" />
               message
-            </button>
-            <button
+            </motion.button>
+            <motion.button
+              whileHover={{ scale: 1.05 }}
+              whileTap={{ scale: 0.95 }}
               onClick={() => setActiveTab('drawing')}
-              className={`flex items-center gap-1.5 sm:gap-2 px-2 sm:px-3 py-1 sm:py-1.5 text-[10px] sm:text-xs font-mono lowercase rounded-md sm:rounded-lg transition-all ${
+              className={`flex items-center gap-1.5 sm:gap-2 px-2 sm:px-3 py-1 sm:py-1.5 text-[10px] sm:text-xs font-mono lowercase rounded-md sm:rounded-lg transition-colors ${
                 activeTab === 'drawing'
                   ? 'bg-foreground text-background'
                   : 'bg-muted/30 text-muted-foreground hover:text-foreground'
@@ -238,7 +233,7 @@ const ContactPage = () => {
             >
               <Palette className="w-2.5 h-2.5 sm:w-3 sm:h-3" />
               drawing
-            </button>
+            </motion.button>
           </div>
 
           {/* Message form */}
@@ -348,7 +343,7 @@ const ContactPage = () => {
             />
           )}
         </BrowserFrame>
-      </div>
+      </motion.div>
     </PageLayout>
   );
 };

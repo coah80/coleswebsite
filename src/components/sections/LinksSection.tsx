@@ -1,12 +1,9 @@
 import { useState, useEffect, useRef } from 'react';
-import { gsap } from 'gsap';
-import { ScrollTrigger } from 'gsap/ScrollTrigger';
+import { motion, useInView } from 'framer-motion';
 import { ExternalLink } from 'lucide-react';
 import { supabase } from '@/integrations/supabase/client';
 import { getPlatformVisuals } from '@/lib/social-platforms';
 import SlamText from '@/components/typography/SlamText';
-
-gsap.registerPlugin(ScrollTrigger);
 
 interface SocialLink {
   id: string;
@@ -18,51 +15,30 @@ interface SocialLink {
   is_published: boolean;
 }
 
+const linkVariants = {
+  hidden: { x: -100, opacity: 0, rotateY: -15 },
+  visible: (i: number) => ({
+    x: 0,
+    opacity: 1,
+    rotateY: 0,
+    transition: {
+      delay: i * 0.08,
+      duration: 0.6,
+      ease: [0.34, 1.56, 0.64, 1],
+    },
+  }),
+};
+
 const LinksSection = () => {
   const sectionRef = useRef<HTMLElement>(null);
   const linksRef = useRef<HTMLDivElement>(null);
   const [socialLinks, setSocialLinks] = useState<SocialLink[]>([]);
   const [isLoading, setIsLoading] = useState(true);
-  const hasAnimated = useRef(false);
+  const isInView = useInView(sectionRef, { once: true, margin: '-30%' });
 
   useEffect(() => {
     fetchSocialLinks();
   }, []);
-
-  useEffect(() => {
-    if (!linksRef.current || isLoading || hasAnimated.current) return;
-
-    const links = linksRef.current.querySelectorAll('.social-link');
-    
-    gsap.set(links, {
-      x: -100,
-      opacity: 0,
-      rotateY: -15
-    });
-
-    ScrollTrigger.create({
-      trigger: sectionRef.current,
-      start: 'top 70%',
-      onEnter: () => {
-        if (hasAnimated.current) return;
-        hasAnimated.current = true;
-
-        gsap.to(links, {
-          x: 0,
-          opacity: 1,
-          rotateY: 0,
-          duration: 0.6,
-          stagger: 0.08,
-          ease: 'back.out(1.2)'
-        });
-      },
-      once: true
-    });
-
-    return () => {
-      ScrollTrigger.getAll().forEach(trigger => trigger.kill());
-    };
-  }, [isLoading]);
 
   const fetchSocialLinks = async () => {
     try {
@@ -103,6 +79,7 @@ const LinksSection = () => {
       <div 
         ref={linksRef}
         className="w-full max-w-3xl grid grid-cols-1 md:grid-cols-2 gap-3"
+        style={{ perspective: '1000px' }}
       >
         {isLoading ? (
           // Loading skeleton
@@ -110,18 +87,24 @@ const LinksSection = () => {
             <div key={i} className="h-20 bg-card/30 rounded-lg animate-pulse" />
           ))
         ) : (
-          socialLinks.map((link) => {
+          socialLinks.map((link, i) => {
             const { icon: IconComponent, gradient } = getPlatformVisuals(link.name, link.url);
             
             return (
-              <a
+              <motion.a
                 key={link.id}
+                custom={i}
+                variants={linkVariants}
+                initial="hidden"
+                animate={isInView ? "visible" : "hidden"}
                 href={link.url}
                 target="_blank"
                 rel="noopener noreferrer"
-                className="social-link group block"
+                className="group block"
+                whileHover={{ scale: 1.02, y: -2 }}
+                whileTap={{ scale: 0.98 }}
               >
-                <div className="flex items-center gap-4 p-4 bg-card/30 border border-border/20 rounded-lg transition-all duration-200 hover:bg-card/60 hover:border-border/40 hover:scale-[1.02] hover:-translate-y-0.5">
+                <div className="flex items-center gap-4 p-4 bg-card/30 border border-border/20 rounded-lg transition-colors duration-200 hover:bg-card/60 hover:border-border/40">
                   {/* Icon */}
                   <div className={`p-3 rounded-lg bg-gradient-to-br ${gradient} group-hover:scale-110 transition-transform duration-200`}>
                     <IconComponent className="w-5 h-5 text-white" />
@@ -140,7 +123,7 @@ const LinksSection = () => {
                     </span>
                   </div>
                 </div>
-              </a>
+              </motion.a>
             );
           })
         )}

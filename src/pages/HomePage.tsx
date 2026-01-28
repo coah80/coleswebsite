@@ -1,41 +1,15 @@
-import { useState, useEffect, useRef } from 'react';
-import { gsap } from 'gsap';
+import { useState, useEffect, useCallback } from 'react';
+import { motion, AnimatePresence } from 'framer-motion';
 import { Headphones, Gamepad2, Clock } from 'lucide-react';
 import { supabase } from '@/integrations/supabase/client';
+
+// Cache for IGDB covers
+const igdbCache = new Map<string, string>();
 import { getPlatformVisuals } from '@/lib/social-platforms';
 import PageLayout from '@/components/PageLayout';
 import WarpText from '@/components/typography/WarpText';
 import RainbowJumpText from '@/components/typography/RainbowJumpText';
-
-interface LanyardData {
-  discord_user: {
-    id: string;
-    username: string;
-    avatar: string;
-    global_name?: string;
-  };
-  discord_status: 'online' | 'idle' | 'dnd' | 'offline';
-  listening_to_spotify: boolean;
-  activities: Array<{
-    id: string;
-    name: string;
-    type: number;
-    state?: string;
-    details?: string;
-    timestamps?: { start?: number; end?: number };
-    assets?: { large_image?: string };
-    application_id?: string;
-    emoji?: { name: string; id?: string; animated?: boolean };
-  }>;
-  spotify?: {
-    track_id: string;
-    timestamps: { start: number; end: number };
-    song: string;
-    artist: string;
-    album_art_url: string;
-    album: string;
-  } | null;
-}
+import { useLanyard } from '@/hooks/useLanyard';
 
 interface SocialLink {
   id: string;
@@ -46,18 +20,23 @@ interface SocialLink {
 }
 
 const HomePage = () => {
-  const gridRef = useRef<HTMLDivElement>(null);
-  const [lanyardData, setLanyardData] = useState<LanyardData | null>(null);
-  const [isConnected, setIsConnected] = useState(false);
   const [currentTime, setCurrentTime] = useState(Date.now());
   const [socialLinks, setSocialLinks] = useState<SocialLink[]>([]);
   const [viewportHeight, setViewportHeight] = useState(window.innerHeight);
+  const [gameCoverUrl, setGameCoverUrl] = useState<string | null>(null);
 
-  const DISCORD_USER_ID = (import.meta.env.VITE_DISCORD_USER_ID && 
-    typeof import.meta.env.VITE_DISCORD_USER_ID === 'string' && 
-    import.meta.env.VITE_DISCORD_USER_ID.trim() !== '') 
-    ? import.meta.env.VITE_DISCORD_USER_ID 
-    : '761701756119547955';
+  const {
+    data: lanyardData,
+    gameActivity,
+    customStatus,
+    isSpotifyActive,
+    spotify,
+    status,
+    getAvatarUrl,
+    getStatusColor,
+    getStatusText,
+    getActivityAssetUrl,
+  } = useLanyard();
 
   // Handle viewport resize
   useEffect(() => {
@@ -85,73 +64,46 @@ const HomePage = () => {
     return () => clearInterval(interval);
   }, []);
 
-  // Lanyard WebSocket
+  // Fetch game cover - Discord asset first, then IGDB fallback
   useEffect(() => {
-    let ws: WebSocket | null = null;
-    let heartbeatInterval: NodeJS.Timeout;
+    if (!gameActivity?.name) {
+      setGameCoverUrl(null);
+      return;
+    }
 
-    const connect = () => {
-      if (!DISCORD_USER_ID || !/^\d{17,19}$/.test(DISCORD_USER_ID)) return;
-      
-      ws = new WebSocket('wss://api.lanyard.rest/socket');
-      
-      ws.onopen = () => {
-        setIsConnected(true);
-        ws?.send(JSON.stringify({ op: 2, d: { subscribe_to_id: DISCORD_USER_ID } }));
-      };
+    // First try Discord's activity asset
+    const discordAsset = getActivityAssetUrl(gameActivity, 'large');
+    if (discordAsset) {
+      setGameCoverUrl(discordAsset);
+      return;
+    }
 
-      ws.onmessage = (event) => {
-        const message = JSON.parse(event.data);
-        if (message.op === 0 && message.d) setLanyardData(message.d);
-        if (message.op === 1) {
-          ws?.send(JSON.stringify({ op: 3 }));
-          if (heartbeatInterval) clearInterval(heartbeatInterval);
-          heartbeatInterval = setInterval(() => ws?.send(JSON.stringify({ op: 3 })), message.d?.heartbeat_interval || 30000);
+    // Fall back to IGDB
+    const gameName = gameActivity.name;
+    const cacheKey = gameName.toLowerCase().trim();
+    
+    if (igdbCache.has(cacheKey)) {
+      setGameCoverUrl(igdbCache.get(cacheKey) || null);
+      return;
+    }
+
+    const fetchCover = async () => {
+      try {
+        const { data, error } = await supabase.functions.invoke('igdb-cover', {
+          body: { gameName }
+        });
+        if (error) throw error;
+        if (data?.coverUrl) {
+          igdbCache.set(cacheKey, data.coverUrl);
+          setGameCoverUrl(data.coverUrl);
         }
-      };
-
-      ws.onclose = () => setIsConnected(false);
-      ws.onerror = () => { setIsConnected(false); ws?.close(); };
+      } catch (err) {
+        console.error(`[IGDB] Failed to fetch cover for ${gameName}:`, err);
+      }
     };
 
-    connect();
-    return () => { ws?.close(); clearInterval(heartbeatInterval); };
-  }, [DISCORD_USER_ID]);
-
-  // Animate tiles
-  useEffect(() => {
-    if (!gridRef.current) return;
-    const tiles = gridRef.current.querySelectorAll('.bento-tile');
-    
-    gsap.set(tiles, { opacity: 0, y: 20, scale: 0.97 });
-    gsap.to(tiles, {
-      opacity: 1,
-      y: 0,
-      scale: 1,
-      duration: 0.4,
-      stagger: 0.06,
-      ease: 'back.out(1.4)',
-      delay: 0.2 // Small delay after intro completes
-    });
-  }, []);
-
-  const getStatusColor = (status: string) => {
-    switch (status) {
-      case 'online': return 'bg-green-500';
-      case 'idle': return 'bg-yellow-500';
-      case 'dnd': return 'bg-red-500';
-      default: return 'bg-muted-foreground/50';
-    }
-  };
-
-  const getStatusText = (status: string) => {
-    switch (status) {
-      case 'online': return 'online';
-      case 'idle': return 'away';
-      case 'dnd': return 'busy';
-      default: return 'offline';
-    }
-  };
+    fetchCover();
+  }, [gameActivity?.name, gameActivity, getActivityAssetUrl]);
 
   const formatSpotifyTime = (ms: number) => {
     const totalSeconds = Math.floor(ms / 1000);
@@ -168,54 +120,56 @@ const HomePage = () => {
     return `${minutes}m`;
   };
 
-  const getDiscordAvatarUrl = () => {
-    if (!lanyardData?.discord_user) return null;
-    const { id, avatar } = lanyardData.discord_user;
-    return `https://cdn.discordapp.com/avatars/${id}/${avatar}.png?size=256`;
+  const formatLocalTime = () => {
+    return new Date(currentTime).toLocaleTimeString('en-US', {
+      hour: '2-digit',
+      minute: '2-digit',
+      second: '2-digit',
+      hour12: true,
+    });
   };
 
-  const gameActivity = lanyardData?.activities?.find(a => a.type === 0);
-  const customStatus = lanyardData?.activities?.find(a => a.type === 4);
-  // Use listening_to_spotify flag AND check spotify object exists
-  const isSpotifyActive = lanyardData?.listening_to_spotify && lanyardData?.spotify;
+  const formatLocalDate = () => {
+    return new Date(currentTime).toLocaleDateString('en-US', {
+      weekday: 'short',
+      month: 'short',
+      day: 'numeric',
+    });
+  };
 
   // Calculate social rows needed
-  // 1-3: 1 per row, 4-6: 2 per row, 7+: 4 per row
   const getSocialsPerRow = () => {
     if (socialLinks.length <= 3) return 1;
     if (socialLinks.length <= 6) return 2;
-    return 4; // 4 per row for 7+ socials
+    return 4;
   };
   const getSocialRows = () => Math.max(2, Math.ceil(socialLinks.length / getSocialsPerRow()));
 
-  // Dynamic row height based on social count - fill the screen exactly
   const getRowHeight = () => {
-    // Header is h-14 on mobile, h-16 on desktop (64px)
-    // Main has py-4 on mobile, py-5 on desktop (20px * 2 = 40px)
-    // Plus gap between rows (4 * (rows - 1))
     const headerHeight = 64;
     const paddingY = 40;
     const socialRows = getSocialRows();
-    const gapSize = 16; // gap-4
+    const gapSize = 16;
     const totalGapHeight = gapSize * (socialRows - 1);
     const availableHeight = viewportHeight - headerHeight - paddingY - totalGapHeight;
     return Math.floor(availableHeight / socialRows);
   };
 
-  // Profile spans same number of rows as socials
   const getProfileRowSpan = () => getSocialRows();
 
   return (
     <PageLayout title="home" showTransition={true}>
       <div 
-        ref={gridRef}
         className="grid grid-cols-2 sm:grid-cols-4 md:grid-cols-6 lg:grid-cols-12 gap-2 sm:gap-3 md:gap-4 h-full overflow-y-auto lg:overflow-hidden pb-4 lg:pb-0"
         style={{ 
           gridAutoRows: window.innerWidth >= 1024 ? `${getRowHeight()}px` : 'auto',
         }}
       >
         {/* ===== PROFILE TILE ===== */}
-        <div 
+        <motion.div 
+          initial={{ opacity: 0, y: 30, scale: 0.95 }}
+          animate={{ opacity: 1, y: 0, scale: 1 }}
+          transition={{ duration: 0.5, delay: 0.1, ease: [0.16, 1, 0.3, 1] }}
           className="bento-tile col-span-2 sm:col-span-4 md:col-span-3 lg:col-span-4 bg-card/40 border border-border/20 rounded-xl sm:rounded-2xl p-3 sm:p-4 md:p-5 flex flex-col overflow-hidden relative group"
           style={{ gridRow: window.innerWidth >= 1024 ? `span ${getProfileRowSpan()}` : 'auto' }}
         >
@@ -226,24 +180,24 @@ const HomePage = () => {
             <div className="relative flex-shrink-0">
               <div className="w-12 h-12 sm:w-16 sm:h-16 md:w-20 md:h-20 rounded-xl sm:rounded-2xl overflow-hidden ring-2 ring-border/30">
                 {lanyardData?.discord_user ? (
-                  <img src={getDiscordAvatarUrl()!} alt="coah" className="w-full h-full object-cover" />
+                  <img src={getAvatarUrl(256) || ''} alt="coah" className="w-full h-full object-cover" />
                 ) : (
                   <div className="w-full h-full bg-muted/50 animate-pulse" />
                 )}
               </div>
-              <div className={`absolute -bottom-0.5 -right-0.5 sm:-bottom-1 sm:-right-1 w-4 h-4 sm:w-5 sm:h-5 md:w-6 md:h-6 rounded-full border-2 sm:border-4 border-card ${getStatusColor(lanyardData?.discord_status || 'offline')} ${lanyardData?.discord_status === 'online' ? 'animate-pulse' : ''}`} />
+              <div className={`absolute -bottom-0.5 -right-0.5 sm:-bottom-1 sm:-right-1 w-4 h-4 sm:w-5 sm:h-5 md:w-6 md:h-6 rounded-full border-2 sm:border-4 border-card ${getStatusColor()} ${status === 'online' ? 'animate-pulse' : ''}`} />
             </div>
 
             {/* Name + Status */}
             <div className="flex-1 min-w-0">
-              <WarpText className="text-xl sm:text-2xl md:text-3xl lg:text-4xl font-black lowercase leading-none tracking-tight text-foreground">
+              <RainbowJumpText className="text-xl sm:text-2xl md:text-3xl lg:text-4xl font-black lowercase leading-none tracking-tight text-foreground" triggerOnParentHover>
                 coah
-              </WarpText>
+              </RainbowJumpText>
               
               <div className="mt-1 sm:mt-2 flex items-center gap-1.5 sm:gap-2 flex-wrap">
-                <div className={`w-1.5 h-1.5 sm:w-2 sm:h-2 rounded-full ${getStatusColor(lanyardData?.discord_status || 'offline')}`} />
+                <div className={`w-1.5 h-1.5 sm:w-2 sm:h-2 rounded-full ${getStatusColor()}`} />
                 <span className="text-[10px] sm:text-xs font-mono text-muted-foreground">
-                  {getStatusText(lanyardData?.discord_status || 'offline')}
+                  {getStatusText()}
                 </span>
                 {customStatus?.state && (
                   <>
@@ -260,60 +214,244 @@ const HomePage = () => {
             video editor · content creator · bad coder
           </p>
 
-          {/* Activity */}
-          <div className="relative z-10 mt-auto">
-              {isSpotifyActive && lanyardData?.spotify && (
-                <div className="flex items-center gap-2 sm:gap-3 p-2 sm:p-3 bg-green-500/10 border border-green-500/20 rounded-lg sm:rounded-xl">
-                  <img src={lanyardData.spotify.album_art_url} alt={lanyardData.spotify.album} className="w-8 h-8 sm:w-10 sm:h-10 rounded-md sm:rounded-lg" />
+          {/* Time, Languages & Activity - Desktop only */}
+          <div className="hidden lg:flex flex-col gap-2 flex-1">
+            {/* Time */}
+            <div className="flex-1 p-4 bg-muted/10 border border-border/20 rounded-xl flex flex-col justify-center">
+              <div className="flex items-center gap-2 mb-2">
+                <Clock className="w-4 h-4 text-blue-400" />
+                <span className="text-xs font-mono text-muted-foreground uppercase">Local Time</span>
+              </div>
+              <p className="text-2xl font-mono font-bold text-foreground">{formatLocalTime()}</p>
+              <p className="text-sm text-muted-foreground mt-1">{formatLocalDate()}</p>
+            </div>
+
+            {/* Languages */}
+            <div className="flex-1 p-4 bg-muted/10 border border-border/20 rounded-xl flex flex-col">
+              <div className="flex items-center gap-2 mb-3">
+                <span className="text-xs font-mono text-muted-foreground uppercase tracking-wider">Languages</span>
+              </div>
+              <div className="flex flex-wrap gap-2 content-start flex-1">
+                {[
+                  { name: 'HTML', icon: 'https://cdn.simpleicons.org/html5/E34F26' },
+                  { name: 'CSS', icon: 'https://cdn.jsdelivr.net/gh/devicons/devicon/icons/css3/css3-original.svg' },
+                  { name: 'Java', icon: 'https://cdn.jsdelivr.net/gh/devicons/devicon/icons/java/java-original.svg' },
+                  { name: 'C#', icon: 'https://cdn.jsdelivr.net/gh/devicons/devicon/icons/csharp/csharp-original.svg' },
+                  { name: 'C++', icon: 'https://cdn.jsdelivr.net/gh/devicons/devicon/icons/cplusplus/cplusplus-original.svg' },
+                  { name: 'JavaScript', icon: 'https://cdn.simpleicons.org/javascript/F7DF1E' },
+                  { name: 'After Effects', icon: '/icons/aftereffects.svg' },
+                  { name: 'Premiere Pro', icon: '/icons/premierepro.svg' },
+                  { name: 'Git', icon: 'https://cdn.simpleicons.org/git/F05032' },
+                ].map((skill) => (
+                  <div
+                    key={skill.name}
+                    className="flex items-center gap-2 px-3 py-1.5 bg-muted/20 border border-border/30 rounded-lg hover:bg-muted/40 transition-colors group"
+                    title={skill.name}
+                  >
+                    <img src={skill.icon} alt={skill.name} className="w-4 h-4" />
+                    <span className="text-xs font-medium text-muted-foreground group-hover:text-foreground transition-colors">{skill.name}</span>
+                  </div>
+                ))}
+              </div>
+            </div>
+
+            {/* Activity - Desktop (shows both Spotify and Game if available) */}
+            <div className="flex-1 p-4 bg-muted/10 border border-border/20 rounded-xl flex flex-col gap-3 overflow-hidden">
+              <div className="flex items-center gap-2">
+                <Gamepad2 className="w-4 h-4 text-accent" />
+                <span className="text-xs font-mono text-muted-foreground uppercase">Activities</span>
+              </div>
+              <AnimatePresence mode="popLayout">
+                {isSpotifyActive && spotify && (
+                  <motion.div
+                    key={`spotify-${spotify.song}`}
+                    initial={{ opacity: 0, y: -20, scale: 0.95 }}
+                    animate={{ opacity: 1, y: 0, scale: 1 }}
+                    exit={{ opacity: 0, y: -20, scale: 0.95 }}
+                    transition={{ duration: 0.3, ease: [0.16, 1, 0.3, 1] }}
+                    layout
+                    className="flex flex-col gap-2"
+                  >
+                    <div className="flex items-center gap-3">
+                      <img src={spotify.album_art_url} alt={spotify.album} className="w-12 h-12 rounded-lg" />
+                      <div className="flex-1 min-w-0">
+                        <div className="flex items-center gap-2 mb-1">
+                          <Headphones className="w-4 h-4 text-green-400" />
+                          <span className="text-xs font-mono text-green-400 uppercase">listening</span>
+                        </div>
+                        <p className="font-bold text-sm text-foreground truncate">{spotify.song}</p>
+                        <p className="text-xs text-muted-foreground truncate">{spotify.artist}</p>
+                      </div>
+                    </div>
+                    {/* Progress bar */}
+                    <div className="flex items-center gap-2">
+                      <span className="text-[10px] font-mono text-muted-foreground w-8 text-right">
+                        {formatSpotifyTime(currentTime - spotify.timestamps.start)}
+                      </span>
+                      <div className="flex-1 h-1 bg-muted/30 rounded-full overflow-hidden">
+                        <motion.div 
+                          className="h-full bg-green-500 rounded-full"
+                          initial={{ width: 0 }}
+                          animate={{ 
+                            width: `${Math.min(100, ((currentTime - spotify.timestamps.start) / (spotify.timestamps.end - spotify.timestamps.start)) * 100)}%` 
+                          }}
+                          transition={{ duration: 0.5, ease: "linear" }}
+                        />
+                      </div>
+                      <span className="text-[10px] font-mono text-muted-foreground w-8">
+                        {formatSpotifyTime(spotify.timestamps.end - spotify.timestamps.start)}
+                      </span>
+                    </div>
+                  </motion.div>
+                )}
+
+                {gameActivity && (
+                  <motion.div
+                    key={`game-${gameActivity.name}`}
+                    initial={{ opacity: 0, y: 20, scale: 0.95 }}
+                    animate={{ opacity: 1, y: 0, scale: 1 }}
+                    exit={{ opacity: 0, y: 20, scale: 0.95 }}
+                    transition={{ duration: 0.3, ease: [0.16, 1, 0.3, 1] }}
+                    layout
+                    className="flex gap-4 flex-1"
+                  >
+                    {/* IGDB-style cover */}
+                    {gameCoverUrl ? (
+                      <div className="relative flex-shrink-0">
+                        <img 
+                          src={gameCoverUrl} 
+                          alt={gameActivity.name} 
+                          className="w-20 h-28 rounded-xl object-cover shadow-lg ring-1 ring-white/10" 
+                        />
+                        <div className="absolute inset-0 rounded-xl bg-gradient-to-t from-black/40 to-transparent" />
+                      </div>
+                    ) : (
+                      <div className="w-20 h-28 rounded-xl bg-muted/30 flex items-center justify-center flex-shrink-0 ring-1 ring-white/10">
+                        <Gamepad2 className="w-8 h-8 text-accent" />
+                      </div>
+                    )}
+                    <div className="flex-1 min-w-0 flex flex-col justify-center">
+                      <div className="flex items-center gap-2 mb-1">
+                        <div className="w-2 h-2 rounded-full bg-green-500 animate-pulse" />
+                        <span className="text-xs font-mono text-accent uppercase font-bold">Now Playing</span>
+                      </div>
+                      <p className="font-black text-lg text-foreground leading-tight line-clamp-2">{gameActivity.name}</p>
+                      {gameActivity.details && (
+                        <p className="text-xs text-muted-foreground mt-1 truncate">{gameActivity.details}</p>
+                      )}
+                      {gameActivity.state && (
+                        <p className="text-xs text-muted-foreground/70 italic truncate">{gameActivity.state}</p>
+                      )}
+                      {gameActivity.timestamps?.start && (
+                        <div className="flex items-center gap-1.5 mt-2 text-xs font-mono text-muted-foreground">
+                          <Clock className="w-3 h-3" />
+                          <span>{formatElapsedTime(gameActivity.timestamps.start)} played</span>
+                        </div>
+                      )}
+                    </div>
+                  </motion.div>
+                )}
+
+                {!isSpotifyActive && !gameActivity && (
+                  <motion.div
+                    key="idle"
+                    initial={{ opacity: 0 }}
+                    animate={{ opacity: 1 }}
+                    exit={{ opacity: 0 }}
+                    transition={{ duration: 0.2 }}
+                    className="flex items-center justify-center h-full"
+                  >
+                    <p className="text-sm font-mono text-muted-foreground/60">not doing anything rn</p>
+                  </motion.div>
+                )}
+              </AnimatePresence>
+            </div>
+          </div>
+
+          {/* Activity - Mobile only */}
+          <div className="relative z-10 mt-auto lg:hidden overflow-hidden">
+            <AnimatePresence mode="wait">
+              {isSpotifyActive && spotify && (
+                <motion.div
+                  key={`mobile-spotify-${spotify.song}`}
+                  initial={{ opacity: 0, y: 20, scale: 0.95 }}
+                  animate={{ opacity: 1, y: 0, scale: 1 }}
+                  exit={{ opacity: 0, y: -20, scale: 0.95 }}
+                  transition={{ duration: 0.3, ease: [0.16, 1, 0.3, 1] }}
+                  className="flex items-center gap-2 sm:gap-3 p-2 sm:p-3 bg-green-500/10 border border-green-500/20 rounded-lg sm:rounded-xl"
+                >
+                  <img src={spotify.album_art_url} alt={spotify.album} className="w-8 h-8 sm:w-10 sm:h-10 rounded-md sm:rounded-lg" />
                   <div className="flex-1 min-w-0">
                     <div className="flex items-center gap-1 sm:gap-1.5 mb-0.5">
                       <Headphones className="w-2.5 h-2.5 sm:w-3 sm:h-3 text-green-400" />
                       <span className="text-[8px] sm:text-[10px] font-mono text-green-400 uppercase">listening</span>
                     </div>
-                    <p className="font-bold text-[10px] sm:text-xs text-foreground truncate">{lanyardData.spotify.song}</p>
-                    <p className="text-[8px] sm:text-[10px] text-muted-foreground truncate">{lanyardData.spotify.artist}</p>
+                    <p className="font-bold text-[10px] sm:text-xs text-foreground truncate">{spotify.song}</p>
+                    <p className="text-[8px] sm:text-[10px] text-muted-foreground truncate">{spotify.artist}</p>
                   </div>
                   <div className="text-[8px] sm:text-[10px] font-mono text-muted-foreground hidden sm:block">
-                    {formatSpotifyTime(currentTime - lanyardData.spotify.timestamps.start)}
+                    {formatSpotifyTime(currentTime - spotify.timestamps.start)}
                   </div>
-                </div>
+                </motion.div>
               )}
 
               {!isSpotifyActive && gameActivity && (
-                <div className="flex items-center gap-2 sm:gap-3 p-2 sm:p-3 bg-accent/10 border border-accent/20 rounded-lg sm:rounded-xl">
-                  <div className="w-8 h-8 sm:w-10 sm:h-10 rounded-md sm:rounded-lg bg-muted/30 flex items-center justify-center">
-                    <Gamepad2 className="w-4 h-4 sm:w-5 sm:h-5 text-accent" />
-                  </div>
-                  <div className="flex-1 min-w-0">
-                    <div className="flex items-center gap-1 sm:gap-1.5 mb-0.5">
-                      <span className="text-[8px] sm:text-[10px] font-mono text-accent uppercase">playing</span>
+                <motion.div
+                  key={`mobile-game-${gameActivity.name}`}
+                  initial={{ opacity: 0, y: 20, scale: 0.95 }}
+                  animate={{ opacity: 1, y: 0, scale: 1 }}
+                  exit={{ opacity: 0, y: -20, scale: 0.95 }}
+                  transition={{ duration: 0.3, ease: [0.16, 1, 0.3, 1] }}
+                  className="flex gap-3 p-3 bg-accent/10 border border-accent/20 rounded-xl"
+                >
+                  {gameCoverUrl ? (
+                    <div className="relative flex-shrink-0">
+                      <img src={gameCoverUrl} alt={gameActivity.name} className="w-14 h-20 rounded-lg object-cover ring-1 ring-white/10" />
+                      <div className="absolute inset-0 rounded-lg bg-gradient-to-t from-black/30 to-transparent" />
                     </div>
-                    <p className="font-bold text-[10px] sm:text-xs text-foreground truncate">{gameActivity.name}</p>
-                    {gameActivity.details && <p className="text-[8px] sm:text-[10px] text-muted-foreground truncate">{gameActivity.details}</p>}
-                  </div>
-                  {gameActivity.timestamps?.start && (
-                    <div className="items-center gap-1 text-[8px] sm:text-[10px] font-mono text-muted-foreground hidden sm:flex">
-                      <Clock className="w-2.5 h-2.5 sm:w-3 sm:h-3" />
-                      {formatElapsedTime(gameActivity.timestamps.start)}
+                  ) : (
+                    <div className="w-14 h-20 rounded-lg bg-muted/30 flex items-center justify-center ring-1 ring-white/10">
+                      <Gamepad2 className="w-6 h-6 text-accent" />
                     </div>
                   )}
-                </div>
+                  <div className="flex-1 min-w-0 flex flex-col justify-center">
+                    <div className="flex items-center gap-1.5 mb-1">
+                      <div className="w-1.5 h-1.5 rounded-full bg-green-500 animate-pulse" />
+                      <span className="text-[10px] font-mono text-accent uppercase font-bold">Now Playing</span>
+                    </div>
+                    <p className="font-bold text-sm text-foreground leading-tight line-clamp-2">{gameActivity.name}</p>
+                    {gameActivity.details && <p className="text-[10px] text-muted-foreground mt-0.5 truncate">{gameActivity.details}</p>}
+                    {gameActivity.timestamps?.start && (
+                      <div className="flex items-center gap-1 mt-1 text-[10px] font-mono text-muted-foreground">
+                        <Clock className="w-2.5 h-2.5" />
+                        {formatElapsedTime(gameActivity.timestamps.start)}
+                      </div>
+                    )}
+                  </div>
+                </motion.div>
               )}
 
               {!isSpotifyActive && !gameActivity && (
-                <div className="p-2 sm:p-3 bg-muted/10 border border-border/20 rounded-lg sm:rounded-xl">
+                <motion.div
+                  key="mobile-idle"
+                  initial={{ opacity: 0 }}
+                  animate={{ opacity: 1 }}
+                  exit={{ opacity: 0 }}
+                  transition={{ duration: 0.2 }}
+                  className="p-2 sm:p-3 bg-muted/10 border border-border/20 rounded-lg sm:rounded-xl"
+                >
                   <p className="text-[10px] sm:text-xs font-mono text-muted-foreground/60 text-center">not doing anything rn</p>
-                </div>
+                </motion.div>
               )}
-            </div>
-        </div>
+            </AnimatePresence>
+          </div>
+        </motion.div>
 
         {/* ===== SOCIAL LINKS ===== */}
-        {socialLinks.map((link) => {
+        {socialLinks.map((link, index) => {
           const { icon: IconComponent, gradient, hoverBg } = getPlatformVisuals(link.name, link.url);
           const count = socialLinks.length;
           
-          // Dynamic sizing - responsive for all screen sizes
           let colSpan = 'col-span-1 sm:col-span-2 md:col-span-3 lg:col-span-8';
           
           if (count <= 3) {
@@ -325,24 +463,30 @@ const HomePage = () => {
           }
           
           return (
-            <a
+            <motion.a
               key={link.id}
               href={link.url}
               target="_blank"
               rel="noopener noreferrer"
-              className={`bento-tile ${colSpan} row-span-1 bg-card/30 border border-border/20 rounded-lg sm:rounded-xl p-2 sm:p-3 md:p-4 flex flex-col items-center justify-center gap-1 sm:gap-2 group ${hoverBg} hover:border-border/40 transition-all duration-200 hover:scale-[1.02]`}
+              initial={{ opacity: 0, y: 20, scale: 0.9 }}
+              animate={{ opacity: 1, y: 0, scale: 1 }}
+              transition={{ 
+                duration: 0.4, 
+                delay: 0.2 + index * 0.05,
+                ease: [0.16, 1, 0.3, 1]
+              }}
+              whileHover={{ scale: 1.03, y: -2 }}
+              whileTap={{ scale: 0.98 }}
+              className={`bento-tile ${colSpan} row-span-1 bg-card/30 border border-border/20 rounded-lg sm:rounded-xl p-2 sm:p-3 md:p-4 flex flex-col items-center justify-center gap-1 sm:gap-2 group ${hoverBg} hover:border-border/40 transition-colors duration-200`}
             >
-              {/* Icon */}
               <div className={`p-1.5 sm:p-2 md:p-3 rounded-lg sm:rounded-xl md:rounded-2xl bg-gradient-to-br ${gradient} group-hover:scale-110 transition-transform`}>
                 <IconComponent className="w-4 h-4 sm:w-5 sm:h-5 md:w-6 md:h-6 text-white" />
               </div>
               
-              {/* Platform name - rainbow on hover */}
               <RainbowJumpText className="font-black text-xs sm:text-sm md:text-lg text-foreground text-center leading-tight" triggerOnParentHover>{link.name}</RainbowJumpText>
               
-              {/* Handle - hidden on very small screens */}
               <span className="text-[8px] sm:text-[10px] md:text-xs font-mono text-muted-foreground truncate max-w-full hidden sm:block">{link.handle}</span>
-            </a>
+            </motion.a>
           );
         })}
 

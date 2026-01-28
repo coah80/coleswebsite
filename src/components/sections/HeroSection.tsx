@@ -1,13 +1,8 @@
 import { useState, useEffect, useRef } from 'react';
-import { gsap } from 'gsap';
-import { ScrollTrigger } from 'gsap/ScrollTrigger';
 import { Headphones, Gamepad2, Clock } from 'lucide-react';
 import SlamText from '@/components/typography/SlamText';
 import TypewriterText from '@/components/typography/TypewriterText';
-import WarpText from '@/components/typography/WarpText';
 import BrowserFrame from '@/components/decorations/BrowserFrame';
-
-gsap.registerPlugin(ScrollTrigger);
 
 interface LanyardData {
   discord_user: {
