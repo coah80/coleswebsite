@@ -6,6 +6,7 @@ import { Label } from '@/components/ui/label';
 import { useNavigate } from 'react-router-dom';
 import { ArrowLeft } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
+import { supabase } from '@/integrations/supabase/client';
 
 const AdminLogin = () => {
   const [password, setPassword] = useState('');
@@ -17,20 +18,32 @@ const AdminLogin = () => {
     e.preventDefault();
     setIsLoading(true);
 
-    // Secure password check - change this to your preferred password
-    const adminPassword = "onlyCOLEcanlogin!";
-    
-    if (password === adminPassword) {
+    try {
+      const { data, error } = await supabase.functions.invoke('admin-operations', {
+        body: { operation: 'login', password }
+      });
+
+      if (error || !data?.success) {
+        toast({
+          title: "Access Denied",
+          description: "Invalid password",
+          variant: "destructive",
+        });
+        setIsLoading(false);
+        return;
+      }
+
       sessionStorage.setItem('adminAuth', 'true');
+      sessionStorage.setItem('adminToken', data.token);
       navigate('/admin/dashboard');
-    } else {
+    } catch {
       toast({
         title: "Access Denied",
-        description: "Invalid password",
+        description: "Something went wrong, try again",
         variant: "destructive",
       });
     }
-    
+
     setIsLoading(false);
   };
 

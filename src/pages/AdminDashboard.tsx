@@ -68,13 +68,17 @@ const AdminDashboard = () => {
   const [activeTab, setActiveTab] = useState<'submissions' | 'portfolio' | 'social'>('submissions');
   const [submissionsFilter, setSubmissionsFilter] = useState<'all' | 'message' | 'drawing' | 'other'>('all');
 
+  const getAdminToken = useCallback(() => {
+    return sessionStorage.getItem('adminToken') ?? '';
+  }, []);
+
   const fetchSubmissions = useCallback(async () => {
     setIsRefreshing(true);
     try {
       const { data, error } = await supabase.functions.invoke<{
         submissions?: Submission[];
       }>('admin-operations', {
-        body: { operation: 'fetchSubmissions' }
+        body: { operation: 'fetchSubmissions', token: getAdminToken() }
       });
 
       if (error) {
@@ -722,6 +726,7 @@ const AdminDashboard = () => {
 
   const handleLogout = () => {
     sessionStorage.removeItem('adminAuth');
+    sessionStorage.removeItem('adminToken');
     navigate('/admin');
   };
 

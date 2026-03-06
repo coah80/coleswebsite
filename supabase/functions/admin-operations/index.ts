@@ -1,15 +1,27 @@
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
+import { encode as hexEncode } from "https://deno.land/std@0.168.0/encoding/hex.ts";
 
 const corsHeaders = {
   'Access-Control-Allow-Origin': '*',
   'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type',
 };
 
+const jsonHeaders = { ...corsHeaders, 'Content-Type': 'application/json' };
+
+const unauthorized = () =>
+  new Response(JSON.stringify({ error: 'Unauthorized' }), {
+    status: 401,
+    headers: jsonHeaders,
+  });
+
+const hashPassword = async (password: string): Promise<string> => {
+  const data = new TextEncoder().encode(password);
+  const hash = await crypto.subtle.digest('SHA-256', data);
+  return new TextDecoder().decode(hexEncode(new Uint8Array(hash)));
+};
+
 serve(async (req) => {
-  console.log('Admin operations function started - version 2.0');
-  
-  // Handle CORS preflight requests
   if (req.method === 'OPTIONS') {
     return new Response(null, { headers: corsHeaders });
   }
@@ -17,17 +29,30 @@ serve(async (req) => {
   try {
     const SUPABASE_URL = Deno.env.get('SUPABASE_URL');
     const SUPABASE_SERVICE_ROLE_KEY = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY');
-    
-    console.log('Environment check:', { 
-      hasUrl: !!SUPABASE_URL, 
-      hasKey: !!SUPABASE_SERVICE_ROLE_KEY 
-    });
-    
-    if (!SUPABASE_URL || !SUPABASE_SERVICE_ROLE_KEY) {
-      throw new Error('Missing Supabase configuration');
+    const ADMIN_PASSWORD = Deno.env.get('ADMIN_PASSWORD');
+
+    if (!SUPABASE_URL || !SUPABASE_SERVICE_ROLE_KEY || !ADMIN_PASSWORD) {
+      throw new Error('Missing server configuration');
     }
 
-    // Create admin client with service role key
+    const requestBody = await req.json();
+    const { operation, token, password, submissionId, approved, projectData, projectId } = requestBody;
+
+    const expectedToken = await hashPassword(ADMIN_PASSWORD);
+
+    if (operation === 'login') {
+      if (password !== ADMIN_PASSWORD) {
+        return unauthorized();
+      }
+      return new Response(JSON.stringify({ success: true, token: expectedToken }), {
+        headers: jsonHeaders,
+      });
+    }
+
+    if (!token || token !== expectedToken) {
+      return unauthorized();
+    }
+
     const supabaseAdmin = createClient(SUPABASE_URL, SUPABASE_SERVICE_ROLE_KEY, {
       auth: {
         autoRefreshToken: false,
@@ -35,169 +60,109 @@ serve(async (req) => {
       }
     });
 
-    const requestBody = await req.json();
-    console.log('Request received:', requestBody);
-    
-    const { operation, submissionId, approved, projectData, projectId } = requestBody;
-    
-    console.log('Processing operation:', operation);
-
     switch (operation) {
-      case 'fetchSubmissions':
-        console.log('[SUBMISSIONS] Fetching all submissions');
+      case 'fetchSubmissions': {
         const { data: submissions, error: fetchError } = await supabaseAdmin
           .from('submissions')
           .select('*')
           .order('submitted_at', { ascending: false });
 
-        if (fetchError) {
-          console.error('[SUBMISSIONS] Error fetching submissions:', fetchError);
-          throw fetchError;
-        }
+        if (fetchError) throw fetchError;
 
-        console.log(`[SUBMISSIONS] Successfully fetched ${submissions?.length || 0} submissions`);
         return new Response(JSON.stringify({ submissions }), {
-          headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+          headers: jsonHeaders,
         });
+      }
 
-      case 'updateApproval':
-        console.log(`[SUBMISSIONS] Updating approval for submission ${submissionId} to ${approved}`);
+      case 'updateApproval': {
         const { error: updateError } = await supabaseAdmin
           .from('submissions')
           .update({ is_approved: approved })
           .eq('id', submissionId);
 
-        if (updateError) {
-          console.error('[SUBMISSIONS] Error updating approval:', updateError);
-          throw updateError;
-        }
+        if (updateError) throw updateError;
 
-        console.log('[SUBMISSIONS] Successfully updated approval status');
         return new Response(JSON.stringify({ success: true }), {
-          headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+          headers: jsonHeaders,
         });
+      }
 
-      case 'deleteSubmission':
-        console.log(`[SUBMISSIONS] Deleting submission ${submissionId}`);
+      case 'deleteSubmission': {
         const { error: deleteError } = await supabaseAdmin
           .from('submissions')
           .delete()
           .eq('id', submissionId);
 
-        if (deleteError) {
-          console.error('[SUBMISSIONS] Error deleting submission:', deleteError);
-          throw deleteError;
-        }
+        if (deleteError) throw deleteError;
 
-        console.log('[SUBMISSIONS] Successfully deleted submission');
         return new Response(JSON.stringify({ success: true }), {
-          headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+          headers: jsonHeaders,
         });
+      }
 
-      case 'fetchProjects':
-        console.log('[PROJECTS] Executing fetchProjects operation');
-        try {
-          const { data: projects, error: fetchProjectsError } = await supabaseAdmin
-            .from('projects')
-            .select('*')
-            .order('created_at', { ascending: false });
+      case 'fetchProjects': {
+        const { data: projects, error: fetchProjectsError } = await supabaseAdmin
+          .from('projects')
+          .select('*')
+          .order('created_at', { ascending: false });
 
-          if (fetchProjectsError) {
-            console.error('[PROJECTS] Error fetching projects:', fetchProjectsError);
-            throw fetchProjectsError;
-          }
+        if (fetchProjectsError) throw fetchProjectsError;
 
-          console.log(`[PROJECTS] Successfully fetched ${projects?.length || 0} projects`);
-          return new Response(JSON.stringify({ projects }), {
-            headers: { ...corsHeaders, 'Content-Type': 'application/json' },
-          });
-        } catch (error) {
-          console.error('[PROJECTS] Fetch projects error:', error);
-          throw error;
-        }
+        return new Response(JSON.stringify({ projects }), {
+          headers: jsonHeaders,
+        });
+      }
 
-      case 'createProject':
-        console.log('[PROJECTS] Executing createProject operation with data:', projectData);
-        try {
-          const { data: newProject, error: createError } = await supabaseAdmin
-            .from('projects')
-            .insert([projectData])
-            .select()
-            .single();
+      case 'createProject': {
+        const { data: newProject, error: createError } = await supabaseAdmin
+          .from('projects')
+          .insert([projectData])
+          .select()
+          .single();
 
-          if (createError) {
-            console.error('[PROJECTS] Error creating project:', createError);
-            throw createError;
-          }
+        if (createError) throw createError;
 
-          console.log('[PROJECTS] Successfully created project:', newProject.id);
-          return new Response(JSON.stringify({ project: newProject }), {
-            headers: { ...corsHeaders, 'Content-Type': 'application/json' },
-          });
-        } catch (error) {
-          console.error('[PROJECTS] Create project error:', error);
-          throw error;
-        }
+        return new Response(JSON.stringify({ project: newProject }), {
+          headers: jsonHeaders,
+        });
+      }
 
-      case 'updateProject':
-        console.log(`[PROJECTS] Executing updateProject operation for ${projectId} with data:`, projectData);
-        try {
-          const { data: updatedProject, error: updateProjectError } = await supabaseAdmin
-            .from('projects')
-            .update(projectData)
-            .eq('id', projectId)
-            .select()
-            .single();
+      case 'updateProject': {
+        const { data: updatedProject, error: updateProjectError } = await supabaseAdmin
+          .from('projects')
+          .update(projectData)
+          .eq('id', projectId)
+          .select()
+          .single();
 
-          if (updateProjectError) {
-            console.error('[PROJECTS] Error updating project:', updateProjectError);
-            throw updateProjectError;
-          }
+        if (updateProjectError) throw updateProjectError;
 
-          console.log('[PROJECTS] Successfully updated project');
-          return new Response(JSON.stringify({ project: updatedProject }), {
-            headers: { ...corsHeaders, 'Content-Type': 'application/json' },
-          });
-        } catch (error) {
-          console.error('[PROJECTS] Update project error:', error);
-          throw error;
-        }
+        return new Response(JSON.stringify({ project: updatedProject }), {
+          headers: jsonHeaders,
+        });
+      }
 
-      case 'deleteProject':
-        console.log(`[PROJECTS] Executing deleteProject operation for ${projectId}`);
-        try {
-          const { error: deleteProjectError } = await supabaseAdmin
-            .from('projects')
-            .delete()
-            .eq('id', projectId);
+      case 'deleteProject': {
+        const { error: deleteProjectError } = await supabaseAdmin
+          .from('projects')
+          .delete()
+          .eq('id', projectId);
 
-          if (deleteProjectError) {
-            console.error('[PROJECTS] Error deleting project:', deleteProjectError);
-            throw deleteProjectError;
-          }
+        if (deleteProjectError) throw deleteProjectError;
 
-          console.log('[PROJECTS] Successfully deleted project');
-          return new Response(JSON.stringify({ success: true }), {
-            headers: { ...corsHeaders, 'Content-Type': 'application/json' },
-          });
-        } catch (error) {
-          console.error('[PROJECTS] Delete project error:', error);
-          throw error;
-        }
+        return new Response(JSON.stringify({ success: true }), {
+          headers: jsonHeaders,
+        });
+      }
 
       default:
-        console.error('UNKNOWN OPERATION:', operation, 'Available operations:', [
-          'fetchSubmissions', 'updateApproval', 'deleteSubmission', 
-          'fetchProjects', 'createProject', 'updateProject', 'deleteProject'
-        ]);
         throw new Error(`Invalid operation: ${operation}`);
     }
 
   } catch (error) {
-    console.error('GLOBAL ERROR in admin operation:', error);
     return new Response(JSON.stringify({ error: error.message }), {
       status: 500,
-      headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+      headers: jsonHeaders,
     });
   }
 });
