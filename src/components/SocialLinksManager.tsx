@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import { Card } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -6,7 +6,7 @@ import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
 import { Switch } from '@/components/ui/switch';
 import { Badge } from '@/components/ui/badge';
-import { Trash2, Plus, Copy, ArrowUp, ArrowDown } from 'lucide-react';
+import { Trash2, Plus, ArrowUp, ArrowDown } from 'lucide-react';
 import { supabase } from '@/integrations/supabase/client';
 import { useToast } from '@/hooks/use-toast';
 import { getPlatformVisuals } from '@/lib/social-platforms';
@@ -21,6 +21,16 @@ interface SocialLink {
   is_published: boolean;
 }
 
+const getAdminToken = () => sessionStorage.getItem('adminToken') ?? '';
+
+const adminInvoke = async <T = Record<string, unknown>>(body: Record<string, unknown>): Promise<T> => {
+  const { data, error } = await supabase.functions.invoke<T>('admin-operations', {
+    body: { ...body, token: getAdminToken() },
+  });
+  if (error) throw error;
+  return data as T;
+};
+
 const SocialLinksManager = () => {
   const [socialLinks, setSocialLinks] = useState<SocialLink[]>([]);
   const [isLoading, setIsLoading] = useState(true);
@@ -31,74 +41,15 @@ const SocialLinksManager = () => {
     description: ''
   });
   const [editingId, setEditingId] = useState<string | null>(null);
-  const [lastError, setLastError] = useState<string | null>(null);
   const { toast } = useToast();
 
-  const copyErrorToClipboard = () => {
-    if (lastError) {
-      navigator.clipboard.writeText(lastError);
-      toast({ title: "Error copied to clipboard" });
-    }
-  };
-
-  useEffect(() => {
-    fetchSocialLinks();
-  }, []);
-
-  const moveLink = async (linkId: string, direction: 'up' | 'down') => {
-    const currentIndex = socialLinks.findIndex(link => link.id === linkId);
-    if (currentIndex === -1) return;
-    
-    const newIndex = direction === 'up' ? currentIndex - 1 : currentIndex + 1;
-    if (newIndex < 0 || newIndex >= socialLinks.length) return;
-    
-    // Create new array with swapped positions
-    const newLinks = [...socialLinks];
-    [newLinks[currentIndex], newLinks[newIndex]] = [newLinks[newIndex], newLinks[currentIndex]];
-    
-    // Update display_order for both items
+  const fetchSocialLinks = useCallback(async () => {
     try {
-      const updates = [
-        supabase
-          .from('social_links')
-          .update({ display_order: newIndex })
-          .eq('id', linkId),
-        supabase
-          .from('social_links')
-          .update({ display_order: currentIndex })
-          .eq('id', newLinks[currentIndex].id)
-      ];
-      
-      await Promise.all(updates);
-      
-      // Update local state immediately for better UX
-      setSocialLinks(newLinks);
-      
-      toast({ 
-        title: "Success", 
-        description: "Link order updated" 
+      const result = await adminInvoke<{ socialLinks: SocialLink[] }>({
+        operation: 'fetchSocialLinks',
       });
-    } catch (error) {
-      console.error('Error updating link order:', error);
-      toast({
-        title: "Error",
-        description: "Failed to update link order",
-        variant: "destructive",
-      });
-    }
-  };
-
-  const fetchSocialLinks = async () => {
-    try {
-      const { data, error } = await supabase
-        .from('social_links')
-        .select('*')
-        .order('display_order', { ascending: true });
-
-      if (error) throw error;
-      setSocialLinks(data || []);
-    } catch (error) {
-      console.error('Error fetching social links:', error);
+      setSocialLinks(result.socialLinks ?? []);
+    } catch {
       toast({
         title: "Error",
         description: "Failed to fetch social links",
@@ -106,6 +57,40 @@ const SocialLinksManager = () => {
       });
     }
     setIsLoading(false);
+  }, [toast]);
+
+  useEffect(() => {
+    fetchSocialLinks();
+  }, [fetchSocialLinks]);
+
+  const moveLink = async (linkId: string, direction: 'up' | 'down') => {
+    const currentIndex = socialLinks.findIndex(link => link.id === linkId);
+    if (currentIndex === -1) return;
+
+    const newIndex = direction === 'up' ? currentIndex - 1 : currentIndex + 1;
+    if (newIndex < 0 || newIndex >= socialLinks.length) return;
+
+    const newLinks = [...socialLinks];
+    [newLinks[currentIndex], newLinks[newIndex]] = [newLinks[newIndex], newLinks[currentIndex]];
+
+    try {
+      await adminInvoke({
+        operation: 'reorderSocialLinks',
+        updates: [
+          { id: linkId, display_order: newIndex },
+          { id: newLinks[currentIndex].id, display_order: currentIndex },
+        ],
+      });
+
+      setSocialLinks(newLinks);
+      toast({ title: "Success", description: "Link order updated" });
+    } catch {
+      toast({
+        title: "Error",
+        description: "Failed to update link order",
+        variant: "destructive",
+      });
+    }
   };
 
   const saveSocialLink = async () => {
@@ -124,48 +109,31 @@ const SocialLinksManager = () => {
         handle: formData.handle,
         url: formData.url,
         description: formData.description || null,
-        display_order: socialLinks.length
+        display_order: socialLinks.length,
       };
 
       if (editingId) {
-        const { error } = await supabase
-          .from('social_links')
-          .update(linkData)
-          .eq('id', editingId);
-
-        if (error) throw error;
+        await adminInvoke({
+          operation: 'updateSocialLink',
+          linkId: editingId,
+          linkData,
+        });
         toast({ title: "Success", description: "Social link updated" });
       } else {
-        const { error } = await supabase
-          .from('social_links')
-          .insert([linkData]);
-
-        if (error) throw error;
+        await adminInvoke({
+          operation: 'createSocialLink',
+          linkData,
+        });
         toast({ title: "Success", description: "Social link added" });
       }
 
       setFormData({ name: '', handle: '', url: '', description: '' });
       setEditingId(null);
       fetchSocialLinks();
-    } catch (error) {
-      console.error('Error saving social link:', error);
-      const errorMessage = JSON.stringify(error, null, 2);
-      setLastError(errorMessage);
+    } catch {
       toast({
         title: "Error",
-        description: (
-          <div className="space-y-2">
-            <p>Failed to save social link</p>
-            <Button 
-              size="sm" 
-              variant="outline" 
-              onClick={copyErrorToClipboard}
-              className="w-full"
-            >
-              Copy Error Logs
-            </Button>
-          </div>
-        ),
+        description: "Failed to save social link",
         variant: "destructive",
       });
     }
@@ -173,16 +141,13 @@ const SocialLinksManager = () => {
 
   const deleteSocialLink = async (id: string) => {
     try {
-      const { error } = await supabase
-        .from('social_links')
-        .delete()
-        .eq('id', id);
-
-      if (error) throw error;
+      await adminInvoke({
+        operation: 'deleteSocialLink',
+        linkId: id,
+      });
       toast({ title: "Success", description: "Social link deleted" });
       fetchSocialLinks();
-    } catch (error) {
-      console.error('Error deleting social link:', error);
+    } catch {
       toast({
         title: "Error",
         description: "Failed to delete social link",
@@ -193,15 +158,13 @@ const SocialLinksManager = () => {
 
   const togglePublished = async (id: string, isPublished: boolean) => {
     try {
-      const { error } = await supabase
-        .from('social_links')
-        .update({ is_published: isPublished })
-        .eq('id', id);
-
-      if (error) throw error;
+      await adminInvoke({
+        operation: 'updateSocialLink',
+        linkId: id,
+        linkData: { is_published: isPublished },
+      });
       fetchSocialLinks();
-    } catch (error) {
-      console.error('Error updating social link:', error);
+    } catch {
       toast({
         title: "Error",
         description: "Failed to update social link",
@@ -236,7 +199,7 @@ const SocialLinksManager = () => {
         <h3 className="text-lg font-semibold mb-4 text-foreground">
           {editingId ? 'Edit Social Link' : 'Add New Social Link'}
         </h3>
-        
+
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
           <div>
             <Label htmlFor="name">Platform Name *</Label>
@@ -247,7 +210,7 @@ const SocialLinksManager = () => {
               placeholder="e.g., Instagram, Ko-fi, Steam"
             />
           </div>
-          
+
           <div>
             <Label htmlFor="handle">Handle/Username *</Label>
             <Input
@@ -257,7 +220,7 @@ const SocialLinksManager = () => {
               placeholder="@username or display name"
             />
           </div>
-          
+
           <div className="md:col-span-2">
             <Label htmlFor="url">URL *</Label>
             <Input
@@ -267,7 +230,7 @@ const SocialLinksManager = () => {
               placeholder="https://..."
             />
           </div>
-          
+
           <div className="md:col-span-2">
             <Label htmlFor="description">Description</Label>
             <Textarea
@@ -279,7 +242,7 @@ const SocialLinksManager = () => {
             />
           </div>
         </div>
-        
+
         <div className="flex gap-2 mt-4">
           <Button onClick={saveSocialLink}>
             {editingId ? 'Update' : 'Add'} Social Link
@@ -289,31 +252,16 @@ const SocialLinksManager = () => {
               Cancel
             </Button>
           )}
-          {lastError && (
-            <Button variant="outline" onClick={copyErrorToClipboard}>
-              <Copy className="h-4 w-4 mr-2" />
-              Copy Error
-            </Button>
-          )}
         </div>
-
-        {lastError && (
-          <div className="mt-4 p-3 bg-destructive/10 border border-destructive/20 rounded">
-            <p className="text-sm text-destructive">Last Error:</p>
-            <pre className="text-xs text-muted-foreground mt-1 overflow-auto">
-              {lastError}
-            </pre>
-          </div>
-        )}
       </Card>
 
       {/* Social Links List */}
       <div className="space-y-3">
         <h3 className="text-lg font-semibold text-foreground">Current Social Links</h3>
-        
+
         {socialLinks.map((link) => {
           const { icon: IconComponent, gradient } = getPlatformVisuals(link.name, link.url);
-          
+
           return (
             <Card key={link.id} className="p-4 bg-gradient-card border-border/50">
               <div className="flex items-center gap-4">
@@ -342,7 +290,7 @@ const SocialLinksManager = () => {
                     <IconComponent className="w-4 h-4 text-white" />
                   </div>
                 </div>
-                
+
                 <div className="flex-1">
                   <div className="flex items-center gap-2">
                     <span className="font-medium text-foreground">{link.name}</span>
@@ -359,7 +307,7 @@ const SocialLinksManager = () => {
                     </div>
                   )}
                 </div>
-                
+
                 <div className="flex items-center gap-2 flex-shrink-0">
                   <Switch
                     checked={link.is_published}
@@ -384,7 +332,7 @@ const SocialLinksManager = () => {
             </Card>
           );
         })}
-        
+
         {socialLinks.length === 0 && (
           <Card className="p-8 text-center bg-gradient-card border-border/50">
             <p className="text-muted-foreground">No social links added yet</p>

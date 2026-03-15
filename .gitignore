@@ -23,3 +23,7 @@ dist-ssr
 *.sln
 *.sw?
 .env
+.env.*
+
+# Supabase temp files (contain database credentials)
+supabase/.temp/

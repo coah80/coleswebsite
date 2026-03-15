@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useCallback } from "react";
 import { Plus, Edit, Trash2, Upload, ExternalLink } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -8,7 +8,6 @@ import { Textarea } from "@/components/ui/textarea";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 import { Badge } from "@/components/ui/badge";
 import { useToast } from "@/hooks/use-toast";
-import { Button as ToastButton } from "@/components/ui/button";
 import { supabase } from "@/integrations/supabase/client";
 
 interface Project {
@@ -36,6 +35,16 @@ interface ProjectFormData {
   is_featured: boolean;
 }
 
+const getAdminToken = () => sessionStorage.getItem('adminToken') ?? '';
+
+const adminInvoke = async <T = Record<string, unknown>>(body: Record<string, unknown>): Promise<T> => {
+  const { data, error } = await supabase.functions.invoke<T>('admin-operations', {
+    body: { ...body, token: getAdminToken() },
+  });
+  if (error) throw error;
+  return data as T;
+};
+
 export function PortfolioManager() {
   const [projects, setProjects] = useState<Project[]>([]);
   const [loading, setLoading] = useState(true);
@@ -43,7 +52,6 @@ export function PortfolioManager() {
   const [editingProject, setEditingProject] = useState<Project | null>(null);
   const [uploading, setUploading] = useState(false);
   const [imageFile, setImageFile] = useState<File | null>(null);
-  const [lastError, setLastError] = useState<any>(null);
   const { toast } = useToast();
 
   const [formData, setFormData] = useState<ProjectFormData>({
@@ -57,148 +65,53 @@ export function PortfolioManager() {
     is_featured: false,
   });
 
-  const copyErrorToClipboard = async () => {
-    if (!lastError) {
-      toast({
-        title: "No error to copy",
-        description: "No recent error available",
-        variant: "destructive"
-      });
-      return;
-    }
-    
-    const errorLog = {
-      timestamp: new Date().toISOString(),
-      error: {
-        message: lastError.message,
-        stack: lastError.stack,
-        name: lastError.name,
-        cause: lastError.cause,
-        details: lastError.details || lastError.error_description || lastError.hint,
-        code: lastError.code,
-        severity: lastError.severity
-      },
-      context: {
-        operation: 'save portfolio item',
-        userAgent: navigator.userAgent,
-        url: window.location.href,
-        timestamp: Date.now()
-      },
-      formData: formData,
-      projectData: lastError.projectData || 'not available'
-    };
-
-    const logText = JSON.stringify(errorLog, null, 2);
-    
+  const fetchProjects = useCallback(async () => {
     try {
-      if (navigator.clipboard && navigator.clipboard.writeText) {
-        await navigator.clipboard.writeText(logText);
-        toast({
-          title: "Log copied!",
-          description: "Error details copied to clipboard",
-        });
-      } else {
-        // Fallback for browsers without clipboard API
-        const textArea = document.createElement('textarea');
-        textArea.value = logText;
-        document.body.appendChild(textArea);
-        textArea.select();
-        document.execCommand('copy');
-        document.body.removeChild(textArea);
-        toast({
-          title: "Log copied!",
-          description: "Error details copied to clipboard (fallback method)",
-        });
-      }
-    } catch (err) {
-      console.error('Failed to copy to clipboard:', err);
-      // Always fallback: show error in console for manual copy
-      console.log('ERROR LOG TO COPY:');
-      console.log(logText);
-      toast({
-        title: "Copy failed - Check console",
-        description: "Error details logged to console for manual copy",
-        variant: "destructive"
+      const result = await adminInvoke<{ projects: Project[] }>({
+        operation: 'fetchProjects',
       });
-    }
-  };
-
-  useEffect(() => {
-    fetchProjects();
-  }, []);
-
-  const fetchProjects = async () => {
-    try {
-      console.log('Attempting direct database fetch...');
-      const { data, error } = await supabase
-        .from('projects')
-        .select('*')
-        .order('created_at', { ascending: false });
-
-      console.log('Direct fetch result:', { data, error });
-
-      if (error) throw error;
-      setProjects(data || []);
-      console.log('Successfully loaded projects:', data?.length || 0);
-    } catch (error) {
-      console.error('Error fetching projects:', error);
-      
-      // Store detailed error information
-      const detailedError = {
-        ...error,
-        operation: 'fetch',
-        timestamp: new Date().toISOString()
-      };
-      setLastError(detailedError);
-      
+      setProjects(result.projects ?? []);
+    } catch {
       toast({
         title: "Error",
         description: "Failed to fetch projects",
         variant: "destructive",
-        action: (
-          <ToastButton 
-            variant="outline" 
-            size="sm" 
-            onClick={copyErrorToClipboard}
-          >
-            Copy Log
-          </ToastButton>
-        ),
       });
     } finally {
       setLoading(false);
     }
-  };
+  }, [toast]);
+
+  useEffect(() => {
+    fetchProjects();
+  }, [fetchProjects]);
 
   const uploadImage = async (file: File): Promise<string> => {
     const fileExt = file.name.split('.').pop();
-    const fileName = `${Date.now()}-${Math.random()}.${fileExt}`;
-    const filePath = fileName;
+    const fileName = `${Date.now()}-${Math.random().toString(36).slice(2)}.${fileExt}`;
 
-    console.log('Uploading file:', { fileName, filePath, fileSize: file.size, fileType: file.type });
-
-    const { error: uploadError } = await supabase.storage
-      .from('portfolio')
-      .upload(filePath, file);
-
-    if (uploadError) {
-      console.error('Upload error details:', uploadError);
-      throw uploadError;
+    // Convert file to base64
+    const buffer = await file.arrayBuffer();
+    const bytes = new Uint8Array(buffer);
+    let binary = '';
+    for (let i = 0; i < bytes.length; i++) {
+      binary += String.fromCharCode(bytes[i]);
     }
+    const fileBase64 = btoa(binary);
 
-    const { data: { publicUrl } } = supabase.storage
-      .from('portfolio')
-      .getPublicUrl(filePath);
+    const result = await adminInvoke<{ publicUrl: string }>({
+      operation: 'uploadImage',
+      fileName,
+      fileBase64,
+      contentType: file.type,
+    });
 
-    console.log('Upload successful, public URL:', publicUrl);
-    return publicUrl;
+    return result.publicUrl;
   };
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setUploading(true);
-
-    let projectData: any = null;
 
     try {
       let imageUrl = editingProject?.image_url || null;
@@ -207,7 +120,7 @@ export function PortfolioManager() {
         imageUrl = await uploadImage(imageFile);
       }
 
-      projectData = {
+      const projectData = {
         title: formData.title,
         description: formData.description || null,
         category: formData.category,
@@ -220,28 +133,18 @@ export function PortfolioManager() {
       };
 
       if (editingProject) {
-        console.log('Attempting direct database update...');
-        const { error } = await supabase
-          .from('projects')
-          .update(projectData)
-          .eq('id', editingProject.id);
-
-        if (error) throw error;
-        toast({
-          title: "Success",
-          description: "Portfolio item updated successfully",
+        await adminInvoke({
+          operation: 'updateProject',
+          projectId: editingProject.id,
+          projectData,
         });
+        toast({ title: "Success", description: "Portfolio item updated" });
       } else {
-        console.log('Attempting direct database insert...');
-        const { error } = await supabase
-          .from('projects')
-          .insert([projectData]);
-
-        if (error) throw error;
-        toast({
-          title: "Success",
-          description: "Portfolio item created successfully",
+        await adminInvoke({
+          operation: 'createProject',
+          projectData,
         });
+        toast({ title: "Success", description: "Portfolio item created" });
       }
 
       setIsDialogOpen(false);
@@ -249,32 +152,11 @@ export function PortfolioManager() {
       setImageFile(null);
       resetForm();
       fetchProjects();
-    } catch (error) {
-      console.error('Error saving project:', error);
-      
-      // Store detailed error information
-      const detailedError = {
-        ...error,
-        projectData: projectData,
-        timestamp: new Date().toISOString(),
-        formData: { ...formData },
-        editingProject: editingProject?.id || null
-      };
-      setLastError(detailedError);
-      
+    } catch {
       toast({
         title: "Error",
         description: "Failed to save portfolio item",
         variant: "destructive",
-        action: (
-          <ToastButton 
-            variant="outline" 
-            size="sm" 
-            onClick={copyErrorToClipboard}
-          >
-            Copy Log
-          </ToastButton>
-        ),
       });
     } finally {
       setUploading(false);
@@ -285,44 +167,17 @@ export function PortfolioManager() {
     if (!confirm('Are you sure you want to delete this portfolio item?')) return;
 
     try {
-      console.log('Attempting direct database delete...');
-      const { error } = await supabase
-        .from('projects')
-        .delete()
-        .eq('id', projectId);
-
-      if (error) throw error;
-
-      toast({
-        title: "Success",
-        description: "Portfolio item deleted successfully",
-      });
-      fetchProjects();
-    } catch (error) {
-      console.error('Error deleting project:', error);
-      
-      // Store detailed error information
-      const detailedError = {
-        ...error,
-        operation: 'delete',
+      await adminInvoke({
+        operation: 'deleteProject',
         projectId,
-        timestamp: new Date().toISOString()
-      };
-      setLastError(detailedError);
-      
+      });
+      toast({ title: "Success", description: "Portfolio item deleted" });
+      fetchProjects();
+    } catch {
       toast({
         title: "Error",
         description: "Failed to delete portfolio item",
         variant: "destructive",
-        action: (
-          <ToastButton 
-            variant="outline" 
-            size="sm" 
-            onClick={copyErrorToClipboard}
-          >
-            Copy Log
-          </ToastButton>
-        ),
       });
     }
   };
