@@ -71,7 +71,7 @@ serve(async (req) => {
         'Authorization': `Bearer ${accessToken}`,
         'Content-Type': 'text/plain',
       },
-      body: `search "${gameName}"; fields name,cover.url,cover.image_id; limit 10;`,
+      body: `search "${gameName.replace(/[";\\]/g, '')}"; fields name,cover.url,cover.image_id; limit 10;`,
     });
 
     const games = await igdbResponse.json();
