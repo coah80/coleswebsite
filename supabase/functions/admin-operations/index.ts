@@ -1,6 +1,5 @@
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
-import { encode as hexEncode } from "https://deno.land/std@0.168.0/encoding/hex.ts";
 
 // ---------------------------------------------------------------------------
 // CORS — only allow your actual domain (and localhost for dev)
@@ -47,7 +46,8 @@ const isRateLimited = (key: string, maxRequests: number, windowMs: number): bool
 const hashPassword = async (password: string): Promise<string> => {
   const data = new TextEncoder().encode(password);
   const hash = await crypto.subtle.digest('SHA-256', data);
-  return new TextDecoder().decode(hexEncode(new Uint8Array(hash)));
+  const bytes = new Uint8Array(hash);
+  return Array.from(bytes).map(b => b.toString(16).padStart(2, '0')).join('');
 };
 
 // ---------------------------------------------------------------------------
@@ -389,8 +389,7 @@ serve(async (req) => {
         });
     }
   } catch (error) {
-    // Don't leak internal error details
-    console.error('Admin operation error:', error.message);
+    console.error('Admin operation error:', error?.message);
     return new Response(JSON.stringify({ error: 'Internal server error' }), {
       status: 500,
       headers: { ...getCorsHeaders(req), 'Content-Type': 'application/json' },
