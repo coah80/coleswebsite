@@ -100,7 +100,7 @@ const LandscapeLayout = () => {
       <main className={`max-w-[1800px] mx-auto p-3 sm:p-4 xl:p-8 2xl:p-12 min-h-[calc(100vh-60px)] ${
         isLandscape ? 'h-[calc(100vh-80px)] xl:h-[calc(100vh-100px)]' : ''
       }`}>
-        <Card className={`min-h-full bg-gradient-card border-border/50 p-4 sm:p-6 xl:p-12 2xl:p-16 ${
+        <Card className={`min-h-full bg-card border-ctp-surface1/50 p-4 sm:p-6 xl:p-12 2xl:p-16 ${
           isLandscape ? 'h-full' : ''
         } ${activeTab === 'submissions' ? 'md:overflow-y-auto' : ''}`}>
           <div className={activeTab === 'submissions' ? 'md:py-8 lg:py-12 xl:py-16' : ''}>

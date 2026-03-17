@@ -7,14 +7,14 @@ interface RainbowJumpTextProps {
   triggerOnParentHover?: boolean;
 }
 
-const rainbowColors = [
-  '#ff6b6b', // red
-  '#ffa94d', // orange
-  '#ffd43b', // yellow
-  '#69db7c', // green
-  '#4dabf7', // blue
-  '#9775fa', // purple
-  '#f783ac', // pink
+const catppuccinColors = [
+  '#f38ba8', // red
+  '#fab387', // peach
+  '#f9e2af', // yellow
+  '#a6e3a1', // green
+  '#89b4fa', // blue
+  '#cba6f7', // mauve
+  '#f5c2e7', // pink
 ];
 
 const RainbowJumpText = ({ children, className = '', triggerOnParentHover = false }: RainbowJumpTextProps) => {
@@ -25,15 +25,14 @@ const RainbowJumpText = ({ children, className = '', triggerOnParentHover = fals
     setAnimationKey(prev => prev + 1);
   }, []);
 
-  // For parent hover trigger
   useEffect(() => {
     if (!triggerOnParentHover || !containerRef.current) return;
-    
+
     const groupParent = containerRef.current.closest('.group');
     if (!groupParent) return;
-    
+
     const handleEnter = () => runAnimation();
-    
+
     groupParent.addEventListener('mouseenter', handleEnter);
     return () => groupParent.removeEventListener('mouseenter', handleEnter);
   }, [triggerOnParentHover, runAnimation]);
@@ -46,19 +45,19 @@ const RainbowJumpText = ({ children, className = '', triggerOnParentHover = fals
       style={{ color: 'inherit' }}
     >
       {children.split('').map((char, i) => {
-        const color = rainbowColors[i % rainbowColors.length];
-        
+        const color = catppuccinColors[i % catppuccinColors.length];
+
         return (
           <motion.span
             key={`${i}-${animationKey}`}
-            style={{ 
+            style={{
               display: 'inline-block',
               whiteSpace: char === ' ' ? 'pre' : 'normal',
               color: 'inherit',
             }}
             animate={{
-              y: [0, -8, 0],
-              color: ['hsl(0, 0%, 95%)', color, 'hsl(0, 0%, 95%)'],
+              y: [0, -6, 0],
+              color: ['var(--ctp-text)', color, 'var(--ctp-text)'],
               textShadow: ['none', `0 0 12px ${color}`, 'none'],
             }}
             transition={{

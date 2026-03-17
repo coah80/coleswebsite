@@ -1,8 +1,4 @@
 import { useState } from 'react';
-import { Card } from '@/components/ui/card';
-import { Input } from '@/components/ui/input';
-import { Button } from '@/components/ui/button';
-import { Label } from '@/components/ui/label';
 import { useNavigate } from 'react-router-dom';
 import { ArrowLeft } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
@@ -48,45 +44,46 @@ const AdminLogin = () => {
   };
 
   return (
-    <div className="min-h-screen bg-background flex items-center justify-center p-3 sm:p-4">
-      <Card className="w-full max-w-md p-4 sm:p-6 bg-gradient-card border-border/50">
-        <div className="mb-4 sm:mb-6">
-          <Button
-            variant="ghost"
-            size="sm"
+    <div className="min-h-screen bg-ctp-base flex items-center justify-center p-4">
+      <div className="w-full max-w-md rounded-2xl border border-ctp-surface1/50 bg-ctp-surface0/40 p-6">
+        <div className="mb-6">
+          <button
+            type="button"
             onClick={() => navigate('/')}
-            className="mb-3 sm:mb-4 text-xs sm:text-sm"
+            className="mb-4 flex items-center text-ctp-overlay1 hover:text-ctp-text text-sm transition-colors"
           >
-            <ArrowLeft className="h-3 w-3 sm:h-4 sm:w-4 mr-1.5 sm:mr-2" />
+            <ArrowLeft className="h-4 w-4 mr-2" />
             Back
-          </Button>
-          <h1 className="text-xl sm:text-2xl font-bold text-foreground">Admin Access</h1>
-          <p className="text-xs sm:text-sm text-muted-foreground">Enter the admin password to continue</p>
+          </button>
+          <h1 className="text-2xl font-heading font-bold text-ctp-text">Admin Access</h1>
+          <p className="text-sm text-ctp-subtext1">Enter the admin password to continue</p>
         </div>
-        
-        <form onSubmit={handleLogin} className="space-y-3 sm:space-y-4">
+
+        <form onSubmit={handleLogin} className="space-y-4">
           <div>
-            <Label htmlFor="password" className="text-xs sm:text-sm">Password</Label>
-            <Input
+            <label htmlFor="password" className="text-sm text-ctp-subtext1 font-body">
+              Password
+            </label>
+            <input
               id="password"
               type="password"
               value={password}
               onChange={(e) => setPassword(e.target.value)}
               placeholder="Enter admin password"
               required
-              className="mt-1 text-sm"
+              className="mt-1 w-full rounded-xl border border-ctp-surface1/60 bg-ctp-surface0/40 py-3 px-4 text-ctp-text placeholder:text-ctp-overlay1 focus:border-ctp-mauve/50 focus:ring-1 focus:ring-ctp-mauve/30 outline-none font-body"
             />
           </div>
-          
-          <Button 
-            type="submit" 
-            className="w-full text-sm" 
+
+          <button
+            type="submit"
+            className="w-full bg-ctp-mauve text-ctp-crust font-heading font-bold rounded-xl py-2.5 hover:brightness-110 disabled:opacity-30 transition-all"
             disabled={isLoading}
           >
             {isLoading ? 'Verifying...' : 'Login'}
-          </Button>
+          </button>
         </form>
-      </Card>
+      </div>
     </div>
   );
 };

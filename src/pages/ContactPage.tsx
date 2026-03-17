@@ -22,7 +22,6 @@ const ContactPage = () => {
   const [submitSuccess, setSubmitSuccess] = useState(false);
   const [isLandscape, setIsLandscape] = useState(false);
 
-  // Detect landscape orientation - use aspect ratio > 1.3 and max height 600px for mobile landscape
   useEffect(() => {
     const checkLandscape = () => {
       const aspectRatio = window.innerWidth / window.innerHeight;
@@ -30,11 +29,11 @@ const ContactPage = () => {
       const landscape = aspectRatio > 1.3 && isMobileSize;
       setIsLandscape(landscape);
     };
-    
+
     checkLandscape();
     window.addEventListener('resize', checkLandscape);
     window.addEventListener('orientationchange', checkLandscape);
-    
+
     return () => {
       window.removeEventListener('resize', checkLandscape);
       window.removeEventListener('orientationchange', checkLandscape);
@@ -49,7 +48,6 @@ const ContactPage = () => {
     { value: 'great-vibes', label: 'Great Vibes', className: 'font-great-vibes' },
   ];
 
-  // Cooldown timer
   useEffect(() => {
     const checkCooldown = () => {
       const lastSubmission = localStorage.getItem('lastSubmissionTime');
@@ -111,7 +109,7 @@ const ContactPage = () => {
 
     try {
       const content = JSON.stringify({ drawing: dataUrl, caption });
-      
+
       const { error } = await supabase.from('submissions').insert({
         type: 'drawing',
         content,
@@ -131,19 +129,18 @@ const ContactPage = () => {
     setIsSubmitting(false);
   };
 
-  // Landscape mode: minimal fullscreen layout
   if (isLandscape && activeTab === 'drawing') {
     return (
-      <div className="fixed inset-0 z-[90] bg-background flex flex-col">
-        {/* Minimal top bar with tabs and navigation */}
-        <div className="shrink-0 flex items-center justify-between px-3 py-1.5 bg-background/95 backdrop-blur-sm border-b border-border/30">
+      <div className="fixed inset-0 z-[90] bg-ctp-base flex flex-col">
+
+        <div className="shrink-0 flex items-center justify-between px-3 py-1.5 bg-ctp-base/95 backdrop-blur-sm border-b border-ctp-surface1/30">
           <div className="flex gap-1.5">
             <button
               onClick={() => setActiveTab('message')}
-              className={`flex items-center gap-1 px-2 py-0.5 text-[9px] font-mono lowercase rounded transition-all ${
+              className={`flex items-center gap-1 px-2 py-0.5 text-[9px] font-mono lowercase rounded-xl transition-all ${
                 activeTab === 'message'
-                  ? 'bg-foreground text-background'
-                  : 'bg-muted/30 text-muted-foreground hover:text-foreground'
+                  ? 'bg-ctp-mauve text-ctp-crust font-bold'
+                  : 'bg-ctp-surface0/40 text-ctp-overlay1 hover:text-ctp-text'
               }`}
             >
               <MessageCircle className="w-2.5 h-2.5" />
@@ -151,38 +148,38 @@ const ContactPage = () => {
             </button>
             <button
               onClick={() => setActiveTab('drawing')}
-              className={`flex items-center gap-1 px-2 py-0.5 text-[9px] font-mono lowercase rounded transition-all ${
+              className={`flex items-center gap-1 px-2 py-0.5 text-[9px] font-mono lowercase rounded-xl transition-all ${
                 activeTab === 'drawing'
-                  ? 'bg-foreground text-background'
-                  : 'bg-muted/30 text-muted-foreground hover:text-foreground'
+                  ? 'bg-ctp-mauve text-ctp-crust font-bold'
+                  : 'bg-ctp-surface0/40 text-ctp-overlay1 hover:text-ctp-text'
               }`}
             >
               <Palette className="w-2.5 h-2.5" />
               drawing
             </button>
           </div>
-          
-          {/* Navigation links */}
+
+
           <div className="flex items-center gap-2">
-            <Link 
-              to="/" 
-              className="text-[9px] font-mono text-muted-foreground hover:text-foreground transition-colors"
+            <Link
+              to="/"
+              className="text-[9px] font-mono text-ctp-overlay1 hover:text-ctp-text transition-colors"
             >
               home
             </Link>
-            <Link 
-              to="/portfolio" 
-              className="text-[9px] font-mono text-muted-foreground hover:text-foreground transition-colors"
+            <Link
+              to="/portfolio"
+              className="text-[9px] font-mono text-ctp-overlay1 hover:text-ctp-text transition-colors"
             >
               portfolio
             </Link>
-            <span className="text-[9px] font-mono text-foreground bg-foreground/10 px-1.5 py-0.5 rounded">
+            <span className="text-[9px] font-mono text-ctp-text bg-ctp-surface0/40 px-1.5 py-0.5 rounded-xl">
               say hi
             </span>
           </div>
         </div>
-        
-        {/* Drawing canvas takes rest of screen */}
+
+
         <div className="flex-1 min-h-0 p-2">
           <DrawingCanvas
             onSubmit={handleDrawingSubmit}
@@ -196,26 +193,24 @@ const ContactPage = () => {
   }
 
   return (
-    <PageLayout title="say hi">
-      <motion.div 
-        ref={formRef} 
+    <PageLayout title="say hi" allowScroll={true}>
+      <motion.div
+        ref={formRef}
         initial={{ opacity: 0, y: 30 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ duration: 0.5, delay: 0.1, ease: [0.16, 1, 0.3, 1] }}
-        className={`mx-auto h-full flex flex-col overflow-auto pb-4 ${
-        activeTab === 'drawing' ? 'max-w-4xl' : 'max-w-2xl'
-      }`}>
+        className="mx-auto w-full max-w-xl flex flex-col pb-8">
         <BrowserFrame title="submit://anonymous" className={activeTab === 'drawing' ? 'h-full flex flex-col' : ''}>
-          {/* Tab switcher */}
+
           <div className="flex gap-1.5 sm:gap-2 mb-3 sm:mb-4">
             <motion.button
               whileHover={{ scale: 1.05 }}
               whileTap={{ scale: 0.95 }}
               onClick={() => setActiveTab('message')}
-              className={`flex items-center gap-1.5 sm:gap-2 px-2 sm:px-3 py-1 sm:py-1.5 text-[10px] sm:text-xs font-mono lowercase rounded-md sm:rounded-lg transition-colors ${
+              className={`flex items-center gap-1.5 sm:gap-2 px-2 sm:px-3 py-1 sm:py-1.5 text-[10px] sm:text-xs font-mono lowercase rounded-xl transition-colors ${
                 activeTab === 'message'
-                  ? 'bg-foreground text-background'
-                  : 'bg-muted/30 text-muted-foreground hover:text-foreground'
+                  ? 'bg-ctp-mauve text-ctp-crust font-bold'
+                  : 'bg-ctp-surface0/40 text-ctp-overlay1 hover:text-ctp-text'
               }`}
             >
               <MessageCircle className="w-2.5 h-2.5 sm:w-3 sm:h-3" />
@@ -225,10 +220,10 @@ const ContactPage = () => {
               whileHover={{ scale: 1.05 }}
               whileTap={{ scale: 0.95 }}
               onClick={() => setActiveTab('drawing')}
-              className={`flex items-center gap-1.5 sm:gap-2 px-2 sm:px-3 py-1 sm:py-1.5 text-[10px] sm:text-xs font-mono lowercase rounded-md sm:rounded-lg transition-colors ${
+              className={`flex items-center gap-1.5 sm:gap-2 px-2 sm:px-3 py-1 sm:py-1.5 text-[10px] sm:text-xs font-mono lowercase rounded-xl transition-colors ${
                 activeTab === 'drawing'
-                  ? 'bg-foreground text-background'
-                  : 'bg-muted/30 text-muted-foreground hover:text-foreground'
+                  ? 'bg-ctp-mauve text-ctp-crust font-bold'
+                  : 'bg-ctp-surface0/40 text-ctp-overlay1 hover:text-ctp-text'
               }`}
             >
               <Palette className="w-2.5 h-2.5 sm:w-3 sm:h-3" />
@@ -236,45 +231,47 @@ const ContactPage = () => {
             </motion.button>
           </div>
 
-          {/* Message form */}
+
           {activeTab === 'message' && (
             <div className="space-y-2 sm:space-y-3">
               <textarea
                 value={message}
                 onChange={(e) => setMessage(e.target.value)}
                 placeholder="write something nice..."
-                className="w-full h-20 sm:h-24 p-2 sm:p-3 bg-muted/20 border border-border/30 rounded-md sm:rounded-lg resize-none focus:outline-none focus:border-foreground/50 font-mono text-xs sm:text-sm placeholder:text-muted-foreground/50"
+                maxLength={5000}
+                className="w-full h-20 sm:h-24 p-2 sm:p-3 bg-ctp-surface0/40 border border-ctp-surface1/50 rounded-xl resize-none text-ctp-text placeholder:text-ctp-overlay1 focus:border-ctp-mauve/50 focus:ring-1 focus:ring-ctp-mauve/30 outline-none font-body text-xs sm:text-sm"
               />
 
-              {/* Signature toggle */}
+
               <div className="flex items-center gap-2 sm:gap-3">
                 <button
                   onClick={() => setSignatureEnabled(!signatureEnabled)}
-                  className={`w-3.5 h-3.5 sm:w-4 sm:h-4 rounded border-2 transition-all ${
-                    signatureEnabled ? 'bg-foreground border-foreground' : 'border-muted-foreground'
+                  className={`w-5 h-5 sm:w-4 sm:h-4 rounded border-2 transition-all ${
+                    signatureEnabled ? 'bg-ctp-mauve border-ctp-mauve' : 'border-ctp-overlay1'
                   }`}
                 />
-                <span className="text-[10px] sm:text-xs font-mono text-muted-foreground">add signature</span>
+                <span className="text-ctp-overlay1 font-data text-xs">add signature</span>
               </div>
 
               {signatureEnabled && (
-                <div className="space-y-1.5 sm:space-y-2 p-2 sm:p-3 bg-muted/10 rounded-md sm:rounded-lg">
+                <div className="space-y-1.5 sm:space-y-2 p-2 sm:p-3 bg-ctp-surface0/20 rounded-xl">
                   <input
                     type="text"
                     value={signatureName}
                     onChange={(e) => setSignatureName(e.target.value)}
                     placeholder="your name"
-                    className="w-full p-1.5 sm:p-2 bg-muted/20 border border-border/30 rounded-md sm:rounded-lg focus:outline-none focus:border-foreground/50 font-mono text-[10px] sm:text-xs"
+                    maxLength={50}
+                    className="w-full p-1.5 sm:p-2 bg-ctp-surface0/40 border border-ctp-surface1/50 rounded-xl text-ctp-text placeholder:text-ctp-overlay1 focus:border-ctp-mauve/50 focus:ring-1 focus:ring-ctp-mauve/30 outline-none font-body text-[10px] sm:text-xs"
                   />
                   <div className="flex gap-1 sm:gap-1.5 flex-wrap">
                     {signatureEndingOptions.map((ending) => (
                       <button
                         key={ending}
                         onClick={() => setSignatureEnding(ending)}
-                        className={`px-1.5 sm:px-2 py-0.5 sm:py-1 text-[8px] sm:text-[10px] font-mono rounded-full transition-all ${
+                        className={`px-1.5 sm:px-2 py-1.5 sm:py-1 text-[10px] sm:text-[10px] font-mono rounded-full transition-all ${
                           signatureEnding === ending
-                            ? 'bg-foreground text-background'
-                            : 'bg-muted/30 text-muted-foreground hover:text-foreground'
+                            ? 'bg-ctp-mauve text-ctp-crust'
+                            : 'bg-ctp-surface0/40 text-ctp-overlay1 hover:text-ctp-text'
                         }`}
                       >
                         {ending}
@@ -286,35 +283,35 @@ const ContactPage = () => {
                       <button
                         key={font.value}
                         onClick={() => setSignatureFont(font.value)}
-                        className={`px-1.5 sm:px-2 py-0.5 sm:py-1 text-[10px] sm:text-xs rounded-full transition-all ${font.className} ${
+                        className={`px-1.5 sm:px-2 py-1.5 sm:py-1 text-[10px] sm:text-xs rounded-full transition-all ${font.className} ${
                           signatureFont === font.value
-                            ? 'bg-foreground text-background'
-                            : 'bg-muted/30 text-muted-foreground hover:text-foreground'
+                            ? 'bg-ctp-mauve text-ctp-crust'
+                            : 'bg-ctp-surface0/40 text-ctp-overlay1 hover:text-ctp-text'
                         }`}
                       >
                         {font.label}
                       </button>
                     ))}
                   </div>
-                  
+
                   {signatureName && (
-                    <p className={`text-xs sm:text-sm text-center pt-1 ${fontOptions.find(f => f.value === signatureFont)?.className}`}>
+                    <p className={`text-xs sm:text-sm text-center pt-1 text-ctp-mauve ${fontOptions.find(f => f.value === signatureFont)?.className}`}>
                       {signatureEnding}, {signatureName}
                     </p>
                   )}
                 </div>
               )}
 
-              {/* Submit button for message */}
+
               <button
                 onClick={handleMessageSubmit}
                 disabled={isSubmitting || cooldownTimeLeft > 0 || !message.trim()}
-                className={`w-full flex items-center justify-center gap-1.5 sm:gap-2 px-3 sm:px-4 py-1.5 sm:py-2 font-mono text-[10px] sm:text-xs lowercase rounded-md sm:rounded-lg transition-all ${
+                className={`w-full flex items-center justify-center gap-1.5 sm:gap-2 px-3 sm:px-4 py-1.5 sm:py-2 font-heading font-bold text-[10px] sm:text-xs lowercase rounded-xl transition-all ${
                   submitSuccess
-                    ? 'bg-green-500 text-white'
+                    ? 'bg-ctp-green text-ctp-crust'
                     : cooldownTimeLeft > 0
-                    ? 'bg-muted/30 text-muted-foreground cursor-not-allowed'
-                    : 'bg-foreground text-background hover:opacity-90'
+                    ? 'bg-ctp-surface0/40 text-ctp-overlay1 cursor-not-allowed'
+                    : 'bg-ctp-mauve text-ctp-crust hover:brightness-110'
                 } disabled:opacity-50 disabled:cursor-not-allowed`}
               >
                 {submitSuccess ? (
@@ -333,7 +330,7 @@ const ContactPage = () => {
             </div>
           )}
 
-          {/* Drawing canvas - the new fancy one! */}
+
           {activeTab === 'drawing' && (
             <DrawingCanvas
               onSubmit={handleDrawingSubmit}

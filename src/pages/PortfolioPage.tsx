@@ -41,7 +41,7 @@ const PortfolioPage = () => {
 
       if (error) throw error;
       setProjects(data || []);
-      
+
       const uniqueCategories = ['All', ...new Set(data?.map(p => p.category) || [])];
       setCategories(uniqueCategories);
     } catch (error) {
@@ -50,16 +50,16 @@ const PortfolioPage = () => {
     setIsLoading(false);
   };
 
-  const filteredProjects = selectedCategory === 'All' 
-    ? projects 
+  const filteredProjects = selectedCategory === 'All'
+    ? projects
     : projects.filter(p => p.category === selectedCategory);
 
   return (
-    <PageLayout title="portfolio">
-      <div className="h-full flex flex-col overflow-hidden">
-        {/* Category filters */}
+    <PageLayout title="portfolio" allowScroll={true}>
+      <div className="mx-auto w-full max-w-xl flex flex-col gap-5 sm:gap-6 pb-8">
+
         {categories.length > 1 && (
-          <motion.div 
+          <motion.div
             initial={{ opacity: 0, y: -10 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.3, delay: 0.1 }}
@@ -74,10 +74,10 @@ const PortfolioPage = () => {
                 whileHover={{ scale: 1.05 }}
                 whileTap={{ scale: 0.95 }}
                 onClick={() => setSelectedCategory(category)}
-                className={`px-2 sm:px-3 py-1 sm:py-1.5 text-[10px] sm:text-xs font-mono lowercase rounded-full border transition-colors duration-200 whitespace-nowrap ${
+                className={`px-2 sm:px-3 py-2 sm:py-1.5 text-[10px] sm:text-xs font-varia lowercase rounded-xl border transition-colors duration-200 whitespace-nowrap ${
                   selectedCategory === category
-                    ? 'bg-foreground text-background border-foreground'
-                    : 'bg-transparent text-muted-foreground border-border/50 hover:border-foreground hover:text-foreground'
+                    ? 'bg-ctp-mauve text-ctp-crust font-bold border-ctp-mauve'
+                    : 'bg-transparent text-ctp-overlay1 border-ctp-surface1/50 hover:border-ctp-mauve/30 hover:text-ctp-text'
                 }`}
               >
                 {category}
@@ -86,14 +86,14 @@ const PortfolioPage = () => {
           </motion.div>
         )}
 
-        {/* Projects grid - fits to available space */}
-        <div 
+
+        <div
           ref={gridRef}
-          className="flex-1 grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-2 sm:gap-3 auto-rows-min overflow-y-auto pb-4"
+          className="grid grid-cols-1 sm:grid-cols-2 gap-4"
         >
           {isLoading ? (
             Array.from({ length: 6 }).map((_, i) => (
-              <div key={i} className="aspect-[4/3] bg-card/30 rounded-2xl animate-pulse" />
+              <div key={i} className="aspect-[4/3] bg-ctp-surface0/30 rounded-2xl animate-pulse" />
             ))
           ) : (
             <AnimatePresence mode="popLayout">
@@ -106,20 +106,20 @@ const PortfolioPage = () => {
                   exit={{ opacity: 0, scale: 0.9 }}
                   transition={{ duration: 0.3, delay: index * 0.05, ease: [0.16, 1, 0.3, 1] }}
                   whileHover={{ y: -4, scale: 1.02 }}
-                  className="group relative bg-card/30 border border-border/20 rounded-xl sm:rounded-2xl overflow-hidden transition-colors duration-300 hover:border-border/50 hover:bg-card/50"
+                  className="group relative bg-ctp-surface0/40 border border-ctp-surface1/50 rounded-xl sm:rounded-2xl overflow-hidden transition-colors duration-300 hover:border-ctp-surface2 hover:bg-ctp-surface0/65"
                 >
-                {/* Featured badge */}
+
                 {project.is_featured && (
-                  <div className="absolute top-2 right-2 sm:top-3 sm:right-3 z-10 flex items-center gap-0.5 sm:gap-1 px-1.5 sm:px-2 py-0.5 sm:py-1 bg-foreground/90 text-background text-[10px] sm:text-xs font-mono rounded">
+                  <div className="absolute top-2 right-2 sm:top-3 sm:right-3 z-10 flex items-center gap-0.5 sm:gap-1 px-1.5 sm:px-2 py-0.5 sm:py-1 bg-ctp-mauve text-ctp-crust text-[10px] sm:text-xs font-data rounded-lg">
                     <Star className="w-2.5 h-2.5 sm:w-3 sm:h-3 fill-current" />
                     <span className="hidden sm:inline">featured</span>
                   </div>
                 )}
 
-                {/* Image */}
+
                 {project.image_url && (
                   <div className="aspect-[16/9] overflow-hidden">
-                    <img 
+                    <img
                       src={project.image_url}
                       alt={project.title}
                       className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105"
@@ -127,25 +127,25 @@ const PortfolioPage = () => {
                   </div>
                 )}
 
-                {/* Content */}
+
                 <div className="p-2 sm:p-3">
-                  <WarpText className="font-bold text-xs sm:text-sm text-foreground mb-0.5 sm:mb-1">
+                  <WarpText className="font-heading font-bold text-xs sm:text-sm text-ctp-text mb-0.5 sm:mb-1">
                     {project.title}
                   </WarpText>
-                  
+
                   {project.description && (
-                    <p className="text-[10px] sm:text-xs text-muted-foreground mb-1.5 sm:mb-2 line-clamp-1 sm:line-clamp-2">
+                    <p className="text-[10px] sm:text-xs text-ctp-subtext1 mb-1.5 sm:mb-2 line-clamp-1 sm:line-clamp-2">
                       {project.description}
                     </p>
                   )}
 
-                  {/* Tags */}
+
                   {project.tags && project.tags.length > 0 && (
                     <div className="flex flex-wrap gap-0.5 sm:gap-1 mb-1.5 sm:mb-2">
                       {project.tags.slice(0, 2).map((tag, i) => (
-                        <span 
+                        <span
                           key={i}
-                          className="px-1 sm:px-1.5 py-0.5 text-[8px] sm:text-[10px] font-mono text-muted-foreground bg-muted/30 rounded"
+                          className="px-1 sm:px-1.5 py-0.5 text-[8px] sm:text-[10px] font-data text-ctp-overlay1 bg-ctp-surface0/60 border border-ctp-surface1/40 rounded-lg"
                         >
                           {tag}
                         </span>
@@ -153,14 +153,14 @@ const PortfolioPage = () => {
                     </div>
                   )}
 
-                  {/* Links */}
+
                   <div className="flex items-center gap-2 sm:gap-3">
                     {project.live_url && (
                       <a
                         href={project.live_url}
                         target="_blank"
                         rel="noopener noreferrer"
-                        className="flex items-center gap-0.5 sm:gap-1 text-[10px] sm:text-xs font-mono text-foreground hover:text-accent transition-colors"
+                        className="flex items-center gap-0.5 sm:gap-1 text-[10px] sm:text-xs font-data text-ctp-text hover:text-ctp-mauve transition-colors"
                       >
                         <ExternalLink className="w-2.5 h-2.5 sm:w-3 sm:h-3" />
                         view
@@ -171,7 +171,7 @@ const PortfolioPage = () => {
                         href={project.github_url}
                         target="_blank"
                         rel="noopener noreferrer"
-                        className="flex items-center gap-0.5 sm:gap-1 text-[10px] sm:text-xs font-mono text-foreground hover:text-accent transition-colors"
+                        className="flex items-center gap-0.5 sm:gap-1 text-[10px] sm:text-xs font-data text-ctp-text hover:text-ctp-mauve transition-colors"
                       >
                         <Github className="w-2.5 h-2.5 sm:w-3 sm:h-3" />
                         code
@@ -186,10 +186,10 @@ const PortfolioPage = () => {
         </div>
 
         {filteredProjects.length === 0 && !isLoading && (
-          <div className="flex-1 flex items-center justify-center">
+          <div className="flex items-center justify-center py-12">
             <div className="text-center">
-              <p className="text-4xl font-black text-foreground/10 mb-2">:(</p>
-              <p className="text-muted-foreground font-mono text-sm">no projects to show yet</p>
+              <p className="text-4xl font-black text-ctp-surface2 mb-2">:(</p>
+              <p className="text-ctp-overlay1 font-body text-sm">no projects to show yet</p>
             </div>
           </div>
         )}

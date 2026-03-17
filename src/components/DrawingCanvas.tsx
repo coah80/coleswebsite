@@ -20,8 +20,6 @@ import {
 const CANVAS_WIDTH = 960;  // 16:9 aspect ratio
 const CANVAS_HEIGHT = 540;
 const HISTORY_LIMIT = 50;
-
-// Preset colors
 const BRUSH_COLORS = [
   '#000000', '#ffffff', '#ff6b6b', '#ffa94d', '#ffd43b', 
   '#69db7c', '#4dabf7', '#9775fa', '#f783ac', '#868e96'
@@ -52,15 +50,13 @@ interface DrawingCanvasProps {
 }
 
 const DrawingCanvas = ({ onSubmit, isSubmitting, cooldownTimeLeft, formatCooldownTime }: DrawingCanvasProps) => {
-  // Layer state
   const [layers, setLayers] = useState<LayerData[]>([
     { id: 1, name: 'Layer 1', visible: true, canvas: null },
     { id: 2, name: 'Layer 2', visible: true, canvas: null },
     { id: 3, name: 'Layer 3', visible: true, canvas: null },
   ]);
-  const [activeLayer, setActiveLayer] = useState(0); // Index
-  
-  // Drawing state
+  const [activeLayer, setActiveLayer] = useState(0);
+
   const [brushColor, setBrushColor] = useState('#000000');
   const [backgroundColor, setBackgroundColor] = useState('#ffffff');
   const [brushSize, setBrushSize] = useState(4);
@@ -69,26 +65,26 @@ const DrawingCanvas = ({ onSubmit, isSubmitting, cooldownTimeLeft, formatCooldow
   const [isLandscape, setIsLandscape] = useState(false);
   const [toolbarExpanded, setToolbarExpanded] = useState(true);
   const [hasUserToggledToolbar, setHasUserToggledToolbar] = useState(false);
-  
-  // History state
+
   const [history, setHistory] = useState<HistoryState[]>([]);
   const [historyIndex, setHistoryIndex] = useState(-1);
-  
-  // Refs
+
   const displayCanvasRef = useRef<HTMLCanvasElement>(null);
   const layerCanvasRefs = useRef<(HTMLCanvasElement | null)[]>([null, null, null]);
+  const layersRef = useRef(layers);
+  layersRef.current = layers;
+  const bgRef = useRef(backgroundColor);
+  bgRef.current = backgroundColor;
   const isDrawingRef = useRef(false);
   const lastPointRef = useRef<{ x: number; y: number } | null>(null);
   const activePointerIdRef = useRef<number | null>(null);
 
-  // Detect landscape orientation and auto-collapse toolbar
   useEffect(() => {
     const checkLandscape = () => {
       const aspectRatio = window.innerWidth / window.innerHeight;
       const isMobileSize = window.innerHeight < 600;
       const landscape = aspectRatio > 1.3 && isMobileSize;
       setIsLandscape(landscape);
-      // Auto-collapse toolbar in landscape if user hasn't manually toggled
       if (!hasUserToggledToolbar) {
         setToolbarExpanded(!landscape);
       }
@@ -104,7 +100,6 @@ const DrawingCanvas = ({ onSubmit, isSubmitting, cooldownTimeLeft, formatCooldow
     };
   }, [hasUserToggledToolbar]);
 
-  // Initialize layer canvases
   useEffect(() => {
     layerCanvasRefs.current = layerCanvasRefs.current.map((existing, i) => {
       if (existing) return existing;
@@ -123,37 +118,31 @@ const DrawingCanvas = ({ onSubmit, isSubmitting, cooldownTimeLeft, formatCooldow
       canvas: layerCanvasRefs.current[i]
     })));
     
-    // Initial render
     renderToDisplay();
     saveToHistory();
   }, []);
 
-  // Render all layers to display canvas
   const renderToDisplay = useCallback(() => {
     const displayCanvas = displayCanvasRef.current;
     if (!displayCanvas) return;
-    
+
     const ctx = displayCanvas.getContext('2d');
     if (!ctx) return;
-    
-    // Clear and draw background
-    ctx.fillStyle = backgroundColor;
+
+    ctx.fillStyle = bgRef.current;
     ctx.fillRect(0, 0, CANVAS_WIDTH, CANVAS_HEIGHT);
-    
-    // Draw each visible layer
-    layers.forEach((layer, index) => {
+
+    layersRef.current.forEach((layer, index) => {
       if (layer.visible && layerCanvasRefs.current[index]) {
         ctx.drawImage(layerCanvasRefs.current[index]!, 0, 0);
       }
     });
-  }, [backgroundColor, layers]);
+  }, []);
 
-  // Re-render when layers or background change
   useEffect(() => {
     renderToDisplay();
-  }, [renderToDisplay, backgroundColor]);
+  }, [renderToDisplay, backgroundColor, layers]);
 
-  // Save current state to history
   const saveToHistory = useCallback(() => {
     const layerSnapshots: ImageData[] = [];
     
@@ -172,11 +161,8 @@ const DrawingCanvas = ({ onSubmit, isSubmitting, cooldownTimeLeft, formatCooldow
     };
     
     setHistory(prev => {
-      // Remove any redo states
       const trimmed = prev.slice(0, historyIndex + 1);
-      // Add new state
       const updated = [...trimmed, newState];
-      // Limit history
       if (updated.length > HISTORY_LIMIT) {
         return updated.slice(updated.length - HISTORY_LIMIT);
       }
@@ -186,7 +172,6 @@ const DrawingCanvas = ({ onSubmit, isSubmitting, cooldownTimeLeft, formatCooldow
     setHistoryIndex(prev => Math.min(prev + 1, HISTORY_LIMIT - 1));
   }, [backgroundColor, historyIndex]);
 
-  // Restore from history state
   const restoreFromHistory = useCallback((state: HistoryState) => {
     state.layers.forEach((imageData, index) => {
       const canvas = layerCanvasRefs.current[index];
@@ -201,7 +186,6 @@ const DrawingCanvas = ({ onSubmit, isSubmitting, cooldownTimeLeft, formatCooldow
     renderToDisplay();
   }, [renderToDisplay]);
 
-  // Undo
   const undo = useCallback(() => {
     if (historyIndex > 0) {
       const newIndex = historyIndex - 1;
@@ -210,7 +194,6 @@ const DrawingCanvas = ({ onSubmit, isSubmitting, cooldownTimeLeft, formatCooldow
     }
   }, [historyIndex, history, restoreFromHistory]);
 
-  // Redo
   const redo = useCallback(() => {
     if (historyIndex < history.length - 1) {
       const newIndex = historyIndex + 1;
@@ -219,7 +202,6 @@ const DrawingCanvas = ({ onSubmit, isSubmitting, cooldownTimeLeft, formatCooldow
     }
   }, [historyIndex, history, restoreFromHistory]);
 
-  // Get relative position
   const getRelativePosition = useCallback((event: React.PointerEvent<HTMLCanvasElement>) => {
     const canvas = displayCanvasRef.current;
     if (!canvas) return { x: 0, y: 0 };
@@ -234,12 +216,12 @@ const DrawingCanvas = ({ onSubmit, isSubmitting, cooldownTimeLeft, formatCooldow
     };
   }, []);
 
-  // Begin stroke
   const beginStroke = useCallback((event: React.PointerEvent<HTMLCanvasElement>) => {
     if (event.pointerType === 'mouse' && event.button !== 0) return;
-    
+
     const layerCanvas = layerCanvasRefs.current[activeLayer];
     if (!layerCanvas) return;
+    if (!layers[activeLayer]?.visible) return;
     
     event.preventDefault();
     
@@ -252,7 +234,6 @@ const DrawingCanvas = ({ onSubmit, isSubmitting, cooldownTimeLeft, formatCooldow
       displayCanvasRef.current?.setPointerCapture(event.pointerId);
     } catch {}
     
-    // Draw initial dot
     const ctx = layerCanvas.getContext('2d');
     if (ctx) {
       ctx.strokeStyle = brushColor;
@@ -267,7 +248,6 @@ const DrawingCanvas = ({ onSubmit, isSubmitting, cooldownTimeLeft, formatCooldow
     }
   }, [activeLayer, brushColor, brushSize, getRelativePosition, renderToDisplay]);
 
-  // Extend stroke
   const extendStroke = useCallback((event: React.PointerEvent<HTMLCanvasElement>) => {
     if (!isDrawingRef.current || activePointerIdRef.current !== event.pointerId) return;
     
@@ -294,7 +274,6 @@ const DrawingCanvas = ({ onSubmit, isSubmitting, cooldownTimeLeft, formatCooldow
     }
   }, [activeLayer, brushColor, brushSize, getRelativePosition, renderToDisplay]);
 
-  // End stroke
   const endStroke = useCallback((event?: React.PointerEvent<HTMLCanvasElement>) => {
     if (!isDrawingRef.current) return;
     
@@ -308,11 +287,9 @@ const DrawingCanvas = ({ onSubmit, isSubmitting, cooldownTimeLeft, formatCooldow
     activePointerIdRef.current = null;
     lastPointRef.current = null;
     
-    // Save to history after stroke completes
     saveToHistory();
   }, [saveToHistory]);
 
-  // Clear active layer
   const clearActiveLayer = useCallback(() => {
     const layerCanvas = layerCanvasRefs.current[activeLayer];
     if (!layerCanvas) return;
@@ -325,7 +302,6 @@ const DrawingCanvas = ({ onSubmit, isSubmitting, cooldownTimeLeft, formatCooldow
     }
   }, [activeLayer, renderToDisplay, saveToHistory]);
 
-  // Clear all layers
   const clearAll = useCallback(() => {
     layerCanvasRefs.current.forEach(canvas => {
       if (canvas) {
@@ -339,21 +315,24 @@ const DrawingCanvas = ({ onSubmit, isSubmitting, cooldownTimeLeft, formatCooldow
     saveToHistory();
   }, [renderToDisplay, saveToHistory]);
 
-  // Toggle layer visibility
   const toggleLayerVisibility = useCallback((index: number) => {
-    setLayers(prev => prev.map((layer, i) => 
-      i === index ? { ...layer, visible: !layer.visible } : layer
-    ));
-  }, []);
+    setLayers(prev => {
+      const updated = prev.map((layer, i) =>
+        i === index ? { ...layer, visible: !layer.visible } : layer
+      );
+      if (index === activeLayer && !updated[index].visible) {
+        const next = updated.findIndex((l, i) => l.visible && i !== index);
+        if (next !== -1) setActiveLayer(next);
+      }
+      return updated;
+    });
+  }, [activeLayer]);
 
-  // Handle background color change
   const handleBackgroundChange = useCallback((color: string) => {
     setBackgroundColor(color);
-    // Save to history is called in useEffect when backgroundColor changes
     setTimeout(() => saveToHistory(), 0);
   }, [saveToHistory]);
 
-  // Export final image
   const exportImage = useCallback(() => {
     const exportCanvas = document.createElement('canvas');
     exportCanvas.width = CANVAS_WIDTH;
@@ -362,11 +341,9 @@ const DrawingCanvas = ({ onSubmit, isSubmitting, cooldownTimeLeft, formatCooldow
     
     if (!ctx) return '';
     
-    // Draw background
     ctx.fillStyle = backgroundColor;
     ctx.fillRect(0, 0, CANVAS_WIDTH, CANVAS_HEIGHT);
-    
-    // Draw all visible layers
+
     layers.forEach((layer, index) => {
       if (layer.visible && layerCanvasRefs.current[index]) {
         ctx.drawImage(layerCanvasRefs.current[index]!, 0, 0);
@@ -376,12 +353,10 @@ const DrawingCanvas = ({ onSubmit, isSubmitting, cooldownTimeLeft, formatCooldow
     return exportCanvas.toDataURL('image/png');
   }, [backgroundColor, layers]);
 
-  // Submit drawing
   const handleSubmit = async () => {
     const dataUrl = exportImage();
     if (dataUrl) {
       await onSubmit(dataUrl, caption.trim());
-      // Clear after successful submit
       clearAll();
       setCaption('');
     }

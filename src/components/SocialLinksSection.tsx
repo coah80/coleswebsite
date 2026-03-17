@@ -128,7 +128,7 @@ const SocialLinksSection = ({ isLandscape }: SocialLinksSectionProps) => {
                       animationDelay: `${index * 100}ms` 
                     }}
                   >
-                    <Card className="h-full p-3 bg-card/50 border-border/30 hover:border-primary/50 transition-all duration-300 hover:shadow-link hover:-translate-y-1 group-hover:bg-gradient-card">
+                    <Card className="h-full p-3 bg-card/50 border-ctp-surface1/50 hover:border-primary/50 transition-all duration-300 hover:-translate-y-1 group-hover:bg-card">
                       <div className={`flex items-center h-full ${isCompact ? 'justify-center' : 'gap-3'}`}>
                         {/* Icon */}
                         <div className={`p-2 rounded-full bg-gradient-to-r shadow-lg group-hover:scale-110 transition-transform duration-300 flex-shrink-0 ${gradient}`}>
@@ -177,7 +177,7 @@ const SocialLinksSection = ({ isLandscape }: SocialLinksSectionProps) => {
                     style={{ animationDelay: `${index * 100}ms` }}
                   >
                     <Card 
-                      className={`${isLandscape ? '' : 'p-1.5 sm:p-2 lg:p-2.5'} bg-card/50 border-border/30 hover:border-primary/50 transition-all duration-300 hover:shadow-link hover:-translate-y-1 group-hover:bg-gradient-card`} 
+                      className={`${isLandscape ? '' : 'p-1.5 sm:p-2 lg:p-2.5'} bg-card/50 border-ctp-surface1/50 hover:border-primary/50 transition-all duration-300 hover:-translate-y-1 group-hover:bg-card`} 
                       style={getButtonStyle(socialLinks.length, isLandscape)}
                     >
                       <div className={`flex items-center h-full ${isLandscape ? (isCompact ? 'justify-center' : 'gap-3') : 'gap-1.5 sm:gap-2 lg:gap-3'}`}>

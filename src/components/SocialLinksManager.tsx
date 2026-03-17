@@ -195,7 +195,7 @@ const SocialLinksManager = () => {
   return (
     <div className="space-y-6">
       {/* Add/Edit Form */}
-      <Card className="p-4 bg-gradient-card border-border/50">
+      <Card className="p-4 bg-card border-ctp-surface1/50">
         <h3 className="text-lg font-semibold mb-4 text-foreground">
           {editingId ? 'Edit Social Link' : 'Add New Social Link'}
         </h3>
@@ -263,7 +263,7 @@ const SocialLinksManager = () => {
           const { icon: IconComponent, gradient } = getPlatformVisuals(link.name, link.url);
 
           return (
-            <Card key={link.id} className="p-4 bg-gradient-card border-border/50">
+            <Card key={link.id} className="p-4 bg-card border-ctp-surface1/50">
               <div className="flex items-center gap-4">
                 <div className="flex items-center gap-2 flex-shrink-0">
                   <div className="flex flex-col gap-1">
@@ -334,7 +334,7 @@ const SocialLinksManager = () => {
         })}
 
         {socialLinks.length === 0 && (
-          <Card className="p-8 text-center bg-gradient-card border-border/50">
+          <Card className="p-8 text-center bg-card border-ctp-surface1/50">
             <p className="text-muted-foreground">No social links added yet</p>
           </Card>
         )}

@@ -19,22 +19,16 @@ export default {
 		},
 		extend: {
 			fontFamily: {
-				sans: ["Montserrat Variable", "sans-serif"],
-				'montserrat': ['Montserrat Variable', 'sans-serif'],
-				'heading': ['Montserrat Variable', 'sans-serif'],
-				'body': ['Montserrat Variable', 'sans-serif'], 
-				'code': ['Fira Code', 'monospace'],
-				'display': ['Montserrat Variable', 'sans-serif'],
-				'dancing': ['Dancing Script', 'cursive'],
-				'pacifico': ['Pacifico', 'cursive'],
+				sans: ["'MintSans'", "system-ui", "sans-serif"],
+				heading: ["'Montserrat Variable'", "system-ui", "sans-serif"],
+				body: ["'MintSans'", "system-ui", "sans-serif"],
+				data: ["'MN Varia'", "system-ui", "sans-serif"],
+				varia: ["'MN Varia'", "system-ui", "sans-serif"],
+				code: ["'MN Varia'", "system-ui", "sans-serif"],
+				dancing: ['Dancing Script', 'cursive'],
+				pacifico: ['Pacifico', 'cursive'],
 				'great-vibes': ['Great Vibes', 'cursive'],
-				'caveat': ['Caveat', 'cursive'],
-				'sacramento': ['Sacramento', 'cursive'],
-				'allura': ['Allura', 'cursive'],
-				'alex-brush': ['Alex Brush', 'cursive'],
-				'kaushan': ['Kaushan Script', 'cursive'],
-				'satisfy': ['Satisfy', 'cursive'],
-				'cookie': ['Cookie', 'cursive'],
+				caveat: ['Caveat', 'cursive'],
 			},
 			colors: {
 				border: 'hsl(var(--border))',
@@ -70,34 +64,31 @@ export default {
 					DEFAULT: 'hsl(var(--card))',
 					foreground: 'hsl(var(--card-foreground))'
 				},
-				sidebar: {
-					DEFAULT: 'hsl(var(--sidebar-background))',
-					foreground: 'hsl(var(--sidebar-foreground))',
-					primary: 'hsl(var(--sidebar-primary))',
-					'primary-foreground': 'hsl(var(--sidebar-primary-foreground))',
-					accent: 'hsl(var(--sidebar-accent))',
-					'accent-foreground': 'hsl(var(--sidebar-accent-foreground))',
-					border: 'hsl(var(--sidebar-border))',
-					ring: 'hsl(var(--sidebar-ring))'
-				}
-			},
-			backgroundImage: {
-				'gradient-primary': 'var(--gradient-primary)',
-				'gradient-card': 'var(--gradient-card)',
-				'gradient-glow': 'var(--gradient-glow)'
-			},
-			boxShadow: {
-				'link': 'var(--shadow-link)',
-				'card': 'var(--shadow-card)'
-			},
-			transitionTimingFunction: {
-				'bounce': 'var(--transition-bounce)',
-				'smooth': 'var(--transition-smooth)'
-			},
-			animation: {
-				'bounce-in': 'scale-in 0.5s cubic-bezier(0.68, -0.55, 0.265, 1.55)',
-				'fade-up': 'fade-in 0.6s ease-out',
-				'glow': 'pulse 2s cubic-bezier(0.4, 0, 0.6, 1) infinite'
+				// Catppuccin Mocha direct colors
+				ctp: {
+					crust: '#11111b',
+					mantle: '#181825',
+					base: '#1e1e2e',
+					surface0: '#313244',
+					surface1: '#45475a',
+					surface2: '#585b70',
+					text: '#cdd6f4',
+					subtext1: '#bac2de',
+					subtext0: '#a6adc8',
+					overlay2: '#9399b2',
+					overlay1: '#7f849c',
+					overlay0: '#6c7086',
+					mauve: '#cba6f7',
+					green: '#a6e3a1',
+					red: '#f38ba8',
+					blue: '#89b4fa',
+					peach: '#fab387',
+					yellow: '#f9e2af',
+					teal: '#94e2d5',
+					sky: '#89dceb',
+					pink: '#f5c2e7',
+					lavender: '#b4befe',
+				},
 			},
 			borderRadius: {
 				lg: 'var(--radius)',
@@ -106,20 +97,12 @@ export default {
 			},
 			keyframes: {
 				'accordion-down': {
-					from: {
-						height: '0'
-					},
-					to: {
-						height: 'var(--radix-accordion-content-height)'
-					}
+					from: { height: '0' },
+					to: { height: 'var(--radix-accordion-content-height)' }
 				},
 				'accordion-up': {
-					from: {
-						height: 'var(--radix-accordion-content-height)'
-					},
-					to: {
-						height: '0'
-					}
+					from: { height: 'var(--radix-accordion-content-height)' },
+					to: { height: '0' }
 				}
 			},
 			animation: {

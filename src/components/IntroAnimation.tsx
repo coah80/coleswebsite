@@ -12,9 +12,8 @@ const IntroAnimation = ({ onComplete }: IntroAnimationProps) => {
 
   const words = ['hey', 'im', 'coah!'];
 
-  // Generate random exit positions for each word's letters
-  const randomExitPositions = useMemo(() => 
-    words.map(word => 
+  const randomExitPositions = useMemo(() =>
+    words.map(word =>
       word.split('').map(() => ({
         y: -200 - Math.random() * 200,
         x: (Math.random() - 0.5) * 300,
@@ -32,7 +31,6 @@ const IntroAnimation = ({ onComplete }: IntroAnimationProps) => {
 
     const animateWord = (wordIndex: number) => {
       if (wordIndex >= words.length) {
-        // All words done, fade out container
         setIsVisible(false);
         setTimeout(onComplete, 150);
         return;
@@ -41,10 +39,8 @@ const IntroAnimation = ({ onComplete }: IntroAnimationProps) => {
       setCurrentWord(wordIndex);
       setPhase('entering');
 
-      // After entering, hold
       timeout = setTimeout(() => {
         setPhase('exiting');
-        // After exiting, move to next word
         timeout = setTimeout(() => {
           animateWord(wordIndex + 1);
         }, timings.exit);
@@ -90,7 +86,7 @@ const IntroAnimation = ({ onComplete }: IntroAnimationProps) => {
           initial={{ opacity: 1 }}
           exit={{ opacity: 0 }}
           transition={{ duration: 0.15 }}
-          className="fixed inset-0 z-50 bg-background flex items-center justify-center overflow-hidden"
+          className="fixed inset-0 z-50 bg-ctp-base flex items-center justify-center overflow-hidden"
         >
           <AnimatePresence mode="wait">
             <motion.div
@@ -105,8 +101,8 @@ const IntroAnimation = ({ onComplete }: IntroAnimationProps) => {
                   variants={letterVariants}
                   initial="hidden"
                   animate={phase === 'entering' ? 'visible' : 'exit'}
-                  className="inline-block text-[15vw] sm:text-[18vw] md:text-[20vw] font-montserrat font-black text-foreground lowercase select-none"
-                  style={{ 
+                  className="inline-block text-[15vw] sm:text-[18vw] md:text-[20vw] font-heading font-black text-ctp-text lowercase select-none"
+                  style={{
                     transformStyle: 'preserve-3d',
                     transformOrigin: 'center bottom',
                   }}
@@ -116,9 +112,14 @@ const IntroAnimation = ({ onComplete }: IntroAnimationProps) => {
               ))}
             </motion.div>
           </AnimatePresence>
-          
-          {/* Subtle background glow */}
-          <div className="absolute inset-0 bg-gradient-glow opacity-30 pointer-events-none" />
+
+          {/* Subtle mauve glow */}
+          <div
+            className="absolute inset-0 pointer-events-none opacity-20"
+            style={{
+              background: 'radial-gradient(ellipse at center, rgba(203,166,247,0.15), transparent)',
+            }}
+          />
         </motion.div>
       )}
     </AnimatePresence>

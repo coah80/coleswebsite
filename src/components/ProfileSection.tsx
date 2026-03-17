@@ -277,7 +277,7 @@ const ProfileSection = () => {
         <div className="flex items-start gap-4 lg:gap-6 xl:gap-8 mb-4 xl:mb-6">
           {/* Avatar */}
           <div className="relative flex-shrink-0">
-            <div className="w-16 h-16 lg:w-20 lg:h-20 xl:w-24 xl:h-24 2xl:w-32 2xl:h-32 rounded-full overflow-hidden ring-2 lg:ring-4 xl:ring-6 ring-primary/20 shadow-link">
+            <div className="w-16 h-16 lg:w-20 lg:h-20 xl:w-24 xl:h-24 2xl:w-32 2xl:h-32 rounded-full overflow-hidden ring-2 lg:ring-4 xl:ring-6 ring-primary/20 shadow-lg shadow-ctp-crust/40">
               {lanyardData?.discord_user ? (
                 <img 
                   src={getDiscordAvatarUrl()!} 
@@ -307,7 +307,7 @@ const ProfileSection = () => {
           {/* Info */}
           <div className="flex-1 min-w-0">
             <div className="flex items-center gap-2 lg:gap-3 mb-2 xl:mb-3">
-              <h1 className="text-2xl lg:text-3xl xl:text-4xl 2xl:text-5xl font-bold font-display bg-gradient-primary bg-clip-text text-transparent">
+              <h1 className="text-2xl lg:text-3xl xl:text-4xl 2xl:text-5xl font-bold font-display text-ctp-text">
                 coah
               </h1>
               <Badge 

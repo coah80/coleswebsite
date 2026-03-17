@@ -63,7 +63,7 @@ const PortfolioSection = () => {
     return (
       <div className="space-y-6">
         <div className="text-center">
-          <h2 className="text-3xl font-bold mb-4 bg-gradient-primary bg-clip-text text-transparent">
+          <h2 className="text-3xl font-bold mb-4 text-ctp-text">
             my work
           </h2>
           <p className="text-muted-foreground">loading projects...</p>
@@ -76,7 +76,7 @@ const PortfolioSection = () => {
     return (
       <div className="space-y-6">
         <div className="text-center">
-          <h2 className="text-3xl font-bold mb-4 bg-gradient-primary bg-clip-text text-transparent">
+          <h2 className="text-3xl font-bold mb-4 text-ctp-text">
             my work
           </h2>
           <p className="text-muted-foreground">no projects available yet. check back soon!</p>
@@ -88,7 +88,7 @@ const PortfolioSection = () => {
   return (
     <div className="space-y-6" id="portfolio">
       <div className="text-center">
-        <h2 className="text-3xl font-bold mb-4 bg-gradient-primary bg-clip-text text-transparent">
+        <h2 className="text-3xl font-bold mb-4 text-ctp-text">
           my work
         </h2>
         <p className="text-muted-foreground max-w-2xl mx-auto">
@@ -117,7 +117,7 @@ const PortfolioSection = () => {
         {filteredProjects.map((project) => (
           <Card 
             key={project.id} 
-            className={`group overflow-hidden bg-card/50 border-border/30 hover:shadow-card transition-all duration-300 hover:-translate-y-2 ${
+            className={`group overflow-hidden bg-card/50 border-border/30 hover:shadow-lg hover:shadow-ctp-crust/40 transition-all duration-300 hover:-translate-y-2 ${
               project.is_featured ? 'ring-2 ring-accent/50' : ''
             }`}
           >

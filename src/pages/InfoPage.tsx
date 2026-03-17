@@ -1,9 +1,9 @@
 import { useState, useEffect, useRef, useCallback } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { 
-  Headphones, 
-  Gamepad2, 
-  Clock, 
+import {
+  Headphones,
+  Gamepad2,
+  Clock,
   ExternalLink,
   Music2,
   Play,
@@ -16,7 +16,7 @@ import {
 } from 'lucide-react';
 import { useLanyard, LanyardActivity } from '@/hooks/useLanyard';
 import PageLayout from '@/components/PageLayout';
-import WarpText from '@/components/typography/WarpText';
+
 import { supabase } from '@/integrations/supabase/client';
 
 interface SteamGame {
@@ -47,8 +47,8 @@ interface GameItem {
   id: string;
   name: string;
   source: 'steam' | 'discord';
-  playtime?: number; // minutes
-  recentPlaytime?: number; // minutes in last 2 weeks
+  playtime?: number;
+  recentPlaytime?: number;
   imageUrl?: string;
   storeUrl?: string;
   isPlaying?: boolean;
@@ -56,7 +56,6 @@ interface GameItem {
 
 const STEAM_PROFILE_URL = 'https://steamcommunity.com/profiles/76561199229763710';
 
-// Cache for IGDB covers
 const igdbCache = new Map<string, string>();
 
 const InfoPage = () => {
@@ -69,7 +68,7 @@ const InfoPage = () => {
   const [failedImages, setFailedImages] = useState<Set<string>>(new Set());
   const [wishlistPage, setWishlistPage] = useState(0);
   const [wishlist, setWishlist] = useState<WishlistItem[]>([]);
-  
+
   const {
     data,
     isConnected,
@@ -82,20 +81,16 @@ const InfoPage = () => {
     user,
     activities,
     getAvatarUrl,
-    getAvatarDecorationUrl,
-    getBannerUrl,
-    getBannerColor,
     getStatusColor,
     getStatusText,
     getActivityAssetUrl,
   } = useLanyard();
 
-  // Debug log for Lanyard data
   useEffect(() => {
     if (import.meta.env.DEV) {
-      console.log('[InfoPage] Lanyard state:', { 
-        isConnected, 
-        lanyardError, 
+      console.log('[InfoPage] Lanyard state:', {
+        isConnected,
+        lanyardError,
         hasData: !!data,
         banner: data?.discord_user?.banner,
         bannerColor: data?.discord_user?.banner_color,
@@ -106,19 +101,17 @@ const InfoPage = () => {
     }
   }, [isConnected, lanyardError, data, gameActivity, spotify, activities]);
 
-  // Update time every second
   useEffect(() => {
     const interval = setInterval(() => setCurrentTime(new Date()), 1000);
     return () => clearInterval(interval);
   }, []);
 
-  // Fetch Steam data
   useEffect(() => {
     const fetchSteamData = async () => {
       try {
         const { data, error } = await supabase.functions.invoke('steam-games');
         if (error) throw error;
-        
+
         console.log('[InfoPage] Steam data received:', data);
         setSteamData(data);
       } catch (err) {
@@ -130,10 +123,8 @@ const InfoPage = () => {
     fetchSteamData();
   }, []);
 
-  // Fetch Steam wishlist using scraper edge function
   useEffect(() => {
     const fetchWishlist = async () => {
-      // Fallback wishlist in case scraping fails (extracted from Steam cookies)
       const FALLBACK_WISHLIST: WishlistItem[] = [
         { appid: 726830, name: 'Vacation Simulator', priority: 1 },
         { appid: 448880, name: "Spells 'n' Stuff", priority: 2 },
@@ -192,28 +183,25 @@ const InfoPage = () => {
       ];
 
       try {
-        // Try the scraper edge function first
         console.log('[Wishlist] Trying scraper...');
         const { data, error } = await supabase.functions.invoke('steam-wishlist-scraper');
-        
+
         if (!error && data?.wishlist && data.wishlist.length > 0) {
           console.log('[Wishlist] Scraper returned', data.wishlist.length, 'items');
           setWishlist(data.wishlist);
           return;
         }
-        
+
         if (error) {
           console.log('[Wishlist] Scraper error:', error);
         }
 
-        // If scraper failed, check steam-games API response
         if (steamData?.wishlist && steamData.wishlist.length > 0) {
           console.log('[Wishlist] Using Steam API data:', steamData.wishlist.length, 'items');
           setWishlist(steamData.wishlist);
           return;
         }
 
-        // Fall back to hardcoded list
         console.log('[Wishlist] Using fallback list');
         setWishlist(FALLBACK_WISHLIST);
       } catch (err) {
@@ -222,13 +210,11 @@ const InfoPage = () => {
       }
     };
 
-    // Wait for steamData to be loaded first
     if (!steamLoading) {
       fetchWishlist();
     }
   }, [steamLoading, steamData]);
 
-  // Fetch IGDB cover for a game
   const fetchIGDBCover = useCallback(async (gameName: string): Promise<string | null> => {
     const cacheKey = gameName.toLowerCase().trim();
     if (igdbCache.has(cacheKey)) {
@@ -250,7 +236,6 @@ const InfoPage = () => {
     return null;
   }, []);
 
-  // Fetch song.link data
   useEffect(() => {
     if (spotify?.track_id) {
       const fetchSongLinks = async () => {
@@ -275,25 +260,21 @@ const InfoPage = () => {
     }
   }, [spotify?.track_id]);
 
-  // Get game activities from Discord (type 0 = Playing)
   const discordGames = activities.filter(a => a.type === 0 && a.name !== 'Spotify');
 
-  // Check if a Discord game matches a Steam game (by name similarity)
   const findSteamMatch = useCallback((gameName: string): SteamGame | null => {
     if (!steamData?.recentlyPlayed && !steamData?.mostPlayed) return null;
-    
+
     const normalizedName = gameName.toLowerCase().trim();
-    
-    // Check recently played first
-    const recentMatch = steamData.recentlyPlayed?.find(g => 
+
+    const recentMatch = steamData.recentlyPlayed?.find(g =>
       g.name.toLowerCase().trim() === normalizedName ||
       g.name.toLowerCase().includes(normalizedName) ||
       normalizedName.includes(g.name.toLowerCase())
     );
     if (recentMatch) return recentMatch;
-    
-    // Check most played
-    const mostMatch = steamData.mostPlayed?.find(g => 
+
+    const mostMatch = steamData.mostPlayed?.find(g =>
       g.name.toLowerCase().trim() === normalizedName ||
       g.name.toLowerCase().includes(normalizedName) ||
       normalizedName.includes(g.name.toLowerCase())
@@ -301,22 +282,18 @@ const InfoPage = () => {
     return mostMatch || null;
   }, [steamData]);
 
-  // Merge Steam and Discord games for "In Rotation"
   const getInRotationGames = useCallback((): GameItem[] => {
     const games: GameItem[] = [];
     const seen = new Set<string>();
 
-    // Add current Discord activity first (if playing)
     if (gameActivity) {
       const key = gameActivity.name.toLowerCase();
       if (!seen.has(key)) {
         seen.add(key);
-        
-        // Check if this Discord game is on Steam
+
         const steamMatch = findSteamMatch(gameActivity.name);
-        
+
         if (steamMatch) {
-          // Use Steam data for hours and image
           games.push({
             id: `steam-${steamMatch.appid}`,
             name: steamMatch.name,
@@ -327,10 +304,8 @@ const InfoPage = () => {
             storeUrl: `https://store.steampowered.com/app/${steamMatch.appid}`,
             isPlaying: true,
           });
-          // Also mark the steam key as seen
           seen.add(steamMatch.name.toLowerCase());
         } else {
-          // Not on Steam - use Discord data, will fetch IGDB image
           games.push({
             id: `discord-${gameActivity.id}`,
             name: gameActivity.name,
@@ -342,7 +317,6 @@ const InfoPage = () => {
       }
     }
 
-    // Add Steam recently played (that aren't already added)
     if (steamData?.recentlyPlayed) {
       for (const game of steamData.recentlyPlayed) {
         const key = game.name.toLowerCase();
@@ -364,12 +338,10 @@ const InfoPage = () => {
     return games.slice(0, 8);
   }, [gameActivity, steamData, getActivityAssetUrl, findSteamMatch]);
 
-  // Get most played games (Steam + detected Discord games)
   const getMostPlayedGames = useCallback((): GameItem[] => {
     const games: GameItem[] = [];
     const seen = new Set<string>();
 
-    // Add Steam most played
     if (steamData?.mostPlayed) {
       for (const game of steamData.mostPlayed) {
         const key = game.name.toLowerCase();
@@ -390,26 +362,20 @@ const InfoPage = () => {
     return games.slice(0, 10);
   }, [steamData]);
 
-  // Fetch IGDB images for non-Steam games OR failed Steam images
   useEffect(() => {
     const gamesNeedingImages: string[] = [];
-    
-    // Check in rotation games - fetch IGDB for non-Steam games OR Steam games with failed images
+
     const inRotation = getInRotationGames();
-    
+
     for (const game of inRotation) {
-      // Fetch IGDB if:
-      // 1. Discord game without image, or
-      // 2. Any game with failed Steam image (that we don't already have IGDB for)
-      const needsIGDB = (game.source === 'discord' && !game.imageUrl) || 
+      const needsIGDB = (game.source === 'discord' && !game.imageUrl) ||
                         (failedImages.has(game.name) && !gameImages[game.name]);
-      
+
       if (needsIGDB && !gameImages[game.name]) {
         gamesNeedingImages.push(game.name);
       }
     }
 
-    // Also check most played games for failed images
     const mostPlayed = getMostPlayedGames();
     for (const game of mostPlayed) {
       if (failedImages.has(game.name) && !gameImages[game.name]) {
@@ -419,7 +385,6 @@ const InfoPage = () => {
       }
     }
 
-    // Fetch missing images from IGDB
     const fetchMissing = async () => {
       for (const name of gamesNeedingImages) {
         const url = await fetchIGDBCover(name);
@@ -434,25 +399,6 @@ const InfoPage = () => {
     }
   }, [getInRotationGames, getMostPlayedGames, fetchIGDBCover, gameImages, failedImages]);
 
-  // Fetch IGDB covers for Steam wishlist
-  useEffect(() => {
-    const wishlistNames = wishlist.map(g => g.name).filter(Boolean);
-
-    const fetchWishlistCovers = async () => {
-      for (const name of wishlistNames) {
-        if (!gameImages[name] && !failedImages.has(name)) {
-          const url = await fetchIGDBCover(name);
-          if (url) {
-            setGameImages(prev => ({ ...prev, [name]: url }));
-          }
-        }
-      }
-    };
-
-    if (wishlistNames.length > 0) {
-      fetchWishlistCovers();
-    }
-  }, [wishlist, fetchIGDBCover, gameImages, failedImages]);
 
 
   const formatTime = (date: Date) => {
@@ -498,13 +444,10 @@ const InfoPage = () => {
   };
 
   const getGameImage = (game: GameItem): string | null => {
-    // If Steam image failed, use IGDB
     if (failedImages.has(game.name) && gameImages[game.name]) {
       return gameImages[game.name];
     }
-    // Otherwise try the game's imageUrl first
     if (game.imageUrl && !failedImages.has(game.name)) return game.imageUrl;
-    // Then try IGDB cache
     if (gameImages[game.name]) return gameImages[game.name];
     return null;
   };
@@ -519,108 +462,89 @@ const InfoPage = () => {
 
   return (
     <PageLayout title="info" allowScroll={true}>
-      <div 
+      <div
         ref={gridRef}
-        className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 pb-8 max-w-6xl mx-auto"
+        className="mx-auto w-full max-w-3xl flex flex-col gap-5 sm:gap-6 pb-8"
       >
-        {/* ===== DISCORD PROFILE ===== */}
-        <motion.div 
-          initial={{ opacity: 0, y: 30, scale: 0.95 }}
-          animate={{ opacity: 1, y: 0, scale: 1 }}
+
+        <motion.div
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.5, delay: 0.1, ease: [0.16, 1, 0.3, 1] }}
-          className="md:col-span-1 lg:col-span-1 bg-card/50 border border-border/30 rounded-2xl overflow-hidden"
+          className="flex flex-col items-center text-center gap-3"
         >
-          {getBannerUrl() ? (
-            <img 
-              src={getBannerUrl(600)!} 
-              alt="Profile banner" 
-              className="h-20 w-full object-cover" 
-              onError={(e) => { e.currentTarget.style.display = 'none'; }}
-            />
-          ) : getBannerColor() ? (
-            <div className="h-20 w-full" style={{ backgroundColor: getBannerColor()! }} />
-          ) : (
-            <div className="h-20 bg-gradient-to-br from-indigo-600 via-purple-600 to-pink-500" />
-          )}
-          <div className="px-5 pb-5 -mt-8 relative">
-            <div className="relative inline-block">
-              <div className="w-16 h-16 rounded-full border-4 border-card overflow-hidden bg-card">
-                {user ? (
-                  <img src={getAvatarUrl(128) || ''} alt={user.username} className="w-full h-full object-cover" />
-                ) : (
-                  <div className="w-full h-full bg-muted animate-pulse" />
-                )}
-              </div>
-              {getAvatarDecorationUrl() && (
-                <img 
-                  src={getAvatarDecorationUrl()!} 
-                  alt="" 
-                  className="absolute -inset-2 w-[calc(100%+16px)] h-[calc(100%+16px)] pointer-events-none" 
-                  onError={(e) => { e.currentTarget.style.display = 'none'; }}
-                />
+          <div className="relative">
+            <div className="w-20 h-20 sm:w-24 sm:h-24 rounded-2xl overflow-hidden ring-2 ring-ctp-surface1/30">
+              {user ? (
+                <img src={getAvatarUrl(256) || ''} alt={user.username} className="w-full h-full object-cover" />
+              ) : (
+                <div className="w-full h-full bg-ctp-surface0/50 animate-pulse" />
               )}
-              <div className={`absolute bottom-0 right-0 w-5 h-5 rounded-full border-[3px] border-card ${getStatusColor()}`} />
             </div>
+            <div className={`absolute -bottom-1 -right-1 w-6 h-6 rounded-full border-4 border-ctp-base ${getStatusColor()}`} />
+          </div>
 
-            <div className="mt-2">
-              <WarpText className="text-2xl font-black text-foreground">
-                {user?.global_name || user?.username || 'Loading...'}
-              </WarpText>
-              <p className="text-sm text-muted-foreground font-mono">@{user?.username}</p>
-              
-              <div className="flex items-center gap-2 mt-2">
-                <div className={`w-2 h-2 rounded-full ${getStatusColor()}`} />
-                <span className="text-sm text-muted-foreground">{getStatusText()}</span>
-              </div>
-
+          <div>
+            <h2 className="text-3xl sm:text-4xl font-heading font-extrabold lowercase tracking-tight text-ctp-text">
+              {user?.global_name || user?.username || 'Loading...'}<span className="text-ctp-mauve">.</span>
+            </h2>
+            <p className="text-sm text-ctp-overlay1 font-data mt-1">@{user?.username}</p>
+            <div className="mt-2 flex items-center justify-center gap-2">
+              <div className={`w-2 h-2 rounded-full ${getStatusColor()}`} />
+              <span className="text-xs font-data text-ctp-overlay1">{getStatusText()}</span>
               {customStatus?.state && (
-                <p className="mt-2 text-sm text-foreground/80 italic">"{customStatus.state}"</p>
+                <>
+                  <span className="text-ctp-overlay1/30">·</span>
+                  <span className="text-xs text-ctp-subtext1/60 italic">"{customStatus.state}"</span>
+                </>
               )}
             </div>
           </div>
         </motion.div>
 
-        {/* ===== LOCAL TIME ===== */}
-        <motion.div 
+        <div className="w-full h-px bg-gradient-to-r from-transparent via-ctp-mauve/40 to-transparent" />
+
+
+        <motion.div
           initial={{ opacity: 0, y: 30, scale: 0.95 }}
           animate={{ opacity: 1, y: 0, scale: 1 }}
           transition={{ duration: 0.5, delay: 0.15, ease: [0.16, 1, 0.3, 1] }}
-          className="bg-card/50 border border-border/30 rounded-2xl p-5 flex flex-col justify-center"
+          className="rounded-2xl border border-ctp-surface1/50 bg-ctp-surface0/40 p-5 flex flex-col justify-center"
         >
           <div className="flex items-center gap-2 mb-2">
-            <Clock className="w-4 h-4 text-accent" />
-            <span className="text-xs font-mono text-muted-foreground uppercase">Local Time</span>
+            <Clock className="w-4 h-4 text-ctp-mauve" />
+            <span className="text-xs font-data font-bold text-ctp-overlay1 uppercase">Local Time</span>
           </div>
-          <p className="text-3xl font-mono font-bold text-foreground">
+          <p className="text-3xl font-data font-bold text-ctp-text">
             {formatTime(currentTime)}
           </p>
-          <p className="text-sm text-muted-foreground mt-1">
+          <p className="text-sm text-ctp-subtext1 mt-1">
             {formatDate(currentTime)}
           </p>
         </motion.div>
 
-        {/* ===== CURRENT ACTIVITY ===== */}
-        <motion.div 
+
+        <motion.div
           initial={{ opacity: 0, y: 30, scale: 0.95 }}
           animate={{ opacity: 1, y: 0, scale: 1 }}
           transition={{ duration: 0.5, delay: 0.2, ease: [0.16, 1, 0.3, 1] }}
           className={`rounded-2xl p-5 transition-all ${
-          gameActivity 
-            ? 'bg-gradient-to-br from-purple-500/20 to-indigo-600/5 border border-purple-500/30' 
-            : 'bg-card/50 border border-border/30'
+          gameActivity
+            ? 'bg-ctp-mauve/10 border border-ctp-mauve/20'
+            : 'border border-ctp-surface1/50 bg-ctp-surface0/40'
         }`}>
           <div className="flex items-center gap-2 mb-4">
-            <Gamepad2 className={`w-4 h-4 ${gameActivity ? 'text-purple-400' : 'text-muted-foreground'}`} />
-            <span className="text-xs font-mono text-muted-foreground uppercase">Activities</span>
+            <Gamepad2 className={`w-4 h-4 ${gameActivity ? 'text-ctp-mauve' : 'text-ctp-overlay1'}`} />
+            <span className="text-xs font-data font-bold text-ctp-overlay1 uppercase">Activities</span>
           </div>
 
           {gameActivity ? (
             <div className="flex gap-4">
               {getActivityAssetUrl(gameActivity) || gameImages[gameActivity.name] ? (
                 <div className="relative flex-shrink-0">
-                  <img 
-                    src={getActivityAssetUrl(gameActivity) || gameImages[gameActivity.name]} 
-                    alt={gameActivity.name} 
+                  <img
+                    src={getActivityAssetUrl(gameActivity) || gameImages[gameActivity.name]}
+                    alt={gameActivity.name}
                     className="w-24 h-32 rounded-xl object-cover shadow-lg ring-1 ring-white/10"
                     onError={(e) => {
                       if (!gameImages[gameActivity.name]) {
@@ -634,20 +558,20 @@ const InfoPage = () => {
                   <div className="absolute inset-0 rounded-xl bg-gradient-to-t from-black/40 to-transparent" />
                 </div>
               ) : (
-                <div className="w-24 h-32 rounded-xl bg-gradient-to-br from-purple-500 to-indigo-600 flex items-center justify-center flex-shrink-0 ring-1 ring-white/10">
-                  <Gamepad2 className="w-10 h-10 text-white" />
+                <div className="w-24 h-32 rounded-xl bg-ctp-mauve/20 flex items-center justify-center flex-shrink-0 ring-1 ring-white/10">
+                  <Gamepad2 className="w-10 h-10 text-ctp-mauve" />
                 </div>
               )}
               <div className="flex-1 min-w-0 flex flex-col justify-center">
                 <div className="flex items-center gap-2 mb-1">
-                  <div className="w-2 h-2 rounded-full bg-green-500 animate-pulse" />
-                  <span className="text-xs font-mono text-purple-400 uppercase font-bold">Now Playing</span>
+                  <div className="w-2 h-2 rounded-full bg-ctp-green animate-pulse" />
+                  <span className="text-xs font-data text-ctp-mauve uppercase font-bold">Now Playing</span>
                 </div>
-                <p className="font-black text-lg text-foreground leading-tight line-clamp-2">{gameActivity.name}</p>
-                {gameActivity.details && <p className="text-xs text-muted-foreground mt-1 truncate">{gameActivity.details}</p>}
-                {gameActivity.state && <p className="text-xs text-muted-foreground/70 italic truncate">{gameActivity.state}</p>}
+                <p className="font-heading font-bold text-lg text-ctp-text leading-tight line-clamp-2">{gameActivity.name}</p>
+                {gameActivity.details && <p className="text-xs text-ctp-subtext1 mt-1 truncate">{gameActivity.details}</p>}
+                {gameActivity.state && <p className="text-xs text-ctp-overlay1/70 italic truncate">{gameActivity.state}</p>}
                 {gameActivity.timestamps?.start && (
-                  <div className="flex items-center gap-1.5 mt-2 text-xs font-mono text-muted-foreground">
+                  <div className="flex items-center gap-1.5 mt-2 text-xs font-data text-ctp-overlay1">
                     <Clock className="w-3 h-3" />
                     <span>{formatElapsedTime(gameActivity.timestamps.start)} played</span>
                   </div>
@@ -655,42 +579,42 @@ const InfoPage = () => {
               </div>
             </div>
           ) : (
-            <div className="text-center py-4 text-muted-foreground">
+            <div className="text-center py-4 text-ctp-overlay1">
               <Gamepad2 className="w-8 h-8 mx-auto mb-2 opacity-30" />
               <p className="text-sm">Not playing anything</p>
             </div>
           )}
         </motion.div>
 
-        {/* ===== SPOTIFY ===== */}
-        <motion.div 
+
+        <motion.div
           initial={{ opacity: 0, y: 30, scale: 0.95 }}
           animate={{ opacity: 1, y: 0, scale: 1 }}
           transition={{ duration: 0.5, delay: 0.25, ease: [0.16, 1, 0.3, 1] }}
-          className={`md:col-span-2 lg:col-span-3 rounded-2xl p-5 transition-all ${
-          isSpotifyActive 
-            ? 'bg-gradient-to-br from-green-500/20 to-green-600/5 border border-green-500/30' 
-            : 'bg-card/50 border border-border/30'
+          className={`rounded-2xl p-5 transition-all ${
+          isSpotifyActive
+            ? 'bg-ctp-green/10 border border-ctp-green/20'
+            : 'border border-ctp-surface1/50 bg-ctp-surface0/40'
         }`}>
           <div className="flex items-center gap-2 mb-4">
-            <Headphones className={`w-4 h-4 ${isSpotifyActive ? 'text-green-400' : 'text-muted-foreground'}`} />
-            <span className="text-xs font-mono text-muted-foreground uppercase">Spotify</span>
-            {isSpotifyActive && <Disc3 className="w-4 h-4 text-green-400 animate-spin" style={{ animationDuration: '3s' }} />}
+            <Headphones className={`w-4 h-4 ${isSpotifyActive ? 'text-ctp-green' : 'text-ctp-overlay1'}`} />
+            <span className="text-xs font-data font-bold text-ctp-overlay1 uppercase">Spotify</span>
+            {isSpotifyActive && <Disc3 className="w-4 h-4 text-ctp-green animate-spin" style={{ animationDuration: '3s' }} />}
           </div>
 
           {isSpotifyActive && spotify ? (
             <div className="flex gap-4">
               <img src={spotify.album_art_url} alt={spotify.album} className="w-20 h-20 rounded-xl shadow-lg flex-shrink-0" />
               <div className="flex-1 min-w-0">
-                <p className="font-bold text-lg text-foreground truncate">{spotify.song}</p>
-                <p className="text-sm text-muted-foreground truncate">{spotify.artist}</p>
-                <p className="text-xs text-muted-foreground/60 truncate">{spotify.album}</p>
-                
-                <div className="mt-2 flex items-center gap-2 text-xs font-mono text-muted-foreground">
+                <p className="font-bold text-lg text-ctp-text truncate">{spotify.song}</p>
+                <p className="text-sm text-ctp-subtext1 truncate">{spotify.artist}</p>
+                <p className="text-xs text-ctp-overlay1/60 truncate">{spotify.album}</p>
+
+                <div className="mt-2 flex items-center gap-2 text-xs font-data text-ctp-overlay1">
                   <span>{formatSpotifyTime(currentTime.getTime() - spotify.timestamps.start)}</span>
-                  <div className="flex-1 h-1 bg-muted/30 rounded-full overflow-hidden max-w-xs">
-                    <div 
-                      className="h-full bg-green-500 rounded-full"
+                  <div className="flex-1 h-1 bg-ctp-surface0/30 rounded-full overflow-hidden max-w-xs">
+                    <div
+                      className="h-full bg-ctp-green rounded-full"
                       style={{ width: `${Math.min(100, ((currentTime.getTime() - spotify.timestamps.start) / (spotify.timestamps.end - spotify.timestamps.start)) * 100)}%` }}
                     />
                   </div>
@@ -700,20 +624,20 @@ const InfoPage = () => {
                 {songLinks && (
                   <div className="mt-3 flex gap-2">
                     {songLinks.spotify && (
-                      <a href={songLinks.spotify} target="_blank" rel="noopener noreferrer" 
-                         className="flex items-center gap-1 text-xs bg-green-500/20 hover:bg-green-500/30 text-green-400 px-2 py-1 rounded transition-colors">
+                      <a href={songLinks.spotify} target="_blank" rel="noopener noreferrer"
+                         className="flex items-center gap-1 text-xs bg-ctp-green/20 hover:bg-ctp-green/30 text-ctp-green px-2 py-1 rounded transition-colors">
                         <Music2 className="w-3 h-3" /> Open
                       </a>
                     )}
                     {songLinks.appleMusic && (
                       <a href={songLinks.appleMusic} target="_blank" rel="noopener noreferrer"
-                         className="flex items-center gap-1 text-xs bg-pink-500/20 hover:bg-pink-500/30 text-pink-400 px-2 py-1 rounded transition-colors">
+                         className="flex items-center gap-1 text-xs bg-ctp-pink/20 hover:bg-ctp-pink/30 text-ctp-pink px-2 py-1 rounded transition-colors">
                         <Music2 className="w-3 h-3" /> Apple
                       </a>
                     )}
                     {songLinks.youtubeMusic && (
                       <a href={songLinks.youtubeMusic} target="_blank" rel="noopener noreferrer"
-                         className="flex items-center gap-1 text-xs bg-red-500/20 hover:bg-red-500/30 text-red-400 px-2 py-1 rounded transition-colors">
+                         className="flex items-center gap-1 text-xs bg-ctp-red/20 hover:bg-ctp-red/30 text-ctp-red px-2 py-1 rounded transition-colors">
                         <Play className="w-3 h-3" /> YouTube
                       </a>
                     )}
@@ -722,39 +646,42 @@ const InfoPage = () => {
               </div>
             </div>
           ) : (
-            <div className="text-center py-4 text-muted-foreground">
+            <div className="text-center py-4 text-ctp-overlay1">
               <Headphones className="w-8 h-8 mx-auto mb-2 opacity-30" />
               <p className="text-sm">Not listening to anything</p>
             </div>
           )}
         </motion.div>
 
-        {/* ===== IN ROTATION ===== */}
-        <motion.div 
+
+        <div className="w-full h-px bg-gradient-to-r from-transparent via-ctp-surface1 to-transparent" />
+
+
+        <motion.div
           initial={{ opacity: 0, y: 30, scale: 0.95 }}
           animate={{ opacity: 1, y: 0, scale: 1 }}
           transition={{ duration: 0.5, delay: 0.3, ease: [0.16, 1, 0.3, 1] }}
-          className="md:col-span-2 lg:col-span-3 bg-card/50 border border-border/30 rounded-2xl p-5"
+          className="rounded-2xl border border-ctp-surface1/50 bg-ctp-surface0/40 p-5"
         >
           <div className="flex items-center justify-between mb-4">
             <div className="flex items-center gap-2">
-              <RotateCcw className="w-4 h-4 text-blue-400" />
-              <span className="text-xs font-mono text-muted-foreground uppercase">In Rotation</span>
+              <RotateCcw className="w-4 h-4 text-ctp-blue" />
+              <span className="text-xs font-data font-bold text-ctp-overlay1 uppercase">In Rotation</span>
             </div>
-            <a href={STEAM_PROFILE_URL} target="_blank" rel="noopener noreferrer" 
-               className="flex items-center gap-1 text-xs text-accent hover:text-accent/80 transition-colors">
+            <a href={STEAM_PROFILE_URL} target="_blank" rel="noopener noreferrer"
+               className="flex items-center gap-1 text-xs text-ctp-mauve hover:text-ctp-mauve/80 transition-colors">
               Steam <ExternalLink className="w-3 h-3" />
             </a>
           </div>
 
           {steamLoading && !gameActivity ? (
-            <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-3">
+            <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
               {[...Array(4)].map((_, i) => (
-                <div key={i} className="animate-pulse bg-muted/20 rounded-lg aspect-[460/215]" />
+                <div key={i} className="animate-pulse bg-ctp-surface0/20 rounded-lg aspect-[460/215]" />
               ))}
             </div>
           ) : inRotationGames.length > 0 ? (
-            <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-3">
+            <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
               {inRotationGames.map((game) => {
                 const imageUrl = getGameImage(game);
                 return (
@@ -763,23 +690,23 @@ const InfoPage = () => {
                     href={game.storeUrl || '#'}
                     target={game.storeUrl ? '_blank' : undefined}
                     rel="noopener noreferrer"
-                    className="group relative rounded-lg overflow-hidden aspect-[460/215] bg-muted/20"
+                    className="group relative rounded-lg overflow-hidden aspect-[460/215] bg-ctp-surface0/20"
                   >
                     {imageUrl ? (
-                      <img 
-                        src={imageUrl} 
-                        alt={game.name} 
+                      <img
+                        src={imageUrl}
+                        alt={game.name}
                         className="w-full h-full object-cover group-hover:scale-105 transition-transform"
                         onError={() => handleImageError(game.name)}
                       />
                     ) : (
-                      <div className="w-full h-full bg-gradient-to-br from-purple-500/30 to-indigo-600/30 flex items-center justify-center">
+                      <div className="w-full h-full bg-ctp-mauve/20 flex items-center justify-center">
                         <Gamepad2 className="w-8 h-8 text-white/50" />
                       </div>
                     )}
                     <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/20 to-transparent" />
                     {game.isPlaying && (
-                      <div className="absolute top-1 right-1 bg-green-500 text-white text-[8px] font-bold px-1.5 py-0.5 rounded">
+                      <div className="absolute top-1 right-1 bg-ctp-green text-ctp-base text-[8px] font-bold px-1.5 py-0.5 rounded">
                         LIVE
                       </div>
                     )}
@@ -794,33 +721,33 @@ const InfoPage = () => {
               })}
             </div>
           ) : (
-            <p className="text-sm text-muted-foreground text-center py-4">No recent games</p>
+            <p className="text-sm text-ctp-overlay1 text-center py-4">No recent games</p>
           )}
         </motion.div>
 
-        {/* ===== MOST PLAYED ===== */}
-        <motion.div 
+
+        <motion.div
           initial={{ opacity: 0, y: 30, scale: 0.95 }}
           animate={{ opacity: 1, y: 0, scale: 1 }}
           transition={{ duration: 0.5, delay: 0.35, ease: [0.16, 1, 0.3, 1] }}
-          className="md:col-span-2 lg:col-span-3 bg-card/50 border border-border/30 rounded-2xl p-5"
+          className="rounded-2xl border border-ctp-surface1/50 bg-ctp-surface0/40 p-5"
         >
           <div className="flex items-center justify-between mb-4">
             <div className="flex items-center gap-2">
-              <TrendingUp className="w-4 h-4 text-amber-400" />
-              <span className="text-xs font-mono text-muted-foreground uppercase">Most Played</span>
-              {steamData && <span className="text-[10px] text-muted-foreground/60">({steamData.totalGames} games)</span>}
+              <TrendingUp className="w-4 h-4 text-ctp-peach" />
+              <span className="text-xs font-data font-bold text-ctp-overlay1 uppercase">Most Played</span>
+              {steamData && <span className="text-[10px] text-ctp-overlay1/60">({steamData.totalGames} games)</span>}
             </div>
           </div>
 
           {steamLoading ? (
-            <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-5 gap-3">
+            <div className="grid grid-cols-2 sm:grid-cols-5 gap-3">
               {[...Array(5)].map((_, i) => (
-                <div key={i} className="animate-pulse bg-muted/20 rounded-lg aspect-[460/215]" />
+                <div key={i} className="animate-pulse bg-ctp-surface0/20 rounded-lg aspect-[460/215]" />
               ))}
             </div>
           ) : mostPlayedGames.length > 0 ? (
-            <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-5 gap-3">
+            <div className="grid grid-cols-2 sm:grid-cols-5 gap-3">
               {mostPlayedGames.map((game, index) => {
                 const imageUrl = getGameImage(game);
                 return (
@@ -829,17 +756,17 @@ const InfoPage = () => {
                     href={game.storeUrl || '#'}
                     target={game.storeUrl ? '_blank' : undefined}
                     rel="noopener noreferrer"
-                    className="group relative rounded-lg overflow-hidden aspect-[460/215] bg-muted/20"
+                    className="group relative rounded-lg overflow-hidden aspect-[460/215] bg-ctp-surface0/20"
                   >
                     {imageUrl ? (
-                      <img 
-                        src={imageUrl} 
-                        alt={game.name} 
+                      <img
+                        src={imageUrl}
+                        alt={game.name}
                         className="w-full h-full object-cover group-hover:scale-105 transition-transform"
                         onError={() => handleImageError(game.name)}
                       />
                     ) : (
-                      <div className="w-full h-full bg-gradient-to-br from-amber-500/30 to-orange-600/30 flex items-center justify-center">
+                      <div className="w-full h-full bg-ctp-peach/20 flex items-center justify-center">
                         <Gamepad2 className="w-8 h-8 text-white/50" />
                       </div>
                     )}
@@ -856,66 +783,65 @@ const InfoPage = () => {
               })}
             </div>
           ) : (
-            <p className="text-sm text-muted-foreground text-center py-4">No games found</p>
+            <p className="text-sm text-ctp-overlay1 text-center py-4">No games found</p>
           )}
         </motion.div>
 
-        {/* ===== STEAM WISHLIST ===== */}
+
         {wishlist.length > 0 && (
-          <motion.div 
+          <motion.div
             initial={{ opacity: 0, y: 30, scale: 0.95 }}
             animate={{ opacity: 1, y: 0, scale: 1 }}
             transition={{ duration: 0.5, delay: 0.5, ease: [0.16, 1, 0.3, 1] }}
-            className="md:col-span-2 lg:col-span-4 bg-gradient-to-br from-blue-500/10 to-indigo-600/5 border border-blue-500/20 rounded-2xl p-5"
+            className="bg-ctp-blue/10 border border-ctp-blue/20 rounded-2xl p-5"
           >
-            <div className="flex items-center justify-between mb-4">
+            <div className="flex flex-wrap items-center justify-between gap-2 mb-4">
               <div className="flex items-center gap-2">
-                <Sparkles className="w-4 h-4 text-blue-400" />
-                <span className="text-xs font-mono text-muted-foreground uppercase">Steam Wishlist</span>
-                <span className="text-[10px] text-muted-foreground/50">({wishlist.length} games)</span>
+                <Sparkles className="w-4 h-4 text-ctp-blue" />
+                <span className="text-xs font-data font-bold text-ctp-overlay1 uppercase">Steam Wishlist</span>
+                <span className="text-[10px] text-ctp-overlay1/50">({wishlist.length} games)</span>
               </div>
               <div className="flex items-center gap-2">
-                {/* Carousel Navigation */}
+
                 <div className="flex items-center gap-1">
                   <button
                     onClick={() => setWishlistPage(Math.max(0, wishlistPage - 1))}
                     disabled={wishlistPage === 0}
-                    className="w-7 h-7 rounded-full bg-white/5 hover:bg-white/10 disabled:opacity-30 disabled:cursor-not-allowed flex items-center justify-center transition-colors"
+                    className="w-9 h-9 sm:w-7 sm:h-7 rounded-full bg-white/5 hover:bg-white/10 disabled:opacity-30 disabled:cursor-not-allowed flex items-center justify-center transition-colors"
                     aria-label="Previous page"
                   >
                     <ChevronLeft className="w-4 h-4" />
                   </button>
-                  <span className="text-[10px] text-muted-foreground min-w-[40px] text-center">
+                  <span className="text-[10px] text-ctp-overlay1 min-w-[40px] text-center">
                     {wishlistPage + 1} / {Math.ceil(wishlist.length / 5)}
                   </span>
                   <button
                     onClick={() => setWishlistPage(Math.min(Math.ceil(wishlist.length / 5) - 1, wishlistPage + 1))}
                     disabled={wishlistPage >= Math.ceil(wishlist.length / 5) - 1}
-                    className="w-7 h-7 rounded-full bg-white/5 hover:bg-white/10 disabled:opacity-30 disabled:cursor-not-allowed flex items-center justify-center transition-colors"
+                    className="w-9 h-9 sm:w-7 sm:h-7 rounded-full bg-white/5 hover:bg-white/10 disabled:opacity-30 disabled:cursor-not-allowed flex items-center justify-center transition-colors"
                     aria-label="Next page"
                   >
                     <ChevronRight className="w-4 h-4" />
                   </button>
                 </div>
-                <a 
+                <a
                   href={`${STEAM_PROFILE_URL}/wishlist`}
                   target="_blank"
                   rel="noopener noreferrer"
-                  className="text-xs text-muted-foreground hover:text-foreground flex items-center gap-1 transition-colors"
+                  className="text-xs text-ctp-overlay1 hover:text-ctp-text flex items-center gap-1 transition-colors"
                 >
                   View All <ExternalLink className="w-3 h-3" />
                 </a>
               </div>
             </div>
 
-            <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-3">
+            <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-5 gap-3">
               <AnimatePresence mode="popLayout">
                 {wishlist.slice(wishlistPage * 5, wishlistPage * 5 + 5).map((game) => {
-                  // Use capsule from scraper, or fallback to Steam library image
                   const capsuleUrl = (game as any).capsule || `https://steamcdn-a.akamaihd.net/steam/apps/${game.appid}/library_600x900.jpg`;
                   const steamHeaderUrl = `https://cdn.cloudflare.steamstatic.com/steam/apps/${game.appid}/header.jpg`;
                   const igdbUrl = gameImages[game.name];
-                  
+
                   return (
                     <motion.a
                       key={game.appid}
@@ -926,26 +852,23 @@ const InfoPage = () => {
                       href={`https://store.steampowered.com/app/${game.appid}`}
                       target="_blank"
                       rel="noopener noreferrer"
-                      className="group relative rounded-xl overflow-hidden aspect-[3/4] bg-muted/20 shadow-lg ring-1 ring-white/10"
+                      className="group relative rounded-xl overflow-hidden aspect-[3/4] bg-ctp-surface0/20 shadow-lg ring-1 ring-white/10"
                     >
-                      <img 
-                        src={capsuleUrl} 
-                        alt={game.name} 
+                      <img
+                        src={capsuleUrl}
+                        alt={game.name}
                         className="w-full h-full object-cover group-hover:scale-105 transition-transform"
                         onError={(e) => {
                           const img = e.target as HTMLImageElement;
                           if (img.src === capsuleUrl) {
-                            // Try IGDB cover next
                             if (igdbUrl) {
                               img.src = igdbUrl;
                             } else {
-                              // Fall back to Steam header
                               img.src = steamHeaderUrl;
                             }
                           } else if (img.src === igdbUrl && steamHeaderUrl) {
                             img.src = steamHeaderUrl;
                           } else {
-                            // Hide if all fail
                             img.style.display = 'none';
                           }
                         }}

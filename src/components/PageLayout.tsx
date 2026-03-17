@@ -26,7 +26,7 @@ const letterVariants = {
     transition: {
       delay: i * 0.04,
       duration: 0.4,
-      ease: [0.34, 1.56, 0.64, 1], // back.out equivalent
+      ease: [0.34, 1.56, 0.64, 1],
     },
   }),
 };
@@ -48,12 +48,11 @@ const PageLayout = ({ children, title, showTransition = true, allowScroll = fals
 
     setIsTransitioning(true);
     setShowContent(false);
-    
-    // Start showing content after title animation
+
     const timer = setTimeout(() => {
       setIsTransitioning(false);
       setShowContent(true);
-    }, title.length * 40 + 800); // letters + hold + fly away
+    }, title.length * 40 + 800);
 
     return () => clearTimeout(timer);
   }, [title, showTransition]);
@@ -64,25 +63,23 @@ const PageLayout = ({ children, title, showTransition = true, allowScroll = fals
   };
 
   return (
-    <div className="min-h-screen h-screen bg-background flex flex-col overflow-hidden">
+    <div className="min-h-screen h-screen bg-ctp-base flex flex-col overflow-hidden">
       <AdminButton />
 
-      {/* Fullscreen title transition overlay */}
+
       <AnimatePresence>
         {isTransitioning && (
           <>
-            {/* Static background layer */}
-            <motion.div 
-              className="fixed inset-0 z-50 bg-background"
+            <motion.div
+              className="fixed inset-0 z-50 bg-ctp-base"
               initial={{ opacity: 1 }}
               exit={{ opacity: 0, transition: { duration: 0.3, delay: 0.1 } }}
             />
-            {/* Animated title layer */}
-            <motion.div 
+            <motion.div
               className="fixed inset-0 z-50 flex items-center justify-center px-4 pointer-events-none"
               style={{ perspective: '1000px' }}
               initial={{ opacity: 1 }}
-              exit={{ 
+              exit={{
                 scale: 0.15,
                 x: '-35vw',
                 y: '-40vh',
@@ -98,7 +95,7 @@ const PageLayout = ({ children, title, showTransition = true, allowScroll = fals
                     variants={letterVariants}
                     initial="hidden"
                     animate="visible"
-                    className="inline-block text-[12vw] sm:text-[15vw] md:text-[18vw] font-black lowercase leading-none tracking-tight text-foreground"
+                    className="inline-block text-[12vw] sm:text-[15vw] md:text-[18vw] font-heading font-black lowercase leading-none tracking-tight text-ctp-text"
                     style={{ transformStyle: 'preserve-3d' }}
                   >
                     {char === ' ' ? '\u00A0' : char}
@@ -110,35 +107,33 @@ const PageLayout = ({ children, title, showTransition = true, allowScroll = fals
         )}
       </AnimatePresence>
 
-      {/* Header with tabs - all in top left */}
-      <header className="relative z-20 border-b border-border/20 bg-background/80 backdrop-blur-sm flex-shrink-0">
-        <div className="w-full px-3 sm:px-4 md:px-6 lg:px-8">
-          <div className="flex items-center justify-between gap-2 sm:gap-4 md:gap-8 h-12 sm:h-14 md:h-16">
-            {/* Page title */}
-            <motion.h1 
+
+      <header className="relative z-20 border-b border-ctp-text/5 bg-ctp-base/90 backdrop-blur-xl flex-shrink-0">
+        <div className="w-full px-4 sm:px-6">
+          <div className="flex items-center justify-between gap-3 sm:gap-6 h-14">
+
+            <motion.h1
               initial={{ opacity: 0 }}
               animate={{ opacity: showContent ? 1 : 0 }}
               transition={{ duration: 0.3 }}
-              className="text-lg sm:text-xl md:text-2xl font-black lowercase tracking-tight text-foreground flex-shrink-0"
+              className="text-lg sm:text-xl font-heading font-bold lowercase tracking-tight text-ctp-text flex-shrink-0"
             >
-              {title}
+              {title}<span className="text-ctp-mauve">.</span>
             </motion.h1>
 
-            {/* Navigation tabs - next to title */}
-            <nav className="flex items-center gap-0.5 sm:gap-1 overflow-x-auto scrollbar-hide">
+
+            <nav className="flex items-center gap-1 overflow-x-auto scrollbar-hide">
               {tabs.map((tab, index) => (
                 <motion.button
                   key={tab.id}
                   initial={{ opacity: 0, y: -10 }}
                   animate={{ opacity: 1, y: 0 }}
                   transition={{ duration: 0.3, delay: (showTransition ? 1.2 : 0) + index * 0.05 }}
-                  whileHover={{ scale: 1.05, y: -1 }}
-                  whileTap={{ scale: 0.95 }}
                   onClick={() => handleTabClick(tab.path)}
-                  className={`px-1.5 sm:px-2 md:px-3 py-1 sm:py-1.5 text-[10px] sm:text-xs md:text-sm font-mono lowercase rounded-md sm:rounded-lg transition-colors duration-200 whitespace-nowrap ${
+                  className={`px-3 py-2.5 sm:py-1.5 text-xs font-varia lowercase rounded-xl transition-all duration-150 ease-out whitespace-nowrap ${
                     currentTab === tab.id
-                      ? 'bg-foreground text-background font-bold'
-                      : 'text-muted-foreground hover:text-foreground hover:bg-muted/30'
+                      ? 'bg-ctp-mauve text-ctp-crust font-bold'
+                      : 'text-ctp-overlay1 hover:text-ctp-subtext1 hover:bg-ctp-surface0/40'
                   }`}
                 >
                   {tab.label}
@@ -149,12 +144,12 @@ const PageLayout = ({ children, title, showTransition = true, allowScroll = fals
         </div>
       </header>
 
-      {/* Main content - fills remaining space */}
-      <motion.main 
-        initial={{ opacity: 0, y: 30 }}
-        animate={{ opacity: showContent ? 1 : 0, y: showContent ? 0 : 30 }}
+
+      <motion.main
+        initial={{ opacity: 0, y: 20 }}
+        animate={{ opacity: showContent ? 1 : 0, y: showContent ? 0 : 20 }}
         transition={{ duration: 0.4, ease: [0.16, 1, 0.3, 1] }}
-        className={`relative z-10 flex-1 w-full px-3 sm:px-4 md:px-6 lg:px-8 py-3 sm:py-4 md:py-5 ${allowScroll ? 'overflow-y-auto' : 'overflow-y-auto lg:overflow-hidden'}`}
+        className={`relative z-10 flex-1 min-h-0 w-full px-4 sm:px-6 py-4 sm:py-5 ${allowScroll ? 'overflow-y-auto' : 'overflow-hidden'}`}
       >
         {children}
       </motion.main>

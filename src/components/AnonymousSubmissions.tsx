@@ -183,7 +183,7 @@ const SubmissionsSection = () => {
     <section className="min-h-screen py-20 px-4 sm:px-6 lg:px-8">
       <div className="max-w-2xl mx-auto">
         <div className="text-center mb-12">
-          <h2 className="text-4xl md:text-5xl font-bold mb-6 bg-gradient-primary bg-clip-text text-transparent">
+          <h2 className="text-4xl md:text-5xl font-bold mb-6 text-ctp-text">
             Leave me something! 
           </h2>
           <p className="text-lg text-muted-foreground">
